@@ -4,4 +4,4 @@ Food Rescue Platform
 
 ## Stručný popis témy
 
-Food Rescue Platform je webová aplikácia zameraná na redistribúciu prebytočného jedla medzi reštauráciami, supermarketmi a charitatívnymi organizáciami. Organizácie môžu prostredníctvom platformy publikovať ponuky dostupného jedla, ktoré môžu charitatívne organizácie vyhľadávať a rezervovať na vyzdvihnutie. Systém poskytuje registráciu a správu používateľov, evidenciu ponúk jedla a mechanizmus rezervácie a vyzdvihnutia. Súčasťou platformy je aj systém rolí pre správu obsahu a administráciu systému. Cieľom aplikácie je znížiť plytvanie potravinami a podporiť efektívne prerozdelenie jedla tým, ktorí ho potrebujú.
+Food Rescue Platform je systém zameraný na znižovanie plytvania potravinami prostredníctvom evidencie, publikovania a rezervácie prebytočných potravín z reštaurácií a obchodov. Systém umožňuje registráciu a správu používateľov, publikovanie ponúk, ich vyhľadávanie a rezerváciu na vyzdvihnutie. Súčasťou riešenia je aj základná administrácia systému a evidencia stavu ponúk a rezervácií. Cieľom aplikácie je efektívnejšie využitie nepredaných potravín a podpora udržateľnej spotreby.
