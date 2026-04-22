@@ -11,8 +11,8 @@ import {
 import { filter } from 'rxjs';
 import { NotificationService } from '../../../core/services/notification.service';
 import { UserService } from '../../../core/services/user.service';
+import { BusinessWorkspaceStateService } from '../../../feature/business/services/business-workspace-state.service';
 import { appIcons } from '../../icons/app-icons';
-import { BusinessWorkspaceStateService } from '../../../features/business/services/business-workspace-state.service';
 import { AccountMenuComponent } from '../../ui/account-menu/account-menu';
 
 interface WorkspaceBreadcrumb {

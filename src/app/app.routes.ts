@@ -3,13 +3,13 @@ import { PageNotFound } from './core/component/page-not-found/page-not-found';
 import { authRequiredGuard } from './core/guards/auth-required.guard';
 import { AppShellComponent } from './shared/layout/app-shell/app-shell';
 import { WorkspaceLayoutComponent } from './shared/layout/workspace-layout/workspace-layout';
-import { BrowseOffersPage } from './features/public/pages/browse-offers/browse-offers';
-import { ForBusinessPage } from './features/public/pages/for-business/for-business';
-import { HomePage } from './features/public/pages/home/home';
-import { HowItWorksPage } from './features/public/pages/how-it-works/how-it-works';
-import { BusinessDetailsPage } from './features/workspace/pages/business-details/business-details';
-import { businessDetailsResolver } from './features/workspace/pages/business-details/business-details.resolver';
-import { MyBusinessesPage } from './features/workspace/pages/my-businesses/my-businesses';
+import { ForBusinessPage } from './feature/business/pages/for-business/for-business';
+import { BusinessDetailsPage } from './feature/business/pages/business-details/business-details';
+import { businessDetailsResolver } from './feature/business/pages/business-details/business-details.resolver';
+import { MyBusinessesPage } from './feature/business/pages/my-businesses/my-businesses';
+import { HomePage } from './feature/home/pages/home/home';
+import { HowItWorksPage } from './feature/info/pages/how-it-works/how-it-works';
+import { BrowseOffersPage } from './feature/offer/pages/browse-offers/browse-offers';
 
 export const routes: Routes = [
   {

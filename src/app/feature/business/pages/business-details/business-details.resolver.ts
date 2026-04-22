@@ -1,9 +1,9 @@
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
 import { catchError, of, tap } from 'rxjs';
-import { BusinessModel } from '../../../business/models/business.model';
-import { BusinessApiService } from '../../../business/services/business-api.service';
-import { BusinessWorkspaceStateService } from '../../../business/services/business-workspace-state.service';
+import { BusinessModel } from '../../models/business.model';
+import { BusinessApiService } from '../../services/business-api.service';
+import { BusinessWorkspaceStateService } from '../../services/business-workspace-state.service';
 
 export const businessDetailsResolver: ResolveFn<BusinessModel | null> = (route) => {
   const businessApi = inject(BusinessApiService);

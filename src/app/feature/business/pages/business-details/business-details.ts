@@ -15,9 +15,9 @@ import {
   BusinessModel,
   BusinessPayload,
   BusinessStatusMeta,
-} from '../../../business/models/business.model';
-import { BusinessApiService } from '../../../business/services/business-api.service';
-import { BusinessWorkspaceStateService } from '../../../business/services/business-workspace-state.service';
+} from '../../models/business.model';
+import { BusinessApiService } from '../../services/business-api.service';
+import { BusinessWorkspaceStateService } from '../../services/business-workspace-state.service';
 
 type BusinessDetailsMode = 'view' | 'create' | 'edit';
 

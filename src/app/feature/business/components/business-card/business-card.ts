@@ -1,15 +1,13 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { BUSINESS_STATUS_META, BusinessWorkspaceListItem } from '../../../business/models/business.model';
+import { BUSINESS_STATUS_META, BusinessWorkspaceListItem } from '../../models/business.model';
 import { appIcons } from '../../../../shared/icons/app-icons';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
 
 const BUSINESS_CARD_IMAGES = [
-  '/images/offer-bakery.png',
-  '/images/offer-sushi.png',
-  '/images/offer-salad.png',
-  '/images/offer-bagels.png',
+  '/images/shop.png',
+  '/images/shop1.png',
 ] as const;
 
 @Component({

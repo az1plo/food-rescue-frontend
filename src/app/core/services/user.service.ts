@@ -92,8 +92,6 @@ export class UserService {
     return {
       subject: this.readStringClaim(claims, 'sub') ?? undefined,
       email: this.readStringClaim(claims, 'email') ?? undefined,
-      firstName: firstName ?? undefined,
-      lastName: lastName ?? undefined,
       name: fallbackName,
       role: this.resolveRole(claims),
     };

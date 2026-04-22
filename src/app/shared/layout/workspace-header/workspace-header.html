@@ -19,6 +19,10 @@
       <span>View as customer</span>
     </button>
 
+    @if (user(); as currentUser) {
+      <app-account-menu [name]="currentUser.name" variant="workspace" />
+    }
+
     <div ngbDropdown placement="bottom-end">
       <button
         class="workspace-header__utility"
@@ -81,9 +85,5 @@
         }
       </div>
     </div>
-
-    @if (user(); as currentUser) {
-      <app-account-menu [name]="currentUser.name" variant="workspace" />
-    }
   </div>
 </header>

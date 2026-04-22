@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { BusinessWorkspaceListItem } from '../../../business/models/business.model';
+import { BusinessWorkspaceListItem } from '../../models/business.model';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
 import { BusinessCardComponent } from '../business-card/business-card';
 

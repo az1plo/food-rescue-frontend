@@ -118,6 +118,13 @@
   } @else if (currentBusiness(); as business) {
     <div class="business-details-page__view-grid">
       <div class="business-details-page__content">
+        <section class="surface business-details-page__panel business-details-page__panel--description">
+          <span class="eyebrow">Description</span>
+          <p class="business-details-page__description">
+            {{ business.description || 'No business description yet. Add a short summary so customers know what to expect.' }}
+          </p>
+        </section>
+
         <div class="business-details-page__panels">
           <section class="surface business-details-page__panel">
             <span class="eyebrow">Address</span>

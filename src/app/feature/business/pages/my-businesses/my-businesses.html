@@ -13,13 +13,6 @@
     />
   </div>
 
-  @if (errorMessage()) {
-    <div class="alert-banner alert-banner--danger">
-      {{ errorMessage() }}
-      <button class="my-businesses-page__retry" type="button" (click)="refreshBusinesses()">Try again</button>
-    </div>
-  }
-
   <div class="my-businesses-page__summary">
     @for (summary of summaryCards(); track trackBusinessSummary($index, summary)) {
       <article class="surface summary-card" [attr.data-tone]="summary.tone">

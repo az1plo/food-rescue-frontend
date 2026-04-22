@@ -4,8 +4,8 @@ import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { appIcons } from '../../../../shared/icons/app-icons';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
 import { CircleIconComponent } from '../../../../shared/ui/circle-icon/circle-icon';
-import { BusinessWorkspaceStateService } from '../../../business/services/business-workspace-state.service';
 import { BusinessListComponent } from '../../components/business-list/business-list';
+import { BusinessWorkspaceStateService } from '../../services/business-workspace-state.service';
 
 type BusinessSummaryTone = 'default' | 'success' | 'pending' | 'danger';
 
