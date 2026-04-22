@@ -1,0 +1,26 @@
+<div class="toast-viewport" aria-live="polite" aria-atomic="true">
+  @for (notification of notifications(); track notification.id) {
+    <article class="toast-card" [attr.data-tone]="notification.tone">
+      <div class="toast-card__icon" aria-hidden="true">
+        <fa-icon class="toast-card__icon-symbol" [icon]="iconForTone(notification.tone)" />
+      </div>
+
+      <div class="toast-card__content">
+        <div class="toast-card__topline">
+          <strong>{{ notification.title }}</strong>
+          <small>{{ notification.createdAt | date: 'shortTime' }}</small>
+        </div>
+        <p>{{ notification.message }}</p>
+      </div>
+
+      <button
+        class="toast-card__close"
+        type="button"
+        aria-label="Dismiss notification"
+        (click)="dismiss(notification.id)"
+      >
+        <fa-icon class="toast-card__close-icon" [icon]="icons.xmark" aria-hidden="true" />
+      </button>
+    </article>
+  }
+</div>

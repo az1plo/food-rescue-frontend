@@ -1,0 +1,12 @@
+.page-not-found {
+  display: grid;
+  min-height: 56rem;
+  place-items: center;
+}
+
+.page-not-found__card {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 3.2rem;
+  text-align: center;
+}

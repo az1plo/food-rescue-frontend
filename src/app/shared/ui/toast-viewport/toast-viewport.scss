@@ -1,0 +1,120 @@
+:host {
+  display: contents;
+}
+
+.toast-viewport {
+  position: fixed;
+  top: 9.2rem;
+  right: 2rem;
+  z-index: 60;
+  display: grid;
+  gap: 1rem;
+  width: min(38rem, calc(100vw - 3.2rem));
+  pointer-events: none;
+}
+
+.toast-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.2rem;
+  align-items: start;
+  padding: 1.4rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(12px);
+  pointer-events: auto;
+}
+
+.toast-card[data-tone='success'] {
+  border-color: #bfe0c9;
+}
+
+.toast-card[data-tone='error'] {
+  border-color: #efc2bf;
+}
+
+.toast-card[data-tone='info'] {
+  border-color: #cddff5;
+}
+
+.toast-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+}
+
+.toast-card__icon-symbol {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.toast-card[data-tone='success'] .toast-card__icon {
+  background: #e8f6ec;
+  color: #22693a;
+}
+
+.toast-card[data-tone='error'] .toast-card__icon {
+  background: #fff0ef;
+  color: #a93636;
+}
+
+.toast-card[data-tone='info'] .toast-card__icon {
+  background: #edf6ff;
+  color: #225b8a;
+}
+
+.toast-card__topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.toast-card__topline strong {
+  font-size: 1.4rem;
+}
+
+.toast-card__topline small {
+  color: var(--color-text-muted);
+  font-size: 1.2rem;
+}
+
+.toast-card__content p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 1.4rem;
+}
+
+.toast-card__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.toast-card__close-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+@media (max-width: 959px) {
+  .toast-viewport {
+    top: auto;
+    right: 1.6rem;
+    bottom: 1.6rem;
+    left: 1.6rem;
+    width: auto;
+  }
+}

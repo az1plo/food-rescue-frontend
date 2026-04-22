@@ -1,0 +1,24 @@
+<article class="surface offer-preview-card">
+  <div class="offer-preview-card__image-wrap">
+    <img [src]="offer().image" [alt]="offer().title" />
+    <span class="offer-preview-card__distance">{{ offer().distance }}</span>
+  </div>
+
+  <div class="offer-preview-card__body">
+    <div class="offer-preview-card__title-row">
+      <h3>{{ offer().title }}</h3>
+      <span class="offer-preview-card__rating">
+        {{ offer().rating }}
+        <fa-icon class="offer-preview-card__star" [icon]="icons.star" aria-hidden="true" />
+      </span>
+    </div>
+
+    <p class="offer-preview-card__business">{{ offer().business }}</p>
+    <strong class="offer-preview-card__price">{{ offer().price }}</strong>
+
+    <div class="offer-preview-card__pickup">
+      <fa-icon class="offer-preview-card__clock-icon" [icon]="icons.clock" aria-hidden="true" />
+      {{ offer().pickup }}
+    </div>
+  </div>
+</article>

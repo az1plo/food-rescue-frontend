@@ -1,0 +1,31 @@
+:host {
+  display: contents;
+}
+
+.action-button {
+  gap: 0.9rem;
+}
+
+.action-button__icon {
+  flex: none;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.action-button__icon svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.button--danger {
+  border-color: rgba(169, 54, 54, 0.32);
+  background: #fff0ef;
+  color: #a93636;
+}
+
+.button--danger:hover:not(:disabled) {
+  background: #ffe5e3;
+}

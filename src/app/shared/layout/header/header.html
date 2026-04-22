@@ -1,0 +1,140 @@
+<header class="header">
+  <div class="container header__inner">
+    <a class="brand" routerLink="/" aria-label="Food Rescue" (click)="closeMenu()">
+      <img class="brand__image" src="/images/logo_footer.png" alt="Food Rescue" />
+    </a>
+
+    <button
+      class="header__toggle"
+      type="button"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="primary-navigation"
+      aria-label="Toggle navigation"
+      (click)="toggleMenu()"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <div class="header__menu" [class.header__menu--open]="menuOpen()" id="primary-navigation">
+      <nav class="header__nav" aria-label="Primary">
+        <a
+          class="header__nav-link"
+          routerLink="/"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          (click)="closeMenu()"
+        >
+          Home
+        </a>
+        <a
+          class="header__nav-link"
+          routerLink="/offers"
+          routerLinkActive="is-active"
+          (click)="closeMenu()"
+        >
+          Browse offers
+        </a>
+        @if (user()) {
+          <a
+            class="header__nav-link"
+            routerLink="/business"
+            routerLinkActive="is-active"
+            (click)="closeMenu()"
+          >
+            Business
+          </a>
+        }
+      </nav>
+
+      <div class="header__actions">
+        @if (user(); as currentUser) {
+          <a class="button button--secondary header__workspace" routerLink="/business" (click)="closeMenu()">
+            Workspace
+          </a>
+
+          <div ngbDropdown placement="bottom-end">
+            <button class="header__account" type="button" ngbDropdownToggle>
+              <span class="header__avatar">{{ initials(currentUser.name) }}</span>
+              <span class="header__account-copy">
+                <strong>{{ currentUser.name }}</strong>
+                <small>{{ currentUser.email || 'Account' }}</small>
+              </span>
+            </button>
+
+            <div ngbDropdownMenu class="header__dropdown-menu">
+              <a ngbDropdownItem routerLink="/business" (click)="closeMenu()">Open workspace</a>
+              <button ngbDropdownItem type="button" (click)="logout()">Sign out</button>
+            </div>
+          </div>
+
+          <div ngbDropdown placement="bottom-end">
+            <button
+              class="header__utility"
+              type="button"
+              ngbDropdownToggle
+              aria-label="Open notifications"
+              (click)="markNotificationsRead()"
+            >
+              <fa-icon class="header__utility-icon" [icon]="icons.bell" aria-hidden="true" />
+              @if (unreadCount()) {
+                <span class="header__utility-count">{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span>
+              }
+            </button>
+
+            <div ngbDropdownMenu class="header__dropdown-menu header__dropdown-menu--notifications">
+              <div class="header__notifications-head">
+                <div>
+                  <strong>Notifications</strong>
+                  <small>Frontend only for now</small>
+                </div>
+
+                @if (notifications().length) {
+                  <button class="header__notifications-clear" type="button" (click)="clearNotifications()">
+                    Clear all
+                  </button>
+                }
+              </div>
+
+              @if (recentNotifications().length) {
+                <div class="header__notifications-list">
+                  @for (notification of recentNotifications(); track notification.id) {
+                    <article class="header__notification" [attr.data-unread]="notification.unread">
+                      <div class="header__notification-dot" [attr.data-tone]="notification.tone"></div>
+
+                      <div class="header__notification-copy">
+                        <div class="header__notification-topline">
+                          <strong>{{ notification.title }}</strong>
+                          <small>{{ notification.createdAt | date: 'shortTime' }}</small>
+                        </div>
+                        <p>{{ notification.message }}</p>
+                      </div>
+
+                      <button
+                        class="header__notification-close"
+                        type="button"
+                        aria-label="Remove notification"
+                        (click)="removeNotification(notification.id, $event)"
+                      >
+                        <fa-icon class="header__notification-close-icon" [icon]="icons.xmark" aria-hidden="true" />
+                      </button>
+                    </article>
+                  }
+                </div>
+              } @else {
+                <div class="header__notifications-empty">
+                  <strong>No notifications yet</strong>
+                  <p>Success, error, and info toasts will appear here too.</p>
+                </div>
+              }
+            </div>
+          </div>
+        } @else {
+          <button class="button button--ghost header__auth-button" type="button" (click)="login()">Sign in</button>
+          <a class="button button--primary header__auth-button" routerLink="/offers" (click)="closeMenu()">Get started</a>
+        }
+      </div>
+    </div>
+  </div>
+</header>

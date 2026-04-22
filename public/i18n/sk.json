@@ -1,0 +1,6 @@
+{
+  "message.type.QUESTION": "Otázka",
+  "message.type.ANSWER": "Odpoveď",
+  "message.type.QUESTION.by": "Otázka od {{name}}",
+  "message.type.ANSWER.by": "Odpoveď od {{name}}"
+}

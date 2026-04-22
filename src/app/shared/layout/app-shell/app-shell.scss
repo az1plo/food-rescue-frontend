@@ -1,0 +1,9 @@
+.app-shell {
+  display: grid;
+  min-height: 100vh;
+  grid-template-rows: auto 1fr auto;
+}
+
+.app-shell__main {
+  min-width: 0;
+}

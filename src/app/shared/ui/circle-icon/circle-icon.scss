@@ -1,0 +1,63 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 4.8rem;
+  height: 4.8rem;
+  border-radius: 50%;
+  background: rgba(232, 246, 236, 0.92);
+  color: var(--color-primary-strong);
+}
+
+:host([data-size='sm']) {
+  width: 4.2rem;
+  height: 4.2rem;
+}
+
+:host([data-size='lg']) {
+  width: 5.2rem;
+  height: 5.2rem;
+}
+
+:host([data-tone='success']) {
+  background: #e8f6ec;
+  color: #22693a;
+}
+
+:host([data-tone='warning']) {
+  background: #fff7e1;
+  color: #8c6514;
+}
+
+:host([data-tone='danger']) {
+  background: #fff0ef;
+  color: #a93636;
+}
+
+:host([data-tone='info']) {
+  background: #edf6ff;
+  color: #225b8a;
+}
+
+:host([data-tone='neutral']) {
+  background: rgba(245, 247, 244, 0.96);
+  color: var(--color-text);
+}
+
+.circle-icon__symbol {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+:host([data-size='sm']) .circle-icon__symbol {
+  font-size: 1.8rem;
+}
+
+.circle-icon__symbol svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}

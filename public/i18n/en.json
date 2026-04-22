@@ -1,0 +1,6 @@
+{
+  "message.type.QUESTION": "Question",
+  "message.type.ANSWER": "Answer",
+  "message.type.QUESTION.by": "Question by {{name}}",
+  "message.type.ANSWER.by": "Answer by {{name}}"
+}

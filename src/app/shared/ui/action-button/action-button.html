@@ -1,0 +1,25 @@
+@if (route(); as currentRoute) {
+  <a class="{{ className() }}" [routerLink]="currentRoute" (click)="handleClick($event)">
+    @if (icon() && iconPosition() === 'start') {
+      <fa-icon class="action-button__icon" [icon]="icon()!" aria-hidden="true" />
+    }
+
+    <span>{{ label() }}</span>
+
+    @if (icon() && iconPosition() === 'end') {
+      <fa-icon class="action-button__icon" [icon]="icon()!" aria-hidden="true" />
+    }
+  </a>
+} @else {
+  <button class="{{ className() }}" [attr.type]="type()" [disabled]="disabled()" (click)="handleClick($event)">
+    @if (icon() && iconPosition() === 'start') {
+      <fa-icon class="action-button__icon" [icon]="icon()!" aria-hidden="true" />
+    }
+
+    <span>{{ label() }}</span>
+
+    @if (icon() && iconPosition() === 'end') {
+      <fa-icon class="action-button__icon" [icon]="icon()!" aria-hidden="true" />
+    }
+  </button>
+}

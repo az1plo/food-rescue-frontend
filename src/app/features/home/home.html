@@ -1,0 +1,140 @@
+<section class="page-section page-section--top-tight home-page">
+  <div class="container home-stack">
+    <section class="home-hero">
+      <div class="home-hero__grid">
+        <div class="home-hero__copy">
+          <span class="home-hero__badge">
+            <fa-icon class="home-hero__badge-icon" [icon]="icons.leaf" aria-hidden="true" />
+            Together against food waste
+          </span>
+
+          <h1 class="home-hero__title">
+            <span class="home-hero__title-lead">Good food</span>
+            deserves a
+            <br />
+            second chance.
+          </h1>
+
+          <p class="home-hero__lead">
+            We connect businesses with people to rescue surplus food and reduce waste in our communities.
+          </p>
+
+          <div class="button-row home-hero__actions">
+            <app-action-button label="Browse offers" [icon]="icons.arrowRight" route="/offers" />
+
+            @if (user()) {
+              <app-action-button
+                label="Open workspace"
+                variant="ghost"
+                [icon]="icons.store"
+                route="/business"
+              />
+            } @else {
+              <app-action-button
+                label="Create business"
+                variant="ghost"
+                [icon]="icons.store"
+                (pressed)="startBusiness()"
+              />
+            }
+          </div>
+
+          <div class="home-hero__benefits">
+            @for (benefit of heroBenefits; track benefit.lead) {
+              <article class="home-hero__benefit">
+                <app-circle-icon class="home-hero__benefit-icon" [icon]="benefit.icon" />
+
+                <div>
+                  <div class="home-hero__benefit-title">
+                    <strong>{{ benefit.lead }}</strong>
+                    @if (benefit.tail) {
+                      <span>{{ benefit.tail }}</span>
+                    }
+                  </div>
+                  <p>{{ benefit.description }}</p>
+                </div>
+              </article>
+            }
+          </div>
+        </div>
+
+        <div class="home-hero__visual">
+          <div class="home-hero__media">
+            <img src="/images/home_hero1.png" alt="Rescued food ready for pickup" />
+          </div>
+
+          <aside class="surface home-hero__note">
+            <app-circle-icon class="home-hero__note-icon" [icon]="icons.heart" />
+            <div>
+              <strong>Every meal saved makes a difference</strong>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="home-offers">
+      <div class="home-section-head">
+        <h2>Nearby rescue offers</h2>
+        <a class="home-section-link" routerLink="/offers">
+          View all offers
+          <fa-icon class="home-section-link-icon" [icon]="icons.arrowRight" aria-hidden="true" />
+        </a>
+      </div>
+
+      <div class="home-offers__grid">
+        @for (offer of offerPreview; track offer.title) {
+          <app-offer-preview-card [offer]="offer" />
+        }
+      </div>
+    </section>
+
+    <section class="home-steps" id="how-it-works">
+      <div class="home-section-head">
+        <h2>How it works</h2>
+      </div>
+
+      <div class="home-steps__grid">
+        @for (step of steps; track step.title) {
+          <article class="home-step">
+            <app-circle-icon class="home-step__icon" [icon]="step.icon" size="lg" />
+            <div class="home-step__copy">
+              <strong>{{ step.title }}</strong>
+              <p>{{ step.description }}</p>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="home-business surface">
+      <div class="home-business__copy">
+        <app-circle-icon class="home-business__icon" [icon]="icons.store" size="lg" />
+        <div>
+          <h2>Have surplus food?</h2>
+          <p>Create your business profile and start rescuing food today.</p>
+        </div>
+      </div>
+
+      @if (user()) {
+        <app-action-button label="Open workspace" [icon]="icons.store" route="/business" />
+      } @else {
+        <app-action-button label="Create business" [icon]="icons.store" (pressed)="startBusiness()" />
+      }
+    </section>
+
+    <section class="home-stats">
+      <div class="home-stats__grid">
+        @for (stat of stats; track stat.label) {
+          <article class="surface stat-card">
+            <app-circle-icon class="stat-card__icon" [icon]="stat.icon" size="lg" />
+            <div>
+              <strong>{{ stat.value }}</strong>
+              <p>{{ stat.label }}</p>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  </div>
+</section>

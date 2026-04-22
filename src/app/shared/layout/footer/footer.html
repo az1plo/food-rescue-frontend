@@ -1,0 +1,44 @@
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__brand">
+      <a class="footer__brand-link" routerLink="/" aria-label="Food Rescue">
+        <img class="footer__brand-image" src="/images/logo_footer.png" alt="Food Rescue" />
+      </a>
+      <p>We connect businesses with people to rescue surplus food and reduce waste in local communities.</p>
+    </div>
+
+    <div class="footer__columns">
+      <nav class="footer__column" aria-label="Explore">
+        <strong>Explore</strong>
+        <a routerLink="/">Home</a>
+        <a routerLink="/offers">Browse offers</a>
+        <a routerLink="/" fragment="how-it-works">How it works</a>
+      </nav>
+
+      <nav class="footer__column" aria-label="Business">
+        <strong>Business</strong>
+        @if (user()) {
+          <a routerLink="/business">Open workspace</a>
+          <a routerLink="/business">Manage business</a>
+        } @else {
+          <button type="button" (click)="login()">Sign in to start</button>
+          <a routerLink="/offers">Browse offers</a>
+        }
+      </nav>
+
+      <nav class="footer__column" aria-label="Use Food Rescue">
+        <strong>Use Food Rescue</strong>
+        <a routerLink="/offers">Find rescue offers</a>
+        @if (user()) {
+          <a routerLink="/business">Business area</a>
+        } @else {
+          <button type="button" (click)="login()">Sign in</button>
+        }
+      </nav>
+    </div>
+  </div>
+
+  <div class="container footer__bottom">
+    <p>© {{ year }} Food Rescue. All rights reserved.</p>
+  </div>
+</footer>
