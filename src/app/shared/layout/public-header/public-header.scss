@@ -22,7 +22,7 @@
 
 .brand__image {
   display: block;
-  width: 21rem;
+  width: 22rem;
   max-width: 100%;
   height: auto;
 }
@@ -108,7 +108,7 @@
 
 .header__auth-button,
 .header__workspace {
-  min-width: 13.6rem;
+  min-width: 14.4rem;
 }
 
 .header__actions .header__utility {
@@ -116,46 +116,6 @@
   height: 4.8rem;
   border-radius: 1.6rem;
   background: rgba(255, 255, 255, 0.84);
-}
-
-.header__account {
-  display: inline-flex;
-  align-items: center;
-  gap: 1rem;
-  min-height: 4.8rem;
-  padding: 0.6rem 0.8rem 0.6rem 0.6rem;
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.88);
-}
-
-.header__avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 3.6rem;
-  height: 3.6rem;
-  border-radius: 50%;
-  background: var(--color-primary-soft);
-  color: var(--color-primary-strong);
-  font-size: 1.3rem;
-  font-weight: 800;
-}
-
-.header__account-copy {
-  display: grid;
-  text-align: left;
-}
-
-.header__account-copy strong {
-  font-size: 1.4rem;
-  line-height: 1.2;
-}
-
-.header__account-copy small {
-  color: var(--color-text-muted);
-  font-size: 1.2rem;
-  line-height: 1.2;
 }
 
 .header__dropdown-menu {
@@ -385,7 +345,7 @@
   .header__auth-button,
   .header__workspace,
   .header__actions .button,
-  .header__account,
+  .header__actions app-account-menu,
   .header__actions .header__utility {
     width: 100%;
     border-radius: 1.4rem;

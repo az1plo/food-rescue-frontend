@@ -1,0 +1,76 @@
+<section class="page-section page-section--top-tight business-landing">
+  <div class="container business-landing__stack">
+    <section class="business-landing__hero">
+      <div class="business-landing__hero-grid">
+        <div class="business-landing__copy">
+          <span class="business-landing__badge">
+            <fa-icon [icon]="icons.store" aria-hidden="true" />
+            <span>For businesses</span>
+          </span>
+          <h1>Turn surplus food into a stronger business routine.</h1>
+          <p>
+            Food Rescue gives businesses a dedicated workspace for managing locations now and preparing for publishing
+            rescue offers later.
+          </p>
+
+          <div class="button-row business-landing__actions">
+            <button class="button button--primary" type="button" (click)="createBusinessProfile()">
+              Create business profile
+            </button>
+            <button class="button button--ghost" type="button" (click)="openWorkspace()">Open workspace</button>
+          </div>
+        </div>
+
+        <div class="business-landing__visual">
+          <div class="business-landing__media">
+            <img src="/images/for_business.png" alt="Food Rescue partner preparing a rescue handoff" />
+          </div>
+
+          <article class="surface business-landing__stat business-landing__stat--top">
+            <strong>10K+</strong>
+            <span>Meals saved</span>
+          </article>
+
+          <article class="surface business-landing__stat business-landing__stat--bottom">
+            <strong>500+</strong>
+            <span>Business partners</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="business-landing__benefits">
+        @for (benefit of benefits; track benefit.title) {
+          <article class="surface business-benefit">
+            <app-circle-icon [icon]="benefit.icon" />
+            <div>
+              <strong>{{ benefit.title }}</strong>
+              <p>{{ benefit.description }}</p>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="business-landing__flow">
+      <div class="page-header business-landing__flow-head">
+        <span class="eyebrow">How it works</span>
+        <h2>Build the business side in a clean sequence</h2>
+        <p>Start with the workspace structure now, then expand into offers and operations as the product grows.</p>
+      </div>
+
+      <div class="business-landing__steps">
+        @for (step of steps; track step.title) {
+          <article class="business-step">
+            <app-circle-icon [icon]="step.icon" size="lg" />
+            <div>
+              <strong>{{ step.title }}</strong>
+              <p>{{ step.description }}</p>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  </div>
+</section>

@@ -1,0 +1,36 @@
+<aside class="workspace-sidebar">
+  <div class="workspace-sidebar__sticky">
+    <a class="workspace-sidebar__brand" routerLink="/" aria-label="Back to Food Rescue">
+      <img class="workspace-sidebar__brand-image" src="/images/logo_footer.png" alt="Food Rescue" />
+    </a>
+
+    <div class="workspace-sidebar__section">
+      <span class="eyebrow">Business workspace</span>
+
+      <nav class="workspace-sidebar__nav" aria-label="Workspace navigation">
+        @for (item of navItems; track item.label) {
+          @if (item.route; as route) {
+            <a
+              class="workspace-sidebar__link"
+              [routerLink]="route"
+              routerLinkActive="is-active"
+              [routerLinkActiveOptions]="{ exact: false }"
+            >
+              <fa-icon class="workspace-sidebar__link-icon" [icon]="item.icon" aria-hidden="true" />
+              <span>{{ item.label }}</span>
+            </a>
+          } @else {
+            <button class="workspace-sidebar__link workspace-sidebar__link--placeholder" type="button" (click)="keepCurrentWorkspaceSection()">
+              <fa-icon class="workspace-sidebar__link-icon" [icon]="item.icon" aria-hidden="true" />
+              <span>{{ item.label }}</span>
+            </button>
+          }
+        }
+      </nav>
+    </div>
+
+    <div class="workspace-sidebar__footer">
+      <a class="workspace-sidebar__footer-link" routerLink="/for-business">Back to public site</a>
+    </div>
+  </div>
+</aside>

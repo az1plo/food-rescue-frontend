@@ -28,46 +28,24 @@
         >
           Home
         </a>
-        <a
-          class="header__nav-link"
-          routerLink="/offers"
-          routerLinkActive="is-active"
-          (click)="closeMenu()"
-        >
+        <a class="header__nav-link" routerLink="/browse-offers" routerLinkActive="is-active" (click)="closeMenu()">
           Browse offers
         </a>
-        @if (user()) {
-          <a
-            class="header__nav-link"
-            routerLink="/business"
-            routerLinkActive="is-active"
-            (click)="closeMenu()"
-          >
-            Business
-          </a>
-        }
+        <a class="header__nav-link" routerLink="/how-it-works" routerLinkActive="is-active" (click)="closeMenu()">
+          How it works
+        </a>
+        <a class="header__nav-link" routerLink="/for-business" routerLinkActive="is-active" (click)="closeMenu()">
+          For business
+        </a>
       </nav>
 
       <div class="header__actions">
         @if (user(); as currentUser) {
-          <a class="button button--secondary header__workspace" routerLink="/business" (click)="closeMenu()">
-            Workspace
+          <a class="button button--secondary header__workspace" routerLink="/workspace" (click)="closeMenu()">
+            Open workspace
           </a>
 
-          <div ngbDropdown placement="bottom-end">
-            <button class="header__account" type="button" ngbDropdownToggle>
-              <span class="header__avatar">{{ initials(currentUser.name) }}</span>
-              <span class="header__account-copy">
-                <strong>{{ currentUser.name }}</strong>
-                <small>{{ currentUser.email || 'Account' }}</small>
-              </span>
-            </button>
-
-            <div ngbDropdownMenu class="header__dropdown-menu">
-              <a ngbDropdownItem routerLink="/business" (click)="closeMenu()">Open workspace</a>
-              <button ngbDropdownItem type="button" (click)="logout()">Sign out</button>
-            </div>
-          </div>
+          <app-account-menu [name]="currentUser.name" [subtitle]="currentUser.email || 'Account'" variant="public" />
 
           <div ngbDropdown placement="bottom-end">
             <button
@@ -132,7 +110,9 @@
           </div>
         } @else {
           <button class="button button--ghost header__auth-button" type="button" (click)="login()">Sign in</button>
-          <a class="button button--primary header__auth-button" routerLink="/offers" (click)="closeMenu()">Get started</a>
+          <button class="button button--secondary header__workspace" type="button" (click)="openWorkspace()">
+            Open workspace
+          </button>
         }
       </div>
     </div>

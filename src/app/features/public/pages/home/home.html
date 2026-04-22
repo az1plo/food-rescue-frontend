@@ -20,22 +20,12 @@
           </p>
 
           <div class="button-row home-hero__actions">
-            <app-action-button label="Browse offers" [icon]="icons.arrowRight" route="/offers" />
+            <app-action-button label="Browse offers" [icon]="icons.arrowRight" route="/browse-offers" />
 
             @if (user()) {
-              <app-action-button
-                label="Open workspace"
-                variant="ghost"
-                [icon]="icons.store"
-                route="/business"
-              />
+              <app-action-button label="Open workspace" variant="ghost" [icon]="icons.store" route="/workspace" />
             } @else {
-              <app-action-button
-                label="Create business"
-                variant="ghost"
-                [icon]="icons.store"
-                (pressed)="startBusiness()"
-              />
+              <app-action-button label="For business" variant="ghost" [icon]="icons.store" route="/for-business" />
             }
           </div>
 
@@ -76,7 +66,7 @@
     <section class="home-offers">
       <div class="home-section-head">
         <h2>Nearby rescue offers</h2>
-        <a class="home-section-link" routerLink="/offers">
+        <a class="home-section-link" routerLink="/browse-offers">
           View all offers
           <fa-icon class="home-section-link-icon" [icon]="icons.arrowRight" aria-hidden="true" />
         </a>
@@ -89,9 +79,13 @@
       </div>
     </section>
 
-    <section class="home-steps" id="how-it-works">
+    <section class="home-steps">
       <div class="home-section-head">
         <h2>How it works</h2>
+        <a class="home-section-link" routerLink="/how-it-works">
+          Explore the flow
+          <fa-icon class="home-section-link-icon" [icon]="icons.arrowRight" aria-hidden="true" />
+        </a>
       </div>
 
       <div class="home-steps__grid">
@@ -112,14 +106,14 @@
         <app-circle-icon class="home-business__icon" [icon]="icons.store" size="lg" />
         <div>
           <h2>Have surplus food?</h2>
-          <p>Create your business profile and start rescuing food today.</p>
+          <p>Explore the business side, then open the workspace when you are ready to manage locations.</p>
         </div>
       </div>
 
       @if (user()) {
-        <app-action-button label="Open workspace" [icon]="icons.store" route="/business" />
+        <app-action-button label="Open workspace" [icon]="icons.store" route="/workspace" />
       } @else {
-        <app-action-button label="Create business" [icon]="icons.store" (pressed)="startBusiness()" />
+        <app-action-button label="For business" [icon]="icons.store" route="/for-business" />
       }
     </section>
 

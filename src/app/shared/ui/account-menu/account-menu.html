@@ -1,0 +1,16 @@
+<div ngbDropdown placement="bottom-end">
+  <button class="account-menu__trigger" type="button" ngbDropdownToggle>
+    <span class="account-menu__avatar">{{ initials(name()) }}</span>
+
+    <span class="account-menu__copy">
+      <strong>{{ name() }}</strong>
+      @if (subtitle(); as value) {
+        <small>{{ value }}</small>
+      }
+    </span>
+  </button>
+
+  <div ngbDropdownMenu class="account-menu__dropdown">
+    <button ngbDropdownItem type="button" (click)="logout()">Sign out</button>
+  </div>
+</div>

@@ -1,0 +1,31 @@
+<article class="surface business-card">
+  <div class="business-card__media">
+    <img [src]="previewImage()" [alt]="business().name" />
+  </div>
+
+  <div class="business-card__content">
+    <div class="business-card__title-row">
+      <div>
+        <h3>{{ business().name }}</h3>
+        <span class="business-card__status" [attr.data-tone]="statusMeta().tone">{{ statusMeta().label }}</span>
+      </div>
+
+      <span class="business-card__id">#{{ business().id }}</span>
+    </div>
+
+    <div class="business-card__details">
+      <div>
+        <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+        <span>{{ addressLine() }}</span>
+      </div>
+      <div>
+        <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
+        <span>Created {{ business().createdAt | date: 'd. M. y' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="business-card__actions">
+    <app-action-button label="View details" variant="ghost" [route]="['/workspace', 'my-businesses', business().id]" />
+  </div>
+</article>

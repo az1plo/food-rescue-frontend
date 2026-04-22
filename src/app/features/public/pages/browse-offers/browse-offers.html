@@ -1,0 +1,25 @@
+<section class="page-section page-section--top-tight offers-page">
+  <div class="container">
+    <div class="page-header offers-page__header">
+      <h1>Browse rescue offers</h1>
+      <p>Available pickup offers will appear here as businesses publish new surplus food collections.</p>
+    </div>
+
+    <section class="surface offers-empty">
+      <div class="offers-empty__copy">
+        <h2>No rescue offers are live right now</h2>
+        <p>Check back soon to reserve the next available pickup in your area.</p>
+      </div>
+
+      <div class="button-row offers-empty__actions">
+        <app-action-button label="Return home" [icon]="icons.arrowRight" route="/" />
+
+        @if (user()) {
+          <app-action-button label="Open workspace" variant="ghost" [icon]="icons.store" route="/workspace" />
+        } @else {
+          <app-action-button label="For business" variant="ghost" [icon]="icons.store" route="/for-business" />
+        }
+      </div>
+    </section>
+  </div>
+</section>

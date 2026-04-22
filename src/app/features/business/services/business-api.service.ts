@@ -36,6 +36,8 @@ export class BusinessApiService {
       id: business.id,
       name: business.name,
       status: business.status,
+      address: business.address,
+      createdAt: business.createdAt,
       lastViewedAt: Number.isFinite(Date.parse(business.createdAt)) ? Date.parse(business.createdAt) : 0,
     };
   }

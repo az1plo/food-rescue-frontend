@@ -1,0 +1,204 @@
+<section class="workspace-page business-details-page">
+  <div class="business-details-page__header">
+    <div class="business-details-page__header-copy">
+      <h1>{{ pageTitle() }}</h1>
+      <p>{{ pageDescription() }}</p>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert-banner alert-banner--danger">{{ errorMessage() }}</div>
+  }
+
+  @if (isEditorMode()) {
+    <div class="business-details-page__editor-layout">
+      <section class="surface business-details-page__editor">
+        <form class="business-form" [formGroup]="form" (ngSubmit)="saveBusiness()">
+          <div class="section-heading">
+            <span class="eyebrow">{{ isCreateMode() ? 'Business details' : 'Edit business' }}</span>
+            <h2>{{ isCreateMode() ? 'Set up your venue profile' : 'Update business details' }}</h2>
+            <p>
+              {{
+                isCreateMode()
+                  ? 'Add the essentials now and continue refining the profile from the workspace.'
+                  : 'Keep the venue information current so the workspace stays ready for future publishing.'
+              }}
+            </p>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field form-field--full">
+              <label class="form-label" for="business-name">Business name</label>
+              <input id="business-name" class="form-control" type="text" formControlName="name" />
+              <div class="field-message-slot">
+                @if (showFieldError('name')) {
+                  <p class="field-error">Enter a business name.</p>
+                }
+              </div>
+            </div>
+
+            <div class="form-field form-field--full">
+              <label class="form-label" for="business-description">Description</label>
+              <textarea id="business-description" class="form-control" formControlName="description"></textarea>
+              <div class="field-message-slot">
+                <p class="field-hint">Use the description to explain the venue and what customers should expect.</p>
+              </div>
+            </div>
+
+            <div class="form-field form-field--full">
+              <label class="form-label" for="business-street">Street</label>
+              <input id="business-street" class="form-control" type="text" formControlName="street" />
+              <div class="field-message-slot">
+                @if (showFieldError('street')) {
+                  <p class="field-error">Enter a street address.</p>
+                }
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="business-city">City</label>
+              <input id="business-city" class="form-control" type="text" formControlName="city" />
+              <div class="field-message-slot">
+                @if (showFieldError('city')) {
+                  <p class="field-error">Enter a city.</p>
+                }
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="business-postal-code">Postal code</label>
+              <input id="business-postal-code" class="form-control" type="text" formControlName="postalCode" />
+              <div class="field-message-slot">
+                @if (showFieldError('postalCode')) {
+                  <p class="field-error">Enter a postal code.</p>
+                }
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="business-country">Country</label>
+              <select id="business-country" class="form-control" formControlName="country">
+                @for (country of countries; track country) {
+                  <option [value]="country">{{ country }}</option>
+                }
+              </select>
+              <div class="field-message-slot"></div>
+            </div>
+          </div>
+
+          <div class="button-row business-form__actions">
+            <button class="button button--primary" type="submit" [disabled]="detailLoading()">
+              {{ isCreateMode() ? 'Save business' : 'Save changes' }}
+            </button>
+            <button class="button button--ghost" type="button" (click)="cancelEdit()">Cancel</button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="business-details-page__side">
+        <section class="surface business-details-page__side-card">
+          <span class="eyebrow">Workspace</span>
+          <h3>{{ sideSummaryTitle() }}</h3>
+          <p>{{ sideSummaryDescription() }}</p>
+
+          <div class="business-details-page__side-actions">
+            <button class="button button--ghost" type="button" (click)="cancelEdit()">
+              {{ isCreateMode() ? 'Back to My businesses' : 'Back to details' }}
+            </button>
+          </div>
+        </section>
+      </aside>
+    </div>
+  } @else if (detailLoading() && !currentBusiness()) {
+    <section class="surface business-details-page__placeholder" aria-busy="true">
+      <span class="eyebrow">Business details</span>
+      <h2>Loading business details</h2>
+      <p>We are opening the selected business inside the workspace.</p>
+    </section>
+  } @else if (currentBusiness(); as business) {
+    <div class="business-details-page__view-grid">
+      <div class="business-details-page__content">
+        <div class="business-details-page__panels">
+          <section class="surface business-details-page__panel">
+            <span class="eyebrow">Address</span>
+            <div class="business-details-page__detail-list">
+              <div>
+                <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+                <span>{{ business.address.street }}</span>
+              </div>
+              <div>
+                <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+                <span>{{ business.address.city }}, {{ business.address.postalCode }}</span>
+              </div>
+              <div>
+                <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+                <span>{{ business.address.country }}</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="surface business-details-page__panel">
+            <span class="eyebrow">Workspace</span>
+            <div class="business-details-page__detail-list">
+              <div>
+                <fa-icon [icon]="icons.hashtag" aria-hidden="true" />
+                <span>Business ID #{{ business.id }}</span>
+              </div>
+              <div>
+                <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
+                <span>Created {{ business.createdAt | date: 'd. M. y' }}</span>
+              </div>
+              <div>
+                <fa-icon [icon]="icons.user" aria-hidden="true" />
+                <span>Owner #{{ business.ownerId }}</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <aside class="surface business-details-page__status">
+        <span class="eyebrow">Status</span>
+        <h3 [attr.data-tone]="statusTone()">{{ selectedStatusMeta()?.label }}</h3>
+        <p>{{ selectedStatusMeta()?.description }}</p>
+
+        <div class="business-details-page__status-actions">
+          <app-action-button
+            label="Edit business"
+            variant="secondary"
+            iconPosition="start"
+            [icon]="icons.pen"
+            (pressed)="startEditBusiness()"
+          />
+
+          <app-action-button
+            label="Refresh details"
+            variant="ghost"
+            iconPosition="start"
+            [icon]="icons.rotateRight"
+            (pressed)="refreshBusiness()"
+          />
+
+          @if (canDeleteBusiness()) {
+            <app-action-button
+              label="Delete business"
+              variant="danger"
+              iconPosition="start"
+              [icon]="icons.trashCan"
+              (pressed)="deleteBusiness()"
+            />
+          }
+        </div>
+      </aside>
+    </div>
+  } @else if (showUnavailableState()) {
+    <section class="surface business-details-page__placeholder">
+      <h2>Business details are unavailable</h2>
+      <p>Select another business from the list or return to My businesses.</p>
+      <div class="button-row">
+        <a class="button button--primary" routerLink="/workspace/my-businesses/new">Create business</a>
+        <a class="button button--ghost" routerLink="/workspace/my-businesses">Back to My businesses</a>
+      </div>
+    </section>
+  }
+</section>

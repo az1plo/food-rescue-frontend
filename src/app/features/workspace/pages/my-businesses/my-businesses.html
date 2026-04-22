@@ -1,0 +1,40 @@
+<section class="workspace-page my-businesses-page">
+  <div class="my-businesses-page__header">
+    <div>
+      <h1>My businesses</h1>
+      <p>Manage all your saved business locations and open each business in its own workspace page.</p>
+    </div>
+
+    <app-action-button
+      label="Create business"
+      iconPosition="start"
+      [icon]="icons.plus"
+      [route]="['/workspace', 'my-businesses', 'new']"
+    />
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert-banner alert-banner--danger">
+      {{ errorMessage() }}
+      <button class="my-businesses-page__retry" type="button" (click)="refreshBusinesses()">Try again</button>
+    </div>
+  }
+
+  <div class="my-businesses-page__summary">
+    @for (summary of summaryCards(); track trackBusinessSummary($index, summary)) {
+      <article class="surface summary-card" [attr.data-tone]="summary.tone">
+        <app-circle-icon [icon]="summary.icon" />
+        <div>
+          <strong>{{ summary.value }}</strong>
+          <p>{{ summary.label }}</p>
+        </div>
+      </article>
+    }
+  </div>
+
+  <app-business-list
+    [businesses]="businesses()"
+    [loading]="loading()"
+    [createRoute]="['/workspace', 'my-businesses', 'new']"
+  />
+</section>

@@ -1,0 +1,17 @@
+.business-list__grid {
+  display: grid;
+  gap: 1.6rem;
+}
+
+.business-list__state {
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+  padding: 2.8rem;
+}
+
+.business-list__state p {
+  max-width: 48rem;
+  margin: 0;
+  color: var(--color-text-muted);
+}

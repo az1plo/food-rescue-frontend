@@ -1,0 +1,110 @@
+.business-card {
+  display: grid;
+  grid-template-columns: 14rem minmax(0, 1fr) auto;
+  gap: 1.8rem;
+  align-items: center;
+  padding: 1.8rem;
+}
+
+.business-card__media {
+  overflow: hidden;
+  border-radius: 1.8rem;
+  aspect-ratio: 1.08;
+}
+
+.business-card__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.business-card__content {
+  display: grid;
+  gap: 1.2rem;
+  min-width: 0;
+}
+
+.business-card__title-row {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+
+.business-card__title-row h3 {
+  margin-bottom: 0.8rem;
+  color: var(--color-primary-strong);
+}
+
+.business-card__status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 3.2rem;
+  padding: 0 1.2rem;
+  border-radius: 999px;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.business-card__status[data-tone='success'] {
+  background: #e8f6ec;
+  color: var(--color-primary-strong);
+}
+
+.business-card__status[data-tone='pending'] {
+  background: #fff4dd;
+  color: #8c6514;
+}
+
+.business-card__status[data-tone='warning'] {
+  background: #fff1e2;
+  color: #a55a12;
+}
+
+.business-card__status[data-tone='danger'] {
+  background: #fff0ef;
+  color: #a93636;
+}
+
+.business-card__id {
+  color: var(--color-text-muted);
+  font-size: 1.4rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.business-card__details {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.business-card__details div {
+  display: flex;
+  align-items: start;
+  gap: 1rem;
+  color: var(--color-text-muted);
+}
+
+.business-card__details fa-icon {
+  margin-top: 0.2rem;
+  color: var(--color-primary-strong);
+}
+
+.business-card__actions {
+  justify-self: end;
+}
+
+@media (max-width: 959px) {
+  .business-card {
+    grid-template-columns: 1fr;
+  }
+
+  .business-card__media {
+    max-width: 20rem;
+  }
+
+  .business-card__actions {
+    justify-self: start;
+  }
+}

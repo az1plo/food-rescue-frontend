@@ -62,7 +62,7 @@ export class BusinessWorkspaceStateService {
     this.activeBusinessId.set(null);
   }
 
-  rememberBusinessSummary(business: Pick<BusinessModel, 'id' | 'name' | 'status'>): void {
+  rememberBusinessSummary(business: Pick<BusinessModel, 'id' | 'name' | 'status' | 'address' | 'createdAt'>): void {
     const existingIndex = this.knownBusinessesState().findIndex((item) => item.id === business.id);
 
     if (existingIndex === -1) {
@@ -73,7 +73,9 @@ export class BusinessWorkspaceStateService {
             id: business.id,
             name: business.name,
             status: business.status,
-            lastViewedAt: Date.now(),
+            address: business.address,
+            createdAt: business.createdAt,
+            lastViewedAt: Number.isFinite(Date.parse(business.createdAt)) ? Date.parse(business.createdAt) : Date.now(),
           },
         ]),
       );
@@ -87,6 +89,8 @@ export class BusinessWorkspaceStateService {
               ...item,
               name: business.name,
               status: business.status,
+              address: business.address,
+              createdAt: business.createdAt,
             }
           : item,
       ),

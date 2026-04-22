@@ -21,6 +21,8 @@ export interface BusinessWorkspaceListItem {
   id: number;
   name: string;
   status: BusinessStatus;
+  address: AddressModel;
+  createdAt: string;
   lastViewedAt: number;
 }
 

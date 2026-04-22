@@ -1,11 +1,27 @@
 .offers-page__header {
-  max-width: 76rem;
+  display: grid;
+  gap: 2rem;
+  max-width: 58rem;
+  margin-bottom: 3.2rem;
+}
+
+.offers-page__header h1 {
+  margin: 0;
+  color: var(--color-primary-strong);
+  line-height: 1.04;
 }
 
 .offers-page__header p,
 .offers-empty__copy p,
 .offers-tip p {
   color: var(--color-text-muted);
+}
+
+.offers-page__header p {
+  max-width: 58rem;
+  margin: 0;
+  font-size: 1.9rem;
+  line-height: 1.55;
 }
 
 .offers-empty {
@@ -19,6 +35,7 @@
 
 .offers-empty__copy h2 {
   margin-bottom: 0.8rem;
+  color: var(--color-primary-strong);
 }
 
 .offers-tips {
@@ -40,6 +57,13 @@
   margin-bottom: 0.4rem;
   font-size: 1.8rem;
   color: var(--color-primary-strong);
+}
+
+.offers-tip p,
+.offers-empty__copy p {
+  margin: 0;
+  font-size: 1.4rem;
+  line-height: 1.55;
 }
 
 @media (max-width: 959px) {

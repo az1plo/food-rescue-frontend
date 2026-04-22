@@ -1,0 +1,89 @@
+<header class="workspace-header">
+  <nav class="workspace-header__breadcrumbs" aria-label="Workspace breadcrumbs">
+    @for (crumb of breadcrumbs(); track crumb.label; let last = $last) {
+      @if (crumb.route && !last) {
+        <a class="workspace-header__crumb" [routerLink]="crumb.route">{{ crumb.label }}</a>
+      } @else {
+        <span class="workspace-header__crumb" [class.is-current]="last">{{ crumb.label }}</span>
+      }
+
+      @if (!last) {
+        <span class="workspace-header__divider" aria-hidden="true">/</span>
+      }
+    }
+  </nav>
+
+  <div class="workspace-header__actions">
+    <button class="workspace-header__customer" type="button" (click)="openCustomerView()">
+      <fa-icon [icon]="icons.eye" aria-hidden="true" />
+      <span>View as customer</span>
+    </button>
+
+    <div ngbDropdown placement="bottom-end">
+      <button
+        class="workspace-header__utility"
+        type="button"
+        ngbDropdownToggle
+        aria-label="Open notifications"
+        (click)="markNotificationsRead()"
+      >
+        <fa-icon class="workspace-header__utility-icon" [icon]="icons.bell" aria-hidden="true" />
+
+        @if (unreadCount()) {
+          <span class="workspace-header__utility-count">{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span>
+        }
+      </button>
+
+      <div ngbDropdownMenu class="workspace-header__dropdown workspace-header__dropdown--notifications">
+        <div class="workspace-header__notifications-head">
+          <div>
+            <strong>Notifications</strong>
+            <small>Frontend only for now</small>
+          </div>
+
+          @if (notifications().length) {
+            <button class="workspace-header__notifications-clear" type="button" (click)="clearNotifications()">
+              Clear all
+            </button>
+          }
+        </div>
+
+        @if (recentNotifications().length) {
+          <div class="workspace-header__notifications-list">
+            @for (notification of recentNotifications(); track notification.id) {
+              <article class="workspace-header__notification" [attr.data-unread]="notification.unread">
+                <div class="workspace-header__notification-dot" [attr.data-tone]="notification.tone"></div>
+
+                <div class="workspace-header__notification-copy">
+                  <div class="workspace-header__notification-topline">
+                    <strong>{{ notification.title }}</strong>
+                    <small>{{ notification.createdAt | date: 'shortTime' }}</small>
+                  </div>
+                  <p>{{ notification.message }}</p>
+                </div>
+
+                <button
+                  class="workspace-header__notification-close"
+                  type="button"
+                  aria-label="Remove notification"
+                  (click)="removeNotification(notification.id, $event)"
+                >
+                  <fa-icon [icon]="icons.xmark" aria-hidden="true" />
+                </button>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="workspace-header__notifications-empty">
+            <strong>No notifications yet</strong>
+            <p>Success, error, and info toasts will appear here too.</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (user(); as currentUser) {
+      <app-account-menu [name]="currentUser.name" variant="workspace" />
+    }
+  </div>
+</header>

@@ -1,0 +1,23 @@
+@if (loading()) {
+  <section class="surface business-list__state">
+    <span class="eyebrow">My businesses</span>
+    <h2>Loading businesses</h2>
+    <p>We are opening your saved business locations now.</p>
+  </section>
+} @else if (!businesses().length) {
+  <section class="surface business-list__state">
+    <span class="eyebrow">My businesses</span>
+    <h2>No businesses yet</h2>
+    <p>Create your first business profile to start building the workspace.</p>
+
+    @if (createRoute(); as route) {
+      <app-action-button label="Create business" [route]="route" />
+    }
+  </section>
+} @else {
+  <div class="business-list__grid">
+    @for (business of businesses(); track business.id) {
+      <app-business-card [business]="business" />
+    }
+  </div>
+}

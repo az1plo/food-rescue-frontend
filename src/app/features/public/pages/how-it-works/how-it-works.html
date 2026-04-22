@@ -1,0 +1,81 @@
+<section class="page-section page-section--top-tight how-page">
+  <div class="container how-page__stack">
+    <section class="how-page__hero">
+      <div class="how-page__hero-grid">
+        <div class="how-page__hero-copy">
+          <h1>How it works</h1>
+          <p>Food Rescue makes it easy to save good food, support local businesses, and reduce waste.</p>
+        </div>
+
+        <div class="how-page__hero-visual">
+          <div class="how-page__hero-media">
+            <img src="/images/how_it_works.png" alt="Food Rescue order prepared for pickup" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="how-flow" id="customers">
+      <div class="how-flow__head">
+        <h2>For customers</h2>
+      </div>
+
+      <div class="how-flow__grid how-flow__grid--customers">
+        @for (step of customerSteps; track step.title) {
+          <article class="surface how-flow-card">
+            <span class="how-flow-card__number">{{ step.step }}</span>
+
+            <div class="how-flow-card__icon">
+              <fa-icon [icon]="step.icon" aria-hidden="true" />
+            </div>
+
+            <div>
+              <strong>{{ step.title }}</strong>
+              <p>{{ step.description }}</p>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="how-flow" id="businesses">
+      <div class="how-flow__head">
+        <h2>For businesses</h2>
+      </div>
+
+      <div class="how-flow__grid how-flow__grid--businesses">
+        @for (step of businessSteps; track step.title) {
+          <article class="surface how-flow-card">
+            <span class="how-flow-card__number">{{ step.step }}</span>
+
+            <div class="how-flow-card__icon">
+              <fa-icon [icon]="step.icon" aria-hidden="true" />
+            </div>
+
+            <div>
+              <strong>{{ step.title }}</strong>
+              <p>{{ step.description }}</p>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="surface how-benefits">
+      <h2>Why use Food Rescue?</h2>
+
+      <div class="how-benefits__grid">
+        @for (benefit of benefits; track benefit.title) {
+          <article class="how-benefit">
+            <app-circle-icon [icon]="benefit.icon" size="lg" />
+
+            <div>
+              <strong>{{ benefit.title }}</strong>
+              <p>{{ benefit.description }}</p>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  </div>
+</section>

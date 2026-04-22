@@ -11,34 +11,36 @@
       <nav class="footer__column" aria-label="Explore">
         <strong>Explore</strong>
         <a routerLink="/">Home</a>
-        <a routerLink="/offers">Browse offers</a>
-        <a routerLink="/" fragment="how-it-works">How it works</a>
+        <a routerLink="/browse-offers">Browse offers</a>
+        <a routerLink="/how-it-works">How it works</a>
       </nav>
 
       <nav class="footer__column" aria-label="Business">
         <strong>Business</strong>
+        <a routerLink="/for-business">For business</a>
         @if (user()) {
-          <a routerLink="/business">Open workspace</a>
-          <a routerLink="/business">Manage business</a>
+          <a routerLink="/workspace">Open workspace</a>
+          <a routerLink="/workspace/my-businesses/new">Create business profile</a>
         } @else {
-          <button type="button" (click)="login()">Sign in to start</button>
-          <a routerLink="/offers">Browse offers</a>
+          <button type="button" (click)="openWorkspace()">Sign in to open workspace</button>
+          <button type="button" (click)="createBusinessProfile()">Create business profile</button>
         }
       </nav>
 
       <nav class="footer__column" aria-label="Use Food Rescue">
         <strong>Use Food Rescue</strong>
-        <a routerLink="/offers">Find rescue offers</a>
+        <a routerLink="/browse-offers">Find rescue offers</a>
+        <a routerLink="/for-business">Explore business area</a>
         @if (user()) {
-          <a routerLink="/business">Business area</a>
+          <a routerLink="/workspace/my-businesses">My businesses</a>
         } @else {
-          <button type="button" (click)="login()">Sign in</button>
+          <button type="button" (click)="openWorkspace()">Open workspace</button>
         }
       </nav>
     </div>
   </div>
 
   <div class="container footer__bottom">
-    <p>© {{ year }} Food Rescue. All rights reserved.</p>
+    <p>(c) {{ year }} Food Rescue. All rights reserved.</p>
   </div>
 </footer>

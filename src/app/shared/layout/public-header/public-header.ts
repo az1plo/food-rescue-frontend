@@ -5,17 +5,17 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/ro
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
   NgbDropdown,
-  NgbDropdownItem,
   NgbDropdownMenu,
   NgbDropdownToggle,
 } from '@ng-bootstrap/ng-bootstrap';
 import { filter } from 'rxjs';
-import { appIcons } from '../../icons/app-icons';
 import { NotificationService } from '../../../core/services/notification.service';
 import { UserService } from '../../../core/services/user.service';
+import { appIcons } from '../../icons/app-icons';
+import { AccountMenuComponent } from '../../ui/account-menu/account-menu';
 
 @Component({
-  selector: 'app-header',
+  selector: 'app-public-header',
   imports: [
     DatePipe,
     FontAwesomeModule,
@@ -24,13 +24,13 @@ import { UserService } from '../../../core/services/user.service';
     NgbDropdown,
     NgbDropdownToggle,
     NgbDropdownMenu,
-    NgbDropdownItem,
+    AccountMenuComponent,
   ],
-  templateUrl: './header.html',
-  styleUrl: './header.scss',
+  templateUrl: './public-header.html',
+  styleUrl: './public-header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HeaderComponent {
+export class PublicHeaderComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly notificationService = inject(NotificationService);
@@ -66,9 +66,15 @@ export class HeaderComponent {
     void this.userService.login(this.router.url);
   }
 
-  protected logout(): void {
+  protected openWorkspace(): void {
     this.closeMenu();
-    this.userService.logout();
+
+    if (this.user()) {
+      void this.router.navigateByUrl('/workspace');
+      return;
+    }
+
+    void this.userService.login('/workspace');
   }
 
   protected markNotificationsRead(): void {
@@ -84,12 +90,4 @@ export class HeaderComponent {
     this.notificationService.remove(id);
   }
 
-  protected initials(name: string): string {
-    return name
-      .split(' ')
-      .map((part) => part[0] ?? '')
-      .join('')
-      .slice(0, 2)
-      .toUpperCase();
-  }
 }

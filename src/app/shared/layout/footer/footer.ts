@@ -15,7 +15,11 @@ export class FooterComponent {
   protected readonly year = new Date().getFullYear();
   protected readonly user = this.userService.getUser();
 
-  protected login(): void {
-    void this.userService.login('/');
+  protected openWorkspace(): void {
+    void this.userService.login('/workspace');
+  }
+
+  protected createBusinessProfile(): void {
+    void this.userService.login('/workspace/my-businesses/new');
   }
 }

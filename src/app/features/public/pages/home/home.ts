@@ -2,14 +2,14 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
-import { UserService } from '../../core/services/user.service';
-import { appIcons } from '../../shared/icons/app-icons';
-import { ActionButtonComponent } from '../../shared/ui/action-button/action-button';
-import { CircleIconComponent } from '../../shared/ui/circle-icon/circle-icon';
+import { UserService } from '../../../../core/services/user.service';
+import { appIcons } from '../../../../shared/icons/app-icons';
+import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
+import { CircleIconComponent } from '../../../../shared/ui/circle-icon/circle-icon';
 import {
   OfferPreviewCardComponent,
   OfferPreviewCardModel,
-} from '../../shared/ui/offer-preview-card/offer-preview-card';
+} from '../../../../shared/ui/offer-preview-card/offer-preview-card';
 
 interface HomeBenefit {
   icon: IconDefinition;
@@ -31,7 +31,7 @@ interface HomeStat {
 }
 
 @Component({
-  selector: 'app-home-page',
+  selector: 'app-public-home-page',
   imports: [RouterLink, FontAwesomeModule, ActionButtonComponent, CircleIconComponent, OfferPreviewCardComponent],
   templateUrl: './home.html',
   styleUrl: './home.scss',
@@ -66,7 +66,7 @@ export class HomePage {
     {
       title: 'Bakery Surprise Box',
       business: 'Little Oven Bakery',
-      price: '3.50 €',
+      price: '3.50 EUR',
       rating: '4.8',
       distance: '1.2 km',
       pickup: 'Today 18:00 - 20:00',
@@ -75,7 +75,7 @@ export class HomePage {
     {
       title: 'Sushi Set',
       business: 'Sakura Sushi',
-      price: '5.00 €',
+      price: '5.00 EUR',
       rating: '4.6',
       distance: '2.1 km',
       pickup: 'Today 19:00 - 21:00',
@@ -84,7 +84,7 @@ export class HomePage {
     {
       title: 'Healthy Mix',
       business: 'Green Kitchen',
-      price: '4.00 €',
+      price: '4.00 EUR',
       rating: '4.7',
       distance: '1.5 km',
       pickup: 'Today 17:30 - 19:30',
@@ -93,7 +93,7 @@ export class HomePage {
     {
       title: 'Bagels Box',
       business: 'City Bagels',
-      price: '3.00 €',
+      price: '3.00 EUR',
       rating: '4.5',
       distance: '2.7 km',
       pickup: 'Today 18:30 - 20:00',
@@ -125,12 +125,4 @@ export class HomePage {
     { icon: appIcons.userGroup, value: '15K+', label: 'Happy rescuers' },
     { icon: appIcons.globe, value: '30+', label: 'Cities' },
   ];
-
-  protected startBusiness(): void {
-    if (this.user()) {
-      return;
-    }
-
-    void this.userService.login('/business');
-  }
 }
