@@ -1,0 +1,318 @@
+.workspace-dashboard-page {
+  display: grid;
+  gap: 2.4rem;
+}
+
+.workspace-dashboard-page__header,
+.workspace-dashboard-page__layout,
+.workspace-dashboard-page__summary,
+.dashboard-panel__head,
+.dashboard-panel__legend,
+.attention-list,
+.business-card-list,
+.top-revenue-list {
+  display: grid;
+}
+
+.workspace-dashboard-page__header {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2rem;
+  align-items: end;
+}
+
+.workspace-dashboard-page__header p,
+.workspace-dashboard-page__state p,
+.workspace-dashboard-page__summary-card p,
+.workspace-dashboard-page__empty-card p,
+.attention-card p,
+.business-performance-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.workspace-dashboard-page__state,
+.workspace-dashboard-page__summary-card,
+.dashboard-panel,
+.workspace-dashboard-page__empty-card {
+  padding: 2.4rem;
+}
+
+.workspace-dashboard-page__state {
+  gap: 1rem;
+}
+
+.workspace-dashboard-page__state--empty {
+  justify-items: start;
+}
+
+.workspace-dashboard-page__summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.6rem;
+}
+
+.workspace-dashboard-page__summary-card {
+  display: grid;
+  gap: 0.8rem;
+  background: linear-gradient(180deg, rgba(247, 250, 244, 0.96), rgba(255, 255, 255, 0.96));
+}
+
+.workspace-dashboard-page__summary-card strong {
+  font-size: clamp(2.6rem, 3vw, 3.4rem);
+}
+
+.workspace-dashboard-page__layout {
+  grid-template-columns: minmax(0, 1.35fr) minmax(32rem, 0.95fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.workspace-dashboard-page__layout--secondary {
+  grid-template-columns: minmax(0, 1.4fr) minmax(30rem, 0.9fr);
+}
+
+.dashboard-panel {
+  gap: 2rem;
+}
+
+.dashboard-panel__head {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.6rem;
+  align-items: end;
+}
+
+.dashboard-panel__legend {
+  grid-auto-flow: column;
+  gap: 0.8rem;
+}
+
+.dashboard-panel__legend span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.2rem;
+  padding: 0 1.2rem;
+  border-radius: 999px;
+  background: rgba(242, 246, 238, 0.92);
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.dashboard-panel__legend span[data-series='offers'] {
+  color: #225b8a;
+}
+
+.dashboard-panel__legend span[data-series='reservations'] {
+  color: #22693a;
+}
+
+.dashboard-panel__legend span[data-series='pickups'] {
+  color: #7c5f19;
+}
+
+.dashboard-panel__legend span[data-series='cancellations'] {
+  color: #a93636;
+}
+
+.dashboard-activity-chart {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+  gap: 1rem;
+}
+
+.dashboard-activity-chart__day {
+  display: grid;
+  gap: 1rem;
+}
+
+.dashboard-activity-chart__bars {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  align-items: end;
+  min-height: 22rem;
+  padding: 1.2rem 1rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, rgba(247, 250, 244, 0.84), rgba(255, 255, 255, 0.96));
+}
+
+.dashboard-activity-chart__bar {
+  border-radius: 999px;
+}
+
+.dashboard-activity-chart__bar[data-series='offers'] {
+  background: linear-gradient(180deg, #7db9ea, #3e84bd);
+}
+
+.dashboard-activity-chart__bar[data-series='reservations'] {
+  background: linear-gradient(180deg, #6fc88c, #2f8f4e);
+}
+
+.dashboard-activity-chart__bar[data-series='pickups'] {
+  background: linear-gradient(180deg, #e9c86f, #b6862e);
+}
+
+.dashboard-activity-chart__bar[data-series='cancellations'] {
+  background: linear-gradient(180deg, #ef9a90, #ce6356);
+}
+
+.dashboard-activity-chart__meta {
+  display: grid;
+  gap: 0.2rem;
+  text-align: center;
+}
+
+.dashboard-activity-chart__meta strong {
+  font-size: 1.3rem;
+}
+
+.dashboard-activity-chart__meta small {
+  color: var(--color-text-muted);
+  font-size: 1.2rem;
+}
+
+.workspace-dashboard-page__empty-card {
+  display: grid;
+  gap: 0.6rem;
+  border-radius: var(--radius-md);
+  background: rgba(242, 246, 238, 0.72);
+}
+
+.attention-list,
+.business-card-list,
+.top-revenue-list {
+  gap: 1.2rem;
+}
+
+.attention-card,
+.business-performance-card,
+.top-revenue-row {
+  display: grid;
+  gap: 1rem;
+  padding: 1.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.attention-card__topline,
+.business-performance-card__title-row,
+.top-revenue-row {
+  align-items: start;
+}
+
+.attention-card__topline,
+.business-performance-card__title-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.attention-card__topline strong,
+.business-performance-card__title-row h3 {
+  margin-bottom: 0.4rem;
+}
+
+.attention-card__topline small,
+.business-performance-card__copy p,
+.top-revenue-row__copy small {
+  color: var(--color-text-muted);
+}
+
+.business-performance-card__status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 3.2rem;
+  padding: 0 1.2rem;
+  border-radius: 999px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.business-performance-card__status[data-tone='success'] {
+  background: rgba(47, 143, 78, 0.12);
+  color: #246e3d;
+}
+
+.business-performance-card__status[data-tone='pending'] {
+  background: rgba(212, 134, 36, 0.14);
+  color: #9a5f14;
+}
+
+.business-performance-card__status[data-tone='warning'] {
+  background: rgba(242, 175, 74, 0.18);
+  color: #9f6315;
+}
+
+.business-performance-card__status[data-tone='danger'] {
+  background: rgba(216, 79, 79, 0.12);
+  color: #b03b3b;
+}
+
+.business-performance-card__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.business-performance-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.top-revenue-row {
+  grid-template-columns: minmax(0, 1fr) minmax(14rem, 1fr) auto;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.top-revenue-row__copy {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.top-revenue-row__bar {
+  height: 1rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(216, 226, 210, 0.88);
+}
+
+.top-revenue-row__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
+}
+
+@media (max-width: 1199px) {
+  .workspace-dashboard-page__layout,
+  .workspace-dashboard-page__layout--secondary,
+  .workspace-dashboard-page__summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 959px) {
+  .workspace-dashboard-page__header,
+  .dashboard-panel__head,
+  .business-performance-card__metrics,
+  .top-revenue-row {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-dashboard-page__state,
+  .workspace-dashboard-page__summary-card,
+  .dashboard-panel,
+  .workspace-dashboard-page__empty-card {
+    padding: 2rem;
+  }
+
+  .dashboard-panel__legend {
+    grid-auto-flow: row;
+  }
+}

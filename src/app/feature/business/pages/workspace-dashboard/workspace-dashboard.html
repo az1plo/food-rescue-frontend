@@ -1,0 +1,266 @@
+<section class="workspace-page workspace-dashboard-page">
+  <div class="workspace-dashboard-page__header">
+    <div>
+      <span class="eyebrow">Owner workspace</span>
+      <h1>Portfolio dashboard</h1>
+      <p>Track all of your businesses together, spot locations that need attention, and jump into the exact workspace that needs action.</p>
+    </div>
+
+    <div class="button-row">
+      <app-action-button
+        label="My businesses"
+        variant="ghost"
+        iconPosition="start"
+        [icon]="icons.store"
+        route="/workspace/my-businesses"
+      />
+      <app-action-button
+        label="Create business"
+        variant="secondary"
+        iconPosition="start"
+        [icon]="icons.plus"
+        route="/workspace/my-businesses/new"
+      />
+      <app-action-button
+        label="Refresh dashboard"
+        variant="ghost"
+        iconPosition="start"
+        [icon]="icons.rotateRight"
+        (pressed)="refreshDashboard()"
+      />
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert-banner alert-banner--danger">{{ errorMessage() }}</div>
+  }
+
+  @if (loading()) {
+    <section class="surface workspace-dashboard-page__state" aria-busy="true">
+      <span class="eyebrow">Dashboard</span>
+      <h2>Loading owner dashboard</h2>
+      <p>We are pulling business lists and analytics snapshots from the backend now.</p>
+    </section>
+  } @else if (!businesses().length) {
+    <section class="surface workspace-dashboard-page__state workspace-dashboard-page__state--empty">
+      <div>
+        <span class="eyebrow">Owner workspace</span>
+        <h2>No businesses yet</h2>
+        <p>Create the first business to unlock the dedicated workspace, offers, reservations, analytics, and settings.</p>
+      </div>
+
+      <div class="button-row">
+        <app-action-button
+          label="Create business"
+          iconPosition="start"
+          [icon]="icons.plus"
+          [route]="['/workspace', 'my-businesses', 'new']"
+        />
+        <app-action-button label="Back to public site" variant="ghost" [icon]="icons.arrowLeft" route="/" />
+      </div>
+    </section>
+  } @else {
+    <section class="workspace-dashboard-page__summary">
+      @for (card of summaryCards(); track card.label) {
+        <article class="surface workspace-dashboard-page__summary-card">
+          <span class="eyebrow">{{ card.label }}</span>
+          <strong>{{ card.value }}</strong>
+          <p>{{ card.detail }}</p>
+        </article>
+      }
+    </section>
+
+    @if (analyticsUnavailableCount()) {
+      <div class="alert-banner alert-banner--info">
+        {{ analyticsUnavailableCount() }} business {{ analyticsUnavailableCount() === 1 ? 'workspace has' : 'workspaces have' }}
+        partial analytics data right now. The list still stays usable, but those locations may need a quick manual check.
+      </div>
+    }
+
+    <div class="workspace-dashboard-page__layout">
+      <section class="surface dashboard-panel dashboard-panel--activity">
+        <div class="dashboard-panel__head">
+          <div>
+            <span class="eyebrow">Cross-business activity</span>
+            <h2>Last 14 days across every location</h2>
+            <p>Use this trend to see whether new offers are translating into reservations and actual pickups.</p>
+          </div>
+
+          <div class="dashboard-panel__legend">
+            <span data-series="offers">Offers</span>
+            <span data-series="reservations">Reservations</span>
+            <span data-series="pickups">Pickups</span>
+            <span data-series="cancellations">Cancellations</span>
+          </div>
+        </div>
+
+        @if (activity().length) {
+          <div class="dashboard-activity-chart">
+            @for (point of activity(); track point.date) {
+              <div class="dashboard-activity-chart__day">
+                <div class="dashboard-activity-chart__bars">
+                  <span class="dashboard-activity-chart__bar" data-series="offers" [style.height.%]="activityHeight(point.offersPublished)"></span>
+                  <span
+                    class="dashboard-activity-chart__bar"
+                    data-series="reservations"
+                    [style.height.%]="activityHeight(point.reservationsCreated)"
+                  ></span>
+                  <span class="dashboard-activity-chart__bar" data-series="pickups" [style.height.%]="activityHeight(point.pickupsConfirmed)"></span>
+                  <span
+                    class="dashboard-activity-chart__bar"
+                    data-series="cancellations"
+                    [style.height.%]="activityHeight(point.cancellations)"
+                  ></span>
+                </div>
+                <div class="dashboard-activity-chart__meta">
+                  <strong>{{ point.date | date: 'd MMM' }}</strong>
+                  <small>{{ point.offersPublished }}/{{ point.reservationsCreated }}/{{ point.pickupsConfirmed }}/{{ point.cancellations }}</small>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="workspace-dashboard-page__empty-card">
+            <strong>No portfolio activity yet</strong>
+            <p>As soon as your businesses start publishing offers and receiving reservations, the portfolio trend will appear here.</p>
+          </div>
+        }
+      </section>
+
+      <section class="surface dashboard-panel dashboard-panel--attention">
+        <div class="dashboard-panel__head">
+          <div>
+            <span class="eyebrow">Attention queue</span>
+            <h2>What needs a business owner's eye</h2>
+            <p>These businesses are either blocked by status, have no live offers, or still have pickups to finish.</p>
+          </div>
+        </div>
+
+        @if (attentionBusinesses().length) {
+          <div class="attention-list">
+            @for (card of attentionBusinesses(); track card.business.id) {
+              <article class="attention-card">
+                <div class="attention-card__topline">
+                  <div>
+                    <strong>{{ card.business.name }}</strong>
+                    <small>{{ card.statusMeta.label }}</small>
+                  </div>
+                  <span>{{ activeReservations(card) }} active</span>
+                </div>
+                <p>{{ attentionMessage(card) }}</p>
+                <app-action-button
+                  label="Open workspace"
+                  variant="ghost"
+                  iconPosition="start"
+                  [icon]="icons.arrowRight"
+                  [route]="['/workspace', 'my-businesses', card.business.id]"
+                />
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="workspace-dashboard-page__empty-card">
+            <strong>Nothing urgent right now</strong>
+            <p>Every tracked business is active, stocked with offers, and does not have an obvious operations bottleneck.</p>
+          </div>
+        }
+      </section>
+    </div>
+
+    <div class="workspace-dashboard-page__layout workspace-dashboard-page__layout--secondary">
+      <section class="surface dashboard-panel">
+        <div class="dashboard-panel__head">
+          <div>
+            <span class="eyebrow">Business workspaces</span>
+            <h2>Open the exact location you want to manage</h2>
+            <p>Each card links into a business-specific workspace with its own dashboard, offers, reservations, analytics, and settings.</p>
+          </div>
+        </div>
+
+        <div class="business-card-list">
+          @for (card of businessCards(); track card.business.id) {
+            <article class="business-performance-card">
+              <div class="business-performance-card__copy">
+                <div class="business-performance-card__title-row">
+                  <div>
+                    <h3>{{ card.business.name }}</h3>
+                    <span class="business-performance-card__status" [attr.data-tone]="card.statusMeta.tone">{{ card.statusMeta.label }}</span>
+                  </div>
+                  <strong>{{ formatCurrency(recoveredRevenue(card)) }}</strong>
+                </div>
+
+                <p>{{ businessAddress(card) }}</p>
+
+                <div class="business-performance-card__metrics">
+                  <div>
+                    <span class="label">Live offers</span>
+                    <span class="value">{{ availableOffers(card) }}</span>
+                  </div>
+                  <div>
+                    <span class="label">Open orders</span>
+                    <span class="value">{{ activeReservations(card) }}</span>
+                  </div>
+                  <div>
+                    <span class="label">Pickup success</span>
+                    <span class="value">{{ formatPercent(pickupSuccessRate(card)) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="business-performance-card__actions">
+                <app-action-button
+                  label="Dashboard"
+                  variant="ghost"
+                  iconPosition="start"
+                  [icon]="icons.globe"
+                  [route]="['/workspace', 'my-businesses', card.business.id]"
+                />
+                <app-action-button
+                  label="Offers"
+                  variant="ghost"
+                  iconPosition="start"
+                  [icon]="icons.list"
+                  [route]="['/workspace', 'my-businesses', card.business.id, 'offers']"
+                />
+                <app-action-button
+                  label="Analytics"
+                  variant="ghost"
+                  iconPosition="start"
+                  [icon]="icons.hashtag"
+                  [route]="['/workspace', 'my-businesses', card.business.id, 'analytics']"
+                />
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+
+      <section class="surface dashboard-panel">
+        <div class="dashboard-panel__head">
+          <div>
+            <span class="eyebrow">Top performers</span>
+            <h2>Revenue recovered by location</h2>
+            <p>This makes it easy to see which business is already converting rescue stock into completed pickups.</p>
+          </div>
+        </div>
+
+        <div class="top-revenue-list">
+          @for (card of businessCards().slice(0, 5); track card.business.id) {
+            <article class="top-revenue-row">
+              <div class="top-revenue-row__copy">
+                <strong>{{ card.business.name }}</strong>
+                <small>{{ activeReservations(card) }} open orders</small>
+              </div>
+
+              <div class="top-revenue-row__bar">
+                <span [style.width.%]="revenueWidth(recoveredRevenue(card))"></span>
+              </div>
+
+              <strong>{{ formatCurrency(recoveredRevenue(card)) }}</strong>
+            </article>
+          }
+        </div>
+      </section>
+    </div>
+  }
+</section>

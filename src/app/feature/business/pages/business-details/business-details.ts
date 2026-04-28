@@ -10,16 +10,25 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { UserService } from '../../../../core/services/user.service';
 import { appIcons } from '../../../../shared/icons/app-icons';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
+import { BusinessAnalyticsModel } from '../../models/business-analytics.model';
 import {
   BUSINESS_STATUS_META,
   BusinessModel,
   BusinessPayload,
   BusinessStatusMeta,
 } from '../../models/business.model';
+import { BusinessAnalyticsApiService } from '../../services/business-analytics-api.service';
 import { BusinessApiService } from '../../services/business-api.service';
 import { BusinessWorkspaceStateService } from '../../services/business-workspace-state.service';
 
 type BusinessDetailsMode = 'view' | 'create' | 'edit';
+type BusinessRouteMode = 'details' | 'create' | 'settings';
+
+interface BusinessDashboardStat {
+  label: string;
+  value: string;
+  detail: string;
+}
 
 @Component({
   selector: 'app-business-details-page',
@@ -33,6 +42,7 @@ export class BusinessDetailsPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
+  private readonly businessAnalyticsApi = inject(BusinessAnalyticsApiService);
   private readonly businessApi = inject(BusinessApiService);
   private readonly businessWorkspaceState = inject(BusinessWorkspaceStateService);
   private readonly notificationService = inject(NotificationService);
@@ -41,9 +51,13 @@ export class BusinessDetailsPage {
   protected readonly user = this.userService.getUser();
   protected readonly currentBusiness = signal<BusinessModel | null>(null);
   protected readonly mode = signal<BusinessDetailsMode>('view');
+  protected readonly routeMode = signal<BusinessRouteMode>('details');
   protected readonly detailLoading = signal(false);
+  protected readonly dashboardLoading = signal(false);
   protected readonly submitAttempted = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly dashboardError = signal<string | null>(null);
+  protected readonly dashboardAnalytics = signal<BusinessAnalyticsModel | null>(null);
   protected readonly icons = appIcons;
   protected readonly countries = ['Slovakia', 'Czechia', 'Austria', 'Hungary', 'Poland'];
 
@@ -59,15 +73,55 @@ export class BusinessDetailsPage {
   protected readonly isCreateMode = computed(() => this.mode() === 'create');
   protected readonly isEditMode = computed(() => this.mode() === 'edit');
   protected readonly isEditorMode = computed(() => this.isCreateMode() || this.isEditMode());
+  protected readonly isSettingsPage = computed(() => this.routeMode() === 'settings');
   protected readonly selectedStatusMeta = computed(() =>
     this.currentBusiness() ? BUSINESS_STATUS_META[this.currentBusiness()!.status] : null,
   );
+  protected readonly canEditBusiness = computed(
+    () => this.user()?.role !== UserRoleEnum.ADMIN && !!this.currentBusiness() && !this.isCreateMode(),
+  );
   protected readonly canDeleteBusiness = computed(
+    () => this.user()?.role !== UserRoleEnum.ADMIN && !!this.currentBusiness() && !this.isCreateMode(),
+  );
+  protected readonly canViewOffers = computed(() => !!this.currentBusiness() && !this.isCreateMode());
+  protected readonly canViewReservations = computed(() => !!this.currentBusiness() && !this.isCreateMode());
+  protected readonly canViewAnalytics = computed(() => !!this.currentBusiness() && !this.isCreateMode());
+  protected readonly canManageSettings = computed(
     () => this.user()?.role !== UserRoleEnum.ADMIN && !!this.currentBusiness() && !this.isCreateMode(),
   );
   protected readonly showUnavailableState = computed(
     () => !this.detailLoading() && !this.isCreateMode() && !this.currentBusiness(),
   );
+  protected readonly dashboardStats = computed<BusinessDashboardStat[]>(() => {
+    const analytics = this.dashboardAnalytics();
+    if (!analytics) {
+      return [];
+    }
+
+    return [
+      {
+        label: 'Live offers',
+        value: analytics.overview.availableOffers.toString(),
+        detail: 'Currently visible to customers.',
+      },
+      {
+        label: 'Order queue',
+        value: analytics.overview.activeReservations.toString(),
+        detail: 'Reservations still waiting for pickup.',
+      },
+      {
+        label: 'Recovered revenue',
+        value: this.formatCurrency(analytics.overview.recoveredRevenue),
+        detail: 'Value already confirmed through pickups.',
+      },
+      {
+        label: 'Pickup success',
+        value: this.formatPercent(analytics.overview.pickupSuccessRate),
+        detail: 'Share of reservations that reached pickup.',
+      },
+    ];
+  });
+  protected readonly dashboardInsights = computed(() => this.dashboardAnalytics()?.insights.slice(0, 3) ?? []);
 
   protected readonly pageTitle = computed(() => {
     if (this.isCreateMode()) {
@@ -75,10 +129,10 @@ export class BusinessDetailsPage {
     }
 
     if (this.isEditMode()) {
-      return 'Edit business';
+      return this.isSettingsPage() ? 'Business settings' : 'Edit business';
     }
 
-    return this.currentBusiness()?.name ?? 'Business details';
+    return this.currentBusiness()?.name ?? 'Business dashboard';
   });
   protected readonly pageDescription = computed(() => {
     if (this.isCreateMode()) {
@@ -86,19 +140,27 @@ export class BusinessDetailsPage {
     }
 
     if (this.isEditMode()) {
-      return 'Update the venue information and save when the business profile is ready.';
+      return this.isSettingsPage()
+        ? 'Update the business profile, pickup location defaults, and core venue details from one settings page.'
+        : 'Update the venue information and save when the business profile is ready.';
     }
 
-    return 'Review status, business information, and workspace details for the selected location.';
+    return 'Review the health of this location, jump into the order queue, and keep the business workspace focused on one venue.';
   });
   protected readonly sideSummaryTitle = computed(() =>
-    this.isCreateMode() ? 'New business profile' : this.currentBusiness()?.name ?? 'Business workspace',
+    this.isCreateMode()
+      ? 'New business profile'
+      : this.isSettingsPage()
+        ? 'Business settings'
+        : this.currentBusiness()?.name ?? 'Business workspace',
   );
   protected readonly sideSummaryDescription = computed(() =>
     this.isCreateMode()
       ? 'New profiles stay separate from the list until you save them.'
       : this.isEditMode()
-        ? 'Return to the saved business details whenever you want before applying changes.'
+        ? this.isSettingsPage()
+          ? 'Save changes here to update the selected business everywhere in the workspace.'
+          : 'Return to the saved business details whenever you want before applying changes.'
         : this.selectedStatusMeta()?.description ?? 'Business details are unavailable right now.',
   );
 
@@ -106,41 +168,59 @@ export class BusinessDetailsPage {
     combineLatest([this.route.paramMap, this.route.data])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([params, data]) => {
-      const rawId = params.get('id');
-      const isCreateRoute = data['mode'] === 'create';
+        const rawId = params.get('id');
+        const resolvedRouteMode = this.resolveRouteMode(data['mode']);
+        this.routeMode.set(resolvedRouteMode);
 
-      if (isCreateRoute) {
-        this.enterCreateMode();
-        return;
-      }
+        if (resolvedRouteMode === 'create') {
+          this.enterCreateMode();
+          return;
+        }
 
-      const businessId = Number(rawId);
-      if (!Number.isInteger(businessId) || businessId <= 0) {
-        this.mode.set('view');
-        this.currentBusiness.set(null);
+        const businessId = Number(rawId);
+        if (!Number.isInteger(businessId) || businessId <= 0) {
+          this.mode.set('view');
+          this.currentBusiness.set(null);
+          this.detailLoading.set(false);
+          this.dashboardLoading.set(false);
+          this.dashboardAnalytics.set(null);
+          this.errorMessage.set('Business details could not be opened.');
+          return;
+        }
+
+        this.mode.set(resolvedRouteMode === 'settings' ? 'edit' : 'view');
+        this.submitAttempted.set(false);
         this.detailLoading.set(false);
-        this.errorMessage.set('Business details could not be opened.');
-        return;
-      }
 
-      this.mode.set('view');
-      this.submitAttempted.set(false);
-      this.detailLoading.set(false);
+        const resolvedBusiness = (data['business'] as BusinessModel | null | undefined) ?? null;
+        if (!resolvedBusiness) {
+          this.currentBusiness.set(null);
+          this.dashboardAnalytics.set(null);
+          this.dashboardLoading.set(false);
+          this.errorMessage.set('Business details could not be loaded.');
+          return;
+        }
 
-      const resolvedBusiness = (data['business'] as BusinessModel | null | undefined) ?? null;
-      if (!resolvedBusiness) {
-        this.currentBusiness.set(null);
-        this.errorMessage.set('Business details could not be loaded.');
-        return;
-      }
+        this.errorMessage.set(null);
+        this.currentBusiness.set(resolvedBusiness);
+        this.patchForm(resolvedBusiness);
 
-      this.errorMessage.set(null);
-      this.currentBusiness.set(resolvedBusiness);
-      this.patchForm(resolvedBusiness);
-    });
+        if (resolvedRouteMode === 'settings') {
+          this.dashboardAnalytics.set(null);
+          this.dashboardLoading.set(false);
+          this.dashboardError.set(null);
+          return;
+        }
+
+        this.loadDashboardAnalytics(resolvedBusiness.id);
+      });
   }
 
   protected startEditBusiness(): void {
+    if (!this.canEditBusiness()) {
+      return;
+    }
+
     const business = this.currentBusiness();
     if (!business) {
       return;
@@ -155,6 +235,14 @@ export class BusinessDetailsPage {
   protected cancelEdit(): void {
     if (this.isCreateMode()) {
       void this.router.navigateByUrl('/workspace/my-businesses');
+      return;
+    }
+
+    if (this.isSettingsPage()) {
+      const business = this.currentBusiness();
+      if (business) {
+        void this.router.navigate(['/workspace', 'my-businesses', business.id]);
+      }
       return;
     }
 
@@ -191,12 +279,16 @@ export class BusinessDetailsPage {
     this.businessApi.updateBusiness(business.id, payload).subscribe({
       next: (updatedBusiness) => {
         this.detailLoading.set(false);
-        this.mode.set('view');
+        this.mode.set(this.isSettingsPage() ? 'edit' : 'view');
         this.currentBusiness.set(updatedBusiness);
         this.patchForm(updatedBusiness);
         this.businessWorkspaceState.rememberBusinessId(updatedBusiness.id);
         this.businessWorkspaceState.rememberBusinessSummary(updatedBusiness);
         this.notificationService.success('Business details were updated.', 'Business saved');
+
+        if (!this.isSettingsPage()) {
+          this.loadDashboardAnalytics(updatedBusiness.id);
+        }
       },
       error: () => {
         this.detailLoading.set(false);
@@ -258,10 +350,21 @@ export class BusinessDetailsPage {
     return this.selectedStatusMeta()?.tone ?? null;
   }
 
+  protected formatCurrency(value: number): string {
+    return `${value.toFixed(2)} EUR`;
+  }
+
+  protected formatPercent(value: number): string {
+    return `${value.toFixed(1)}%`;
+  }
+
   private enterCreateMode(): void {
     this.mode.set('create');
     this.currentBusiness.set(null);
     this.detailLoading.set(false);
+    this.dashboardLoading.set(false);
+    this.dashboardAnalytics.set(null);
+    this.dashboardError.set(null);
     this.submitAttempted.set(false);
     this.errorMessage.set(null);
     this.form.reset({
@@ -286,14 +389,25 @@ export class BusinessDetailsPage {
       next: (business) => {
         this.detailLoading.set(false);
         this.currentBusiness.set(business);
-        this.mode.set('view');
+        this.mode.set(this.isSettingsPage() ? 'edit' : 'view');
         this.patchForm(business);
         this.businessWorkspaceState.rememberBusinessId(business.id);
         this.businessWorkspaceState.rememberBusinessSummary(business);
+
+        if (this.isSettingsPage()) {
+          this.dashboardAnalytics.set(null);
+          this.dashboardLoading.set(false);
+          this.dashboardError.set(null);
+          return;
+        }
+
+        this.loadDashboardAnalytics(business.id);
       },
       error: () => {
         this.detailLoading.set(false);
         this.currentBusiness.set(null);
+        this.dashboardLoading.set(false);
+        this.dashboardAnalytics.set(null);
         this.errorMessage.set('Business details could not be loaded.');
       },
     });
@@ -356,5 +470,31 @@ export class BusinessDetailsPage {
       postalCode: business.address.postalCode,
       country: business.address.country,
     });
+  }
+
+  private loadDashboardAnalytics(businessId: number): void {
+    this.dashboardLoading.set(true);
+    this.dashboardError.set(null);
+    this.dashboardAnalytics.set(null);
+
+    this.businessAnalyticsApi.getBusinessAnalytics(businessId).subscribe({
+      next: (analytics) => {
+        this.dashboardAnalytics.set(analytics);
+        this.dashboardLoading.set(false);
+      },
+      error: () => {
+        this.dashboardAnalytics.set(null);
+        this.dashboardLoading.set(false);
+        this.dashboardError.set('Dashboard metrics are unavailable right now. You can still manage the business and refresh again in a moment.');
+      },
+    });
+  }
+
+  private resolveRouteMode(value: unknown): BusinessRouteMode {
+    if (value === 'create' || value === 'settings') {
+      return value;
+    }
+
+    return 'details';
   }
 }

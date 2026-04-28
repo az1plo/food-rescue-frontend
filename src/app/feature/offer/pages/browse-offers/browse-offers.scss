@@ -1,78 +1,118 @@
-.offers-page__header {
-  display: grid;
-  gap: 2rem;
-  max-width: 58rem;
-  margin-bottom: 3.2rem;
+.browse-offers-page {
+  min-height: 100%;
 }
 
-.offers-page__header h1 {
+.browse-offers-page__header p,
+.browse-offers-page__summary p,
+.browse-offer-card__title-row p,
+.browse-offer-card__note,
+.browse-offers-page__state p {
   margin: 0;
-  color: var(--color-primary-strong);
-  line-height: 1.04;
-}
-
-.offers-page__header p,
-.offers-empty__copy p,
-.offers-tip p {
   color: var(--color-text-muted);
 }
 
-.offers-page__header p {
-  max-width: 58rem;
-  margin: 0;
-  font-size: 1.9rem;
-  line-height: 1.55;
+.browse-offers-page__state,
+.browse-offers-page__summary {
+  padding: 2.4rem;
 }
 
-.offers-empty {
+.browse-offers-page__state--empty {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
   gap: 2rem;
+  text-align: center;
+}
+
+.browse-offers-page__summary {
+  display: flex;
   align-items: center;
-  padding: 3rem;
+  justify-content: space-between;
+  gap: 2rem;
   margin-bottom: 2.4rem;
 }
 
-.offers-empty__copy h2 {
-  margin-bottom: 0.8rem;
+.browse-offers-page__summary strong {
+  display: block;
+  margin-bottom: 0.2rem;
   color: var(--color-primary-strong);
+  font-size: 2.8rem;
 }
 
-.offers-tips {
+.browse-offers-page__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.8rem;
 }
 
-.offers-tip {
+.browse-offer-card {
+  overflow: hidden;
+}
+
+.browse-offer-card__media {
+  aspect-ratio: 1.14 / 0.72;
+}
+
+.browse-offer-card__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.browse-offer-card__body {
   display: grid;
-  grid-template-columns: auto 1fr;
+  gap: 1.4rem;
+  padding: 2rem;
+}
+
+.browse-offer-card__title-row,
+.browse-offer-card__meta div {
+  display: flex;
+}
+
+.browse-offer-card__title-row {
+  justify-content: space-between;
   gap: 1.4rem;
   align-items: start;
-  padding: 2.2rem;
 }
 
-.offers-tip strong {
-  display: block;
-  margin-bottom: 0.4rem;
-  font-size: 1.8rem;
+.browse-offer-card__title-row h2 {
+  margin: 0 0 0.6rem;
+  font-size: 2.4rem;
+}
+
+.browse-offer-card__title-row strong {
   color: var(--color-primary-strong);
+  font-size: 2rem;
+  white-space: nowrap;
 }
 
-.offers-tip p,
-.offers-empty__copy p {
-  margin: 0;
-  font-size: 1.4rem;
-  line-height: 1.55;
+.browse-offer-card__meta {
+  display: grid;
+  gap: 0.9rem;
+  color: var(--color-text-muted);
+  font-size: 1.45rem;
+}
+
+.browse-offer-card__meta div {
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.browse-offer-card__note {
+  padding: 1rem 1.2rem;
+  border-radius: 1.2rem;
+  background: rgba(242, 246, 238, 0.75);
+}
+
+@media (max-width: 1199px) {
+  .browse-offers-page__grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 959px) {
-  .offers-empty,
-  .offers-tips {
-    grid-template-columns: 1fr;
-  }
-
-  .offers-empty {
-    padding: 2.4rem;
+  .browse-offers-page__summary,
+  .browse-offer-card__title-row {
+    display: grid;
   }
 }

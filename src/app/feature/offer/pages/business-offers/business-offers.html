@@ -1,0 +1,455 @@
+<section class="workspace-page business-offers-page">
+  <div class="business-offers-page__header">
+    <div>
+      <span class="eyebrow">Business workspace</span>
+      <h1>{{ business()?.name || 'Offers' }}</h1>
+      <p>{{ pageDescription() }}</p>
+    </div>
+
+    <div class="button-row">
+      @if (business(); as currentBusiness) {
+        <app-action-button
+          label="Back to business"
+          variant="ghost"
+          iconPosition="start"
+          [icon]="icons.arrowLeft"
+          [route]="['/workspace', 'my-businesses', currentBusiness.id]"
+        />
+
+        <app-action-button
+          label="Open analytics"
+          variant="secondary"
+          iconPosition="start"
+          [icon]="icons.hashtag"
+          [route]="['/workspace', 'my-businesses', currentBusiness.id, 'analytics']"
+        />
+      }
+
+      <app-action-button
+        label="Refresh offers"
+        variant="ghost"
+        iconPosition="start"
+        [icon]="icons.rotateRight"
+        (pressed)="refreshOffers()"
+      />
+
+      @if (canCreateOffer()) {
+        <app-action-button
+          label="Create offer"
+          iconPosition="start"
+          [icon]="icons.plus"
+          (pressed)="startCreateOffer()"
+        />
+      }
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert-banner alert-banner--danger">{{ errorMessage() }}</div>
+  }
+
+  @if (businessStatusMeta() && !canCreateOffer()) {
+    <div class="alert-banner alert-banner--info">
+      {{ businessStatusMeta()?.label }}: this business cannot publish new offers until the status becomes active.
+    </div>
+  }
+
+  @if (loading()) {
+    <section class="surface business-offers-page__state" aria-busy="true">
+      <span class="eyebrow">Offers</span>
+      <h2>Loading business offers</h2>
+      <p>We are opening the offer catalog for this workspace now.</p>
+    </section>
+  } @else {
+    <div class="business-offers-page__layout">
+      <section class="surface business-offers-page__catalog">
+        <div class="business-offers-page__catalog-head">
+          <div>
+            <span class="eyebrow">Offer catalog</span>
+            <h2>{{ offerCount() }} {{ offerCount() === 1 ? 'offer' : 'offers' }}</h2>
+            <p>Use the catalog to review live entries, swap image links, and open the editor when something changes.</p>
+          </div>
+        </div>
+
+        @if (!offers().length) {
+          <div class="business-offers-page__empty">
+            <h3>No offers yet</h3>
+            <p>
+              {{ canCreateOffer()
+                ? 'Create the first rescue offer for this business and publish it to the browse page.'
+                : 'The catalog is empty for now. Activate the business first to publish the first rescue offer.' }}
+            </p>
+          </div>
+        } @else {
+          <div class="business-offers-page__offer-list">
+            @for (offer of offers(); track offer.id) {
+              <article class="offer-workspace-card" [attr.data-selected]="selectedOfferId() === offer.id">
+                <div class="offer-workspace-card__media">
+                  <img [src]="resolveOfferImage(offer)" [alt]="offer.title" />
+                </div>
+
+                <div class="offer-workspace-card__main">
+                  <div class="offer-workspace-card__title-row">
+                    <div>
+                      <h3>{{ offer.title }}</h3>
+                      <span class="offer-workspace-card__status" [attr.data-tone]="statusMetaFor(offer.status).tone">
+                        {{ statusMetaFor(offer.status).label }}
+                      </span>
+                    </div>
+
+                    <strong>{{ formatPrice(offer.price) }}</strong>
+                  </div>
+
+                  <p>{{ offer.description || 'No description yet. Add a short summary so customers know what they are reserving.' }}</p>
+
+                  <div class="offer-workspace-card__meta">
+                    <div>
+                      <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
+                      <span>{{ offer.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }} - {{ offer.pickupTimeWindow.to | date: 'HH:mm' }}</span>
+                    </div>
+
+                    <div>
+                      <fa-icon [icon]="icons.list" aria-hidden="true" />
+                      <span>{{ offerItemsSummary(offer) }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="offer-workspace-card__actions">
+                  <app-action-button
+                    label="View"
+                    variant="ghost"
+                    iconPosition="start"
+                    [icon]="icons.eye"
+                    (pressed)="selectOffer(offer.id)"
+                  />
+
+                  @if (statusMetaFor(offer.status).editable) {
+                    <app-action-button
+                      label="Edit"
+                      variant="secondary"
+                      iconPosition="start"
+                      [icon]="icons.pen"
+                      (pressed)="startEditOffer(offer)"
+                    />
+                  }
+
+                  @if (statusMetaFor(offer.status).deletable) {
+                    <app-action-button
+                      label="Delete"
+                      variant="danger"
+                      iconPosition="start"
+                      [icon]="icons.trashCan"
+                      [disabled]="isRemoving(offer.id)"
+                      (pressed)="deleteOffer(offer)"
+                    />
+                  }
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="surface business-offers-page__detail">
+        @if (mode() === 'create' || mode() === 'edit') {
+          <form class="offer-editor" [formGroup]="form" (ngSubmit)="saveOffer()">
+            <div class="section-heading">
+              <span class="eyebrow">{{ mode() === 'create' ? 'New offer' : 'Edit offer' }}</span>
+              <h2>{{ editorTitle() }}</h2>
+              <p>Image links can point to your own hosted files, Azure storage later, or local public assets like `/images/offer-bakery.png`.</p>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-field form-field--full">
+                <label class="form-label" for="offer-title">Offer title</label>
+                <input id="offer-title" class="form-control" type="text" formControlName="title" />
+                <div class="field-message-slot">
+                  @if (showFieldError('title')) {
+                    <p class="field-error">Enter an offer title.</p>
+                  }
+                </div>
+              </div>
+
+              <div class="form-field form-field--full">
+                <label class="form-label" for="offer-description">Description</label>
+                <textarea id="offer-description" class="form-control" formControlName="description"></textarea>
+                <div class="field-message-slot">
+                  <p class="field-hint">Describe what the customer should expect in the pickup bag.</p>
+                </div>
+              </div>
+
+              <div class="form-field form-field--full">
+                <label class="form-label" for="offer-image-url">Image URL</label>
+                <input id="offer-image-url" class="form-control" type="text" formControlName="imageUrl" />
+                <div class="field-message-slot">
+                  <p class="field-hint">Examples: `/images/offer-salad.png` or `https://.../offer.jpg`.</p>
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="offer-price">Price</label>
+                <input id="offer-price" class="form-control" type="number" min="0" step="0.01" formControlName="price" />
+                <div class="field-message-slot">
+                  @if (showFieldError('price')) {
+                    <p class="field-error">Enter a valid price.</p>
+                  }
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="offer-quantity">Quantity available</label>
+                <input id="offer-quantity" class="form-control" type="number" min="1" step="1" formControlName="quantityAvailable" />
+                <div class="field-message-slot">
+                  @if (showFieldError('quantityAvailable')) {
+                    <p class="field-error">Enter a quantity greater than zero.</p>
+                  }
+                </div>
+              </div>
+
+              <div class="form-field form-field--full">
+                <span class="form-label">Quick image presets</span>
+                <div class="offer-editor__image-presets">
+                  @for (option of imageOptions; track option.url) {
+                    <button
+                      class="offer-editor__image-option"
+                      type="button"
+                      [class.is-active]="form.controls.imageUrl.value === option.url"
+                      (click)="applyImagePreset(option)"
+                    >
+                      <img [src]="option.url" [alt]="option.label" />
+                      <span>{{ option.label }}</span>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <div class="form-field form-field--full">
+                <label class="form-label" for="pickup-street">Pickup street</label>
+                <input id="pickup-street" class="form-control" type="text" formControlName="pickupStreet" />
+                <div class="field-message-slot">
+                  @if (showFieldError('pickupStreet')) {
+                    <p class="field-error">Enter the pickup street.</p>
+                  }
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="pickup-city">Pickup city</label>
+                <input id="pickup-city" class="form-control" type="text" formControlName="pickupCity" />
+                <div class="field-message-slot">
+                  @if (showFieldError('pickupCity')) {
+                    <p class="field-error">Enter the pickup city.</p>
+                  }
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="pickup-postal-code">Pickup postal code</label>
+                <input id="pickup-postal-code" class="form-control" type="text" formControlName="pickupPostalCode" />
+                <div class="field-message-slot">
+                  @if (showFieldError('pickupPostalCode')) {
+                    <p class="field-error">Enter the pickup postal code.</p>
+                  }
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="pickup-country">Pickup country</label>
+                <select id="pickup-country" class="form-control" formControlName="pickupCountry">
+                  @for (country of countries; track country) {
+                    <option [value]="country">{{ country }}</option>
+                  }
+                </select>
+                <div class="field-message-slot"></div>
+              </div>
+
+              <div class="form-field form-field--full">
+                <label class="form-label" for="pickup-note">Pickup note</label>
+                <input id="pickup-note" class="form-control" type="text" formControlName="pickupNote" />
+                <div class="field-message-slot">
+                  <p class="field-hint">Optional instructions like the side entrance or counter number.</p>
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="pickup-from">Pickup from</label>
+                <input id="pickup-from" class="form-control" type="datetime-local" formControlName="pickupFrom" />
+                <div class="field-message-slot">
+                  @if (showFieldError('pickupFrom')) {
+                    <p class="field-error">Choose a pickup start time.</p>
+                  }
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="pickup-to">Pickup to</label>
+                <input id="pickup-to" class="form-control" type="datetime-local" formControlName="pickupTo" />
+                <div class="field-message-slot">
+                  @if (showFieldError('pickupTo')) {
+                    <p class="field-error">Choose a pickup end time.</p>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <section class="offer-editor__items" formArrayName="items">
+              <div class="offer-editor__items-head">
+                <div>
+                  <span class="eyebrow">Offer items</span>
+                  <h3>What is inside</h3>
+                </div>
+
+                <button class="button button--ghost" type="button" (click)="addOfferItem()">Add item</button>
+              </div>
+
+              <div class="offer-editor__item-list">
+                @for (itemGroup of offerItemControls(); track $index; let index = $index) {
+                  <div class="offer-editor__item-row" [formGroup]="itemGroup">
+                    <div class="form-field">
+                      <label class="form-label" [for]="'offer-item-name-' + index">Item name</label>
+                      <input class="form-control" [id]="'offer-item-name-' + index" type="text" formControlName="name" />
+                      <div class="field-message-slot">
+                        @if (showItemFieldError(index, 'name')) {
+                          <p class="field-error">Enter an item name.</p>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="form-field">
+                      <label class="form-label" [for]="'offer-item-quantity-' + index">Quantity</label>
+                      <input
+                        class="form-control"
+                        [id]="'offer-item-quantity-' + index"
+                        type="number"
+                        min="1"
+                        step="1"
+                        formControlName="quantity"
+                      />
+                      <div class="field-message-slot">
+                        @if (showItemFieldError(index, 'quantity')) {
+                          <p class="field-error">Enter a valid quantity.</p>
+                        }
+                      </div>
+                    </div>
+
+                    <button class="button button--ghost offer-editor__item-remove" type="button" (click)="removeOfferItem(index)">
+                      Remove
+                    </button>
+                  </div>
+                }
+              </div>
+            </section>
+
+            @if (submitAttempted() && isPickupWindowInvalid()) {
+              <p class="field-error offer-editor__window-error">Pickup end time must be after pickup start time.</p>
+            }
+
+            <div class="button-row">
+              <button class="button button--primary" type="submit" [disabled]="saving()">
+                {{ mode() === 'create' ? 'Save offer' : 'Save changes' }}
+              </button>
+              <button class="button button--ghost" type="button" (click)="cancelEditing()">Cancel</button>
+            </div>
+          </form>
+        } @else if (selectedOffer(); as offer) {
+          <div class="offer-detail">
+            <span class="eyebrow">Offer details</span>
+
+            <div class="offer-detail__hero">
+              <img [src]="resolveOfferImage(offer)" [alt]="offer.title" />
+
+              <div class="offer-detail__hero-copy">
+                <div class="offer-detail__title-row">
+                  <div>
+                    <h2>{{ offer.title }}</h2>
+                    <span class="offer-workspace-card__status" [attr.data-tone]="statusMetaFor(offer.status).tone">
+                      {{ statusMetaFor(offer.status).label }}
+                    </span>
+                  </div>
+
+                  <strong>{{ formatPrice(offer.price) }}</strong>
+                </div>
+
+                <p>{{ offer.description || 'No description yet. Use the editor to explain what customers can expect.' }}</p>
+              </div>
+            </div>
+
+            <div class="offer-detail__grid">
+              <section class="offer-detail__panel">
+                <span class="eyebrow">Pickup</span>
+                <div class="offer-detail__list">
+                  <div>
+                    <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
+                    <span>{{ offer.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }} - {{ offer.pickupTimeWindow.to | date: 'd. M. y, HH:mm' }}</span>
+                  </div>
+                  <div>
+                    <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+                    <span>
+                      {{ offer.pickupLocation.address.street }}, {{ offer.pickupLocation.address.city }},
+                      {{ offer.pickupLocation.address.postalCode }}, {{ offer.pickupLocation.address.country }}
+                    </span>
+                  </div>
+                  @if (offer.pickupLocation.note) {
+                    <div>
+                      <fa-icon [icon]="icons.circleInfo" aria-hidden="true" />
+                      <span>{{ offer.pickupLocation.note }}</span>
+                    </div>
+                  }
+                </div>
+              </section>
+
+              <section class="offer-detail__panel">
+                <span class="eyebrow">Contents</span>
+                <div class="offer-detail__chips">
+                  @for (item of offer.items; track item.name + '-' + item.quantity) {
+                    <span>{{ item.quantity }}x {{ item.name }}</span>
+                  }
+                </div>
+
+                <div class="offer-detail__summary">
+                  <div>
+                    <span class="label">Available quantity</span>
+                    <span class="value">{{ offer.quantityAvailable }}</span>
+                  </div>
+                  <div>
+                    <span class="label">Created</span>
+                    <span class="value">{{ offer.createdAt | date: 'd. M. y' }}</span>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div class="button-row">
+              @if (statusMetaFor(offer.status).editable) {
+                <app-action-button
+                  label="Edit offer"
+                  variant="secondary"
+                  iconPosition="start"
+                  [icon]="icons.pen"
+                  (pressed)="startEditOffer(offer)"
+                />
+              }
+
+              @if (statusMetaFor(offer.status).deletable) {
+                <app-action-button
+                  label="Delete offer"
+                  variant="danger"
+                  iconPosition="start"
+                  [icon]="icons.trashCan"
+                  [disabled]="isRemoving(offer.id)"
+                  (pressed)="deleteOffer(offer)"
+                />
+              }
+            </div>
+          </div>
+        } @else {
+          <div class="business-offers-page__empty business-offers-page__empty--detail">
+            <h3>Select an offer</h3>
+            <p>Pick an offer from the catalog to review details, or create a new one when the business is ready.</p>
+          </div>
+        }
+      </section>
+    </div>
+  }
+</section>

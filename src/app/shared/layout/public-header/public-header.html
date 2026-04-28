@@ -41,9 +41,11 @@
 
       <div class="header__actions">
         @if (user(); as currentUser) {
-          <a class="button button--secondary header__workspace" routerLink="/workspace" (click)="closeMenu()">
-            Open workspace
-          </a>
+          @if (canOpenWorkspace()) {
+            <a class="button button--secondary header__workspace" routerLink="/workspace" (click)="closeMenu()">
+              Open workspace
+            </a>
+          }
 
           <app-account-menu [name]="currentUser.name" [subtitle]="currentUser.email || 'Account'" variant="public" />
 
@@ -53,7 +55,7 @@
               type="button"
               ngbDropdownToggle
               aria-label="Open notifications"
-              (click)="markNotificationsRead()"
+              (click)="openNotifications()"
             >
               <fa-icon class="header__utility-icon" [icon]="icons.bell" aria-hidden="true" />
               @if (unreadCount()) {
@@ -65,45 +67,63 @@
               <div class="header__notifications-head">
                 <div>
                   <strong>Notifications</strong>
-                  <small>Frontend only for now</small>
+                  <small>Live from the backend inbox</small>
                 </div>
 
-                @if (notifications().length) {
-                  <button class="header__notifications-clear" type="button" (click)="clearNotifications()">
-                    Clear all
+                <div class="button-row">
+                  @if (unreadCount()) {
+                    <button class="header__notifications-clear" type="button" (click)="markNotificationsRead($event)">
+                      Mark all as read
+                    </button>
+                  }
+
+                  <button class="header__notifications-clear" type="button" (click)="refreshNotifications($event)">
+                    Refresh
                   </button>
-                }
+                </div>
               </div>
 
-              @if (recentNotifications().length) {
+              @if (notificationsLoading() && !notifications().length) {
+                <div class="header__notifications-empty">
+                  <strong>Loading notifications</strong>
+                  <p>Checking the latest backend events now.</p>
+                </div>
+              } @else if (notificationsError()) {
+                <div class="header__notifications-empty">
+                  <strong>Notifications are unavailable</strong>
+                  <p>{{ notificationsError() }}</p>
+                </div>
+              } @else if (recentNotifications().length) {
                 <div class="header__notifications-list">
                   @for (notification of recentNotifications(); track notification.id) {
-                    <article class="header__notification" [attr.data-unread]="notification.unread">
+                    <article class="header__notification" [attr.data-unread]="!notification.readAt">
                       <div class="header__notification-dot" [attr.data-tone]="notification.tone"></div>
 
                       <div class="header__notification-copy">
                         <div class="header__notification-topline">
                           <strong>{{ notification.title }}</strong>
-                          <small>{{ notification.createdAt | date: 'shortTime' }}</small>
+                          <small>{{ notification.createdAt | date: 'd. M., HH:mm' }}</small>
                         </div>
                         <p>{{ notification.message }}</p>
                       </div>
 
-                      <button
-                        class="header__notification-close"
-                        type="button"
-                        aria-label="Remove notification"
-                        (click)="removeNotification(notification.id, $event)"
-                      >
-                        <fa-icon class="header__notification-close-icon" [icon]="icons.xmark" aria-hidden="true" />
-                      </button>
+                      @if (!notification.readAt) {
+                        <button
+                          class="header__notification-close"
+                          type="button"
+                          aria-label="Mark notification as read"
+                          (click)="markNotificationRead(notification.id, $event)"
+                        >
+                          <fa-icon class="header__notification-close-icon" [icon]="icons.circleCheck" aria-hidden="true" />
+                        </button>
+                      }
                     </article>
                   }
                 </div>
               } @else {
                 <div class="header__notifications-empty">
                   <strong>No notifications yet</strong>
-                  <p>Success, error, and info toasts will appear here too.</p>
+                  <p>Reserve an offer or manage a business and backend notifications will show up here.</p>
                 </div>
               }
             </div>

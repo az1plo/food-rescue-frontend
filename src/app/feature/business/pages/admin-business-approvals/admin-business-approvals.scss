@@ -1,0 +1,117 @@
+.admin-business-approvals-page {
+  display: grid;
+  gap: 2.4rem;
+}
+
+.admin-business-approvals-page__header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.admin-business-approvals-page__header p,
+.admin-business-approvals-page__summary p,
+.approval-card__title p,
+.approval-card__meta p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.admin-business-approvals-page__summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.2rem;
+  align-items: center;
+  padding: 2rem;
+  border-color: #f2d8a4;
+}
+
+.admin-business-approvals-page__summary strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: var(--color-primary-strong);
+  font-size: 2.8rem;
+}
+
+.admin-business-approvals-page__state {
+  padding: 2.4rem;
+}
+
+.admin-business-approvals-page__list {
+  display: grid;
+  gap: 1.6rem;
+}
+
+.approval-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2rem;
+  align-items: start;
+  padding: 2rem;
+}
+
+.approval-card__main {
+  display: grid;
+  gap: 1.6rem;
+}
+
+.approval-card__title {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1.6rem;
+}
+
+.approval-card__title h2 {
+  margin: 0 0 0.6rem;
+}
+
+.approval-card__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 8.4rem;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  background: #fff7e1;
+  color: #8c6514;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.approval-card__meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.approval-card__meta p {
+  margin-top: 0.45rem;
+}
+
+.approval-card__actions {
+  display: grid;
+  gap: 1rem;
+  min-width: 18rem;
+}
+
+@media (max-width: 1199px) {
+  .approval-card__meta {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 959px) {
+  .admin-business-approvals-page__header,
+  .approval-card,
+  .approval-card__title {
+    display: grid;
+  }
+
+  .approval-card__actions {
+    min-width: 0;
+  }
+}

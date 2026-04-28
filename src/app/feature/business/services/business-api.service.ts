@@ -15,6 +15,10 @@ export class BusinessApiService {
     return this.http.get<BusinessModel[]>(this.baseUrl).pipe(map((businesses) => businesses.map((business) => this.toWorkspaceListItem(business))));
   }
 
+  getPendingBusinessesForApproval() {
+    return this.http.get<BusinessModel[]>(`${environment.beUrl}/admin/businesses/pending`);
+  }
+
   getBusiness(id: number) {
     return this.http.get<BusinessModel>(`${this.baseUrl}/${id}`);
   }
@@ -25,6 +29,10 @@ export class BusinessApiService {
 
   updateBusiness(id: number, payload: BusinessPayload) {
     return this.http.put<BusinessModel>(`${this.baseUrl}/${id}`, payload);
+  }
+
+  approveBusiness(id: number) {
+    return this.http.post<BusinessModel>(`${environment.beUrl}/admin/businesses/${id}/approve`, null);
   }
 
   deleteBusiness(id: number) {

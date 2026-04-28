@@ -1,0 +1,159 @@
+<section class="page-section page-section--top-tight workspace-reservations-page">
+  <div class="container">
+    <div class="page-header page-header--split workspace-reservations-page__header">
+      <div>
+        <h1>Your reservations</h1>
+        <p>Track active pickups, recent cancellations, and completed rescue collections in one place.</p>
+      </div>
+
+      <div class="page-header__actions button-row">
+        <app-action-button
+          label="Refresh"
+          variant="ghost"
+          iconPosition="start"
+          [icon]="icons.rotateRight"
+          (pressed)="refreshReservations()"
+        />
+        <app-action-button label="Browse offers" [icon]="icons.arrowRight" route="/browse-offers" />
+      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="alert-banner alert-banner--danger">{{ errorMessage() }}</div>
+    }
+
+    @if (loading()) {
+      <section class="surface workspace-reservations-page__state" aria-busy="true">
+        <span class="eyebrow">Reservations</span>
+        <h2>Loading your reservation history</h2>
+        <p>We are fetching the latest statuses from the backend now.</p>
+      </section>
+    } @else if (!cards().length) {
+      <section class="surface workspace-reservations-page__state workspace-reservations-page__state--empty">
+        <div>
+          <span class="eyebrow">Reservations</span>
+          <h2>No reservations yet</h2>
+          <p>Reserve your first rescue offer and it will appear here with live backend status updates.</p>
+        </div>
+
+        <div class="button-row">
+          <app-action-button label="Browse offers" [icon]="icons.arrowRight" route="/browse-offers" />
+        </div>
+      </section>
+    } @else {
+      <section class="surface workspace-reservations-page__summary">
+        <article>
+          <strong>{{ summary().total }}</strong>
+          <span>Total reservations</span>
+        </article>
+        <article>
+          <strong>{{ summary().active }}</strong>
+          <span>Active pickups</span>
+        </article>
+        <article>
+          <strong>{{ summary().completed }}</strong>
+          <span>Picked up</span>
+        </article>
+        <article>
+          <strong>{{ summary().cancelled }}</strong>
+          <span>Cancelled</span>
+        </article>
+      </section>
+
+      <div class="workspace-reservations-page__grid">
+        @for (card of cards(); track card.reservation.id) {
+          <article class="surface reservation-card" [attr.data-tone]="card.statusMeta.tone">
+            <div class="reservation-card__media">
+              <img [src]="resolveOfferImage(card)" [alt]="resolveOfferTitle(card)" />
+            </div>
+
+            <div class="reservation-card__body">
+              <div class="reservation-card__topline">
+                <div>
+                  <span class="eyebrow">Reservation #{{ card.reservation.id }}</span>
+                  <h2>{{ resolveOfferTitle(card) }}</h2>
+                  <p>{{ resolveOfferDescription(card) }}</p>
+                </div>
+
+                <span class="reservation-card__status" [attr.data-tone]="card.statusMeta.tone">
+                  {{ card.statusMeta.label }}
+                </span>
+              </div>
+
+              <div class="reservation-card__meta">
+                <div>
+                  <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
+                  <span>Reserved {{ card.reservation.createdAt | date: 'd. M. y, HH:mm' }}</span>
+                </div>
+
+                @if (card.offer) {
+                  <div>
+                    <fa-icon [icon]="icons.clock" aria-hidden="true" />
+                    <span>
+                      Pickup {{ card.offer.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }} -
+                      {{ card.offer.pickupTimeWindow.to | date: 'HH:mm' }}
+                    </span>
+                  </div>
+
+                  <div>
+                    <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+                    <span>
+                      {{ card.offer.pickupLocation.address.street }}, {{ card.offer.pickupLocation.address.city }},
+                      {{ card.offer.pickupLocation.address.country }}
+                    </span>
+                  </div>
+
+                  <div>
+                    <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
+                    <span>{{ formatPrice(card.offer.price) }}</span>
+                  </div>
+                }
+
+                @if (card.reservation.cancelledAt) {
+                  <div>
+                    <fa-icon [icon]="icons.circleExclamation" aria-hidden="true" />
+                    <span>Cancelled {{ card.reservation.cancelledAt | date: 'd. M. y, HH:mm' }}</span>
+                  </div>
+                }
+
+                @if (card.reservation.pickupConfirmation?.confirmedAt) {
+                  <div>
+                    <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
+                    <span>Confirmed {{ card.reservation.pickupConfirmation?.confirmedAt | date: 'd. M. y, HH:mm' }}</span>
+                  </div>
+                }
+              </div>
+
+              @if (!card.offer && !loadingOfferDetails()) {
+                <p class="reservation-card__fallback">
+                  Offer detail is not fully available anymore, but reservation status still comes from the backend.
+                </p>
+              }
+
+              <div class="button-row reservation-card__actions">
+                @if (canCancelReservation(card.reservation)) {
+                  <app-action-button
+                    label="Cancel reservation"
+                    variant="danger"
+                    iconPosition="start"
+                    [icon]="icons.xmark"
+                    [disabled]="isCancelling(card.reservation.id)"
+                    (pressed)="cancelReservation(card.reservation)"
+                  />
+                }
+
+                <app-action-button
+                  label="Browse offers"
+                  variant="ghost"
+                  iconPosition="start"
+                  [icon]="icons.arrowRight"
+                  route="/browse-offers"
+                />
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </div>
+</section>

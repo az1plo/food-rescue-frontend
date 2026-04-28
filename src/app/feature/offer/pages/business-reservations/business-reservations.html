@@ -1,0 +1,182 @@
+<section class="workspace-page business-reservations-page">
+  <div class="business-reservations-page__header">
+    <div>
+      <span class="eyebrow">Business reservations</span>
+      <h1>{{ business()?.name || 'Reservations' }}</h1>
+      <p>Track orders for this business, see who reserved each offer, and confirm pickups directly from the workspace.</p>
+    </div>
+
+    <div class="button-row">
+      @if (business(); as currentBusiness) {
+        <app-action-button
+          label="Business dashboard"
+          variant="ghost"
+          iconPosition="start"
+          [icon]="icons.arrowLeft"
+          [route]="['/workspace', 'my-businesses', currentBusiness.id]"
+        />
+        <app-action-button
+          label="Manage offers"
+          variant="secondary"
+          iconPosition="start"
+          [icon]="icons.list"
+          [route]="['/workspace', 'my-businesses', currentBusiness.id, 'offers']"
+        />
+      }
+
+      <app-action-button
+        label="Refresh reservations"
+        variant="ghost"
+        iconPosition="start"
+        [icon]="icons.rotateRight"
+        (pressed)="refreshReservations()"
+      />
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert-banner alert-banner--danger">{{ errorMessage() }}</div>
+  }
+
+  @if (loading()) {
+    <section class="surface business-reservations-page__state" aria-busy="true">
+      <span class="eyebrow">Reservations</span>
+      <h2>Loading business orders</h2>
+      <p>We are fetching reservations attached to this business and matching them to the offer catalog.</p>
+    </section>
+  } @else if (!cards().length) {
+    <section class="surface business-reservations-page__state business-reservations-page__state--empty">
+      <div>
+        <span class="eyebrow">Orders</span>
+        <h2>No reservations yet</h2>
+        <p>This business does not have any customer reservations yet. As soon as an offer is claimed, it will appear here.</p>
+      </div>
+
+      @if (business(); as currentBusiness) {
+        <div class="button-row">
+          <app-action-button
+            label="Create or review offers"
+            iconPosition="start"
+            [icon]="icons.list"
+            [route]="['/workspace', 'my-businesses', currentBusiness.id, 'offers']"
+          />
+          <app-action-button
+            label="Open analytics"
+            variant="ghost"
+            iconPosition="start"
+            [icon]="icons.hashtag"
+            [route]="['/workspace', 'my-businesses', currentBusiness.id, 'analytics']"
+          />
+        </div>
+      }
+    </section>
+  } @else {
+    <section class="surface business-reservations-page__summary">
+      <article>
+        <strong>{{ summary().total }}</strong>
+        <span>Total orders</span>
+      </article>
+      <article>
+        <strong>{{ summary().active }}</strong>
+        <span>Waiting for pickup</span>
+      </article>
+      <article>
+        <strong>{{ summary().completed }}</strong>
+        <span>Picked up</span>
+      </article>
+      <article>
+        <strong>{{ summary().cancelled }}</strong>
+        <span>Cancelled</span>
+      </article>
+    </section>
+
+    <div class="business-reservations-page__grid">
+      @for (card of cards(); track card.reservation.id) {
+        <article class="surface reservation-card" [attr.data-tone]="card.statusMeta.tone">
+          <div class="reservation-card__media">
+            <img [src]="resolveOfferImage(card)" [alt]="card.offer.title" />
+          </div>
+
+          <div class="reservation-card__body">
+            <div class="reservation-card__topline">
+              <div>
+                <span class="eyebrow">Reservation #{{ card.reservation.id }}</span>
+                <h2>{{ card.offer.title }}</h2>
+                <p>{{ card.offer.description || 'No customer-facing description was saved for this offer.' }}</p>
+              </div>
+
+              <span class="reservation-card__status" [attr.data-tone]="card.statusMeta.tone">
+                {{ card.statusMeta.label }}
+              </span>
+            </div>
+
+            <div class="reservation-card__meta">
+              <div>
+                <fa-icon [icon]="icons.user" aria-hidden="true" />
+                <span>Customer #{{ card.reservation.userId }}</span>
+              </div>
+              <div>
+                <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
+                <span>Reserved {{ card.reservation.createdAt | date: 'd. M. y, HH:mm' }}</span>
+              </div>
+              <div>
+                <fa-icon [icon]="icons.clock" aria-hidden="true" />
+                <span>Pickup {{ card.offer.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }} - {{ card.offer.pickupTimeWindow.to | date: 'HH:mm' }}</span>
+              </div>
+              <div>
+                <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+                <span>
+                  {{ card.offer.pickupLocation.address.street }}, {{ card.offer.pickupLocation.address.city }},
+                  {{ card.offer.pickupLocation.address.country }}
+                </span>
+              </div>
+              <div>
+                <fa-icon [icon]="icons.list" aria-hidden="true" />
+                <span>{{ offerItemsSummary(card) }}</span>
+              </div>
+              <div>
+                <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
+                <span>{{ formatPrice(card.offer.price) }}</span>
+              </div>
+
+              @if (card.reservation.cancelledAt) {
+                <div>
+                  <fa-icon [icon]="icons.circleExclamation" aria-hidden="true" />
+                  <span>Cancelled {{ card.reservation.cancelledAt | date: 'd. M. y, HH:mm' }}</span>
+                </div>
+              }
+
+              @if (card.reservation.pickupConfirmation?.confirmedAt) {
+                <div>
+                  <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
+                  <span>Pickup confirmed {{ card.reservation.pickupConfirmation?.confirmedAt | date: 'd. M. y, HH:mm' }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="button-row reservation-card__actions">
+              @if (card.reservation.status === 'ACTIVE') {
+                <app-action-button
+                  label="Confirm pickup"
+                  variant="secondary"
+                  iconPosition="start"
+                  [icon]="icons.circleCheck"
+                  [disabled]="isConfirming(card.reservation.id)"
+                  (pressed)="confirmPickup(card)"
+                />
+              }
+
+              <app-action-button
+                label="Open offer workspace"
+                variant="ghost"
+                iconPosition="start"
+                [icon]="icons.arrowRight"
+                [route]="['/workspace', 'my-businesses', card.offer.businessId, 'offers']"
+              />
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

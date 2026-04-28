@@ -25,13 +25,19 @@
 
 .business-details-page__editor-layout,
 .business-details-page__view-grid,
-.business-details-page__panels {
+.business-details-page__panels,
+.business-details-page__stats {
   display: grid;
 }
 
 .business-details-page__content {
   display: grid;
   gap: 2.4rem;
+}
+
+.business-details-page__stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.6rem;
 }
 
 .business-details-page__editor-layout,
@@ -44,6 +50,7 @@
 .business-details-page__editor,
 .business-details-page__side-card,
 .business-details-page__panel,
+.business-details-page__stat-card,
 .business-details-page__status,
 .business-details-page__placeholder {
   padding: 2.4rem;
@@ -81,6 +88,21 @@
   gap: 1.6rem;
 }
 
+.business-details-page__stat-card {
+  display: grid;
+  gap: 0.8rem;
+  background: linear-gradient(180deg, rgba(247, 250, 244, 0.96), rgba(255, 255, 255, 0.96));
+}
+
+.business-details-page__stat-card strong {
+  font-size: clamp(2.8rem, 3vw, 3.6rem);
+}
+
+.business-details-page__stat-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
 .business-details-page__panel,
 .business-details-page__status {
   background: rgba(255, 255, 255, 0.9);
@@ -89,6 +111,50 @@
 .business-details-page__panel--description {
   display: grid;
   gap: 0.8rem;
+}
+
+.business-details-page__panel--insights {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.business-details-page__insights {
+  display: grid;
+  gap: 1rem;
+}
+
+.business-details-page__insight {
+  display: grid;
+  gap: 0.4rem;
+  padding: 1.4rem 1.6rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: rgba(242, 246, 238, 0.86);
+}
+
+.business-details-page__insight strong {
+  font-size: 1.5rem;
+}
+
+.business-details-page__insight p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 1.4rem;
+}
+
+.business-details-page__insight[data-tone='success'] {
+  border-color: #bfe0c9;
+  background: rgba(232, 246, 236, 0.9);
+}
+
+.business-details-page__insight[data-tone='warning'] {
+  border-color: #efd7b0;
+  background: rgba(255, 247, 230, 0.92);
+}
+
+.business-details-page__insight[data-tone='info'] {
+  border-color: #cddff5;
+  background: rgba(237, 246, 255, 0.92);
 }
 
 .business-details-page__description {
@@ -147,7 +213,8 @@
 @media (max-width: 1199px) {
   .business-details-page__editor-layout,
   .business-details-page__view-grid,
-  .business-details-page__panels {
+  .business-details-page__panels,
+  .business-details-page__stats {
     grid-template-columns: 1fr;
   }
 }
@@ -161,6 +228,7 @@
   .business-details-page__editor,
   .business-details-page__side-card,
   .business-details-page__panel,
+  .business-details-page__stat-card,
   .business-details-page__status,
   .business-details-page__placeholder {
     padding: 2rem;

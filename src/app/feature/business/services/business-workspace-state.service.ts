@@ -1,5 +1,7 @@
-import { effect, inject, Injectable, signal } from '@angular/core';
-import { tap } from 'rxjs';
+import { DestroyRef, computed, effect, inject, Injectable, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize, tap } from 'rxjs';
+import { UserRoleEnum } from '../../../core/models/user-role-enum';
 import { UserModel } from '../../../core/models/user-model';
 import { UserService } from '../../../core/services/user.service';
 import { BusinessModel, BusinessWorkspaceListItem } from '../models/business.model';
@@ -9,14 +11,23 @@ import { BusinessApiService } from './business-api.service';
   providedIn: 'root',
 })
 export class BusinessWorkspaceStateService {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly userService = inject(UserService);
   private readonly businessApi = inject(BusinessApiService);
   private readonly currentUser = this.userService.getUser();
   private readonly activeBusinessId = signal<number | null>(null);
   private readonly knownBusinessesState = signal<BusinessWorkspaceListItem[]>([]);
+  private readonly loadingState = signal(false);
+  private readonly loadedState = signal(false);
 
   readonly businessId = this.activeBusinessId.asReadonly();
   readonly knownBusinesses = this.knownBusinessesState.asReadonly();
+  readonly loading = this.loadingState.asReadonly();
+  readonly loaded = this.loadedState.asReadonly();
+  readonly hasBusinesses = computed(() => this.knownBusinessesState().length > 0);
+  readonly selectedBusiness = computed(
+    () => this.knownBusinessesState().find((business) => business.id === this.activeBusinessId()) ?? null,
+  );
 
   constructor() {
     effect(
@@ -25,19 +36,57 @@ export class BusinessWorkspaceStateService {
         if (!user) {
           this.activeBusinessId.set(null);
           this.knownBusinessesState.set([]);
+          this.loadingState.set(false);
+          this.loadedState.set(false);
           return;
         }
 
         this.activeBusinessId.set(this.readStoredBusinessId(user));
+        if (user.role === UserRoleEnum.ADMIN) {
+          this.knownBusinessesState.set([]);
+          this.loadingState.set(false);
+          this.loadedState.set(true);
+          return;
+        }
+
+        if (!this.loadedState() && !this.loadingState()) {
+          this.refreshBusinesses()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              error: () => {
+                this.knownBusinessesState.set([]);
+              },
+            });
+        }
       },
       { allowSignalWrites: true },
     );
   }
 
   refreshBusinesses() {
+    this.loadingState.set(true);
+
     return this.businessApi.getBusinesses().pipe(
+      finalize(() => {
+        this.loadingState.set(false);
+        this.loadedState.set(true);
+      }),
       tap((businesses) => {
-        this.knownBusinessesState.set(this.normalizeKnownBusinesses(businesses));
+        const normalizedBusinesses = this.normalizeKnownBusinesses(businesses);
+        this.knownBusinessesState.set(normalizedBusinesses);
+
+        const activeBusinessId = this.activeBusinessId();
+        if (activeBusinessId && normalizedBusinesses.some((business) => business.id === activeBusinessId)) {
+          return;
+        }
+
+        const nextBusinessId = normalizedBusinesses[0]?.id ?? null;
+        if (nextBusinessId) {
+          this.rememberBusinessId(nextBusinessId);
+          return;
+        }
+
+        this.clearRememberedBusinessId();
       }),
     );
   }
@@ -50,6 +99,16 @@ export class BusinessWorkspaceStateService {
 
     localStorage.setItem(this.storageKey(user), id.toString());
     this.activeBusinessId.set(id);
+    this.knownBusinessesState.update((items) =>
+      items.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              lastViewedAt: Date.now(),
+            }
+          : item,
+      ),
+    );
   }
 
   clearRememberedBusinessId(): void {
@@ -91,6 +150,7 @@ export class BusinessWorkspaceStateService {
               status: business.status,
               address: business.address,
               createdAt: business.createdAt,
+              lastViewedAt: item.id === business.id ? Date.now() : item.lastViewedAt,
             }
           : item,
       ),
@@ -109,6 +169,7 @@ export class BusinessWorkspaceStateService {
 
   private normalizeKnownBusinesses(items: BusinessWorkspaceListItem[]): BusinessWorkspaceListItem[] {
     const seenIds = new Set<number>();
+    const existingById = new Map(this.knownBusinessesState().map((item) => [item.id, item]));
 
     return items.filter((item) => {
       if (seenIds.has(item.id)) {
@@ -117,7 +178,10 @@ export class BusinessWorkspaceStateService {
 
       seenIds.add(item.id);
       return true;
-    }).slice(0, 12);
+    }).map((item) => ({
+      ...item,
+      lastViewedAt: existingById.get(item.id)?.lastViewedAt ?? item.lastViewedAt,
+    })).slice(0, 12);
   }
 
   private storageKey(user: UserModel): string {

@@ -1,0 +1,151 @@
+<section class="page-section auth-page">
+  <div class="container auth-page__inner">
+    <article class="surface auth-card">
+      <div class="auth-card__brand">
+        <img src="/images/logo_footer.png" alt="Food Rescue" />
+      </div>
+
+      <div class="auth-card__copy">
+        <h1>Create your account</h1>
+        <p>Join Food Rescue and start reserving meals, opening businesses, and managing surplus food in one place.</p>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="alert-banner alert-banner--danger auth-card__alert">{{ errorMessage() }}</div>
+      }
+
+      <form class="auth-form" [formGroup]="form" (ngSubmit)="createAccount()">
+        <div class="auth-form__grid">
+          <div class="auth-form__field">
+            <label class="form-label" for="register-first-name">First name</label>
+            <div class="auth-form__control">
+              <fa-icon [icon]="icons.user" aria-hidden="true" />
+              <input id="register-first-name" class="form-control" type="text" formControlName="firstName" placeholder="First name" />
+            </div>
+            <div class="field-message-slot">
+              @if (showFieldError('firstName')) {
+                <p class="field-error">Enter your first name.</p>
+              }
+            </div>
+          </div>
+
+          <div class="auth-form__field">
+            <label class="form-label" for="register-last-name">Last name</label>
+            <div class="auth-form__control">
+              <fa-icon [icon]="icons.user" aria-hidden="true" />
+              <input id="register-last-name" class="form-control" type="text" formControlName="lastName" placeholder="Last name" />
+            </div>
+            <div class="field-message-slot">
+              @if (showFieldError('lastName')) {
+                <p class="field-error">Enter your last name.</p>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="auth-form__field">
+          <label class="form-label" for="register-email">Email address</label>
+          <div class="auth-form__control">
+            <fa-icon [icon]="icons.email" aria-hidden="true" />
+            <input id="register-email" class="form-control" type="email" formControlName="email" placeholder="Email address" />
+          </div>
+          <div class="field-message-slot">
+            @if (showFieldError('email')) {
+              <p class="field-error">Enter a valid email address.</p>
+            }
+          </div>
+        </div>
+
+        <div class="auth-form__field">
+          <label class="form-label" for="register-password">Password</label>
+          <div class="auth-form__control auth-form__control--with-action">
+            <fa-icon [icon]="icons.lock" aria-hidden="true" />
+            <input
+              id="register-password"
+              class="form-control"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Password"
+            />
+            <button
+              class="auth-form__toggle"
+              type="button"
+              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+              (click)="togglePasswordVisibility()"
+            >
+              <fa-icon [icon]="showPassword() ? icons.eyeSlash : icons.eye" aria-hidden="true" />
+            </button>
+          </div>
+          <div class="field-message-slot">
+            @if (showFieldError('password')) {
+              <p class="field-error">Password must be at least 6 characters long.</p>
+            }
+          </div>
+        </div>
+
+        <div class="auth-form__field">
+          <label class="form-label" for="register-confirm-password">Confirm password</label>
+          <div class="auth-form__control auth-form__control--with-action">
+            <fa-icon [icon]="icons.lock" aria-hidden="true" />
+            <input
+              id="register-confirm-password"
+              class="form-control"
+              [type]="showConfirmPassword() ? 'text' : 'password'"
+              formControlName="confirmPassword"
+              placeholder="Confirm password"
+            />
+            <button
+              class="auth-form__toggle"
+              type="button"
+              [attr.aria-label]="showConfirmPassword() ? 'Hide confirmation password' : 'Show confirmation password'"
+              (click)="toggleConfirmPasswordVisibility()"
+            >
+              <fa-icon [icon]="showConfirmPassword() ? icons.eyeSlash : icons.eye" aria-hidden="true" />
+            </button>
+          </div>
+          <div class="field-message-slot">
+            @if (showFieldError('confirmPassword')) {
+              <p class="field-error">Confirm your password.</p>
+            } @else if (submitAttempted() && passwordsDoNotMatch()) {
+              <p class="field-error">Passwords must match.</p>
+            }
+          </div>
+        </div>
+
+        <label class="auth-form__checkbox">
+          <input type="checkbox" formControlName="acceptTerms" />
+          <span>I agree to the Terms of Service and Privacy Policy.</span>
+        </label>
+        <div class="field-message-slot">
+          @if (showFieldError('acceptTerms')) {
+            <p class="field-error">Accept the terms to continue.</p>
+          }
+        </div>
+
+        <button class="button button--primary auth-card__submit" type="submit" [disabled]="saving()">
+          {{ saving() ? 'Creating account...' : 'Create account' }}
+        </button>
+      </form>
+
+      <div class="auth-card__divider">
+        <span></span>
+        <strong>or continue with</strong>
+        <span></span>
+      </div>
+
+      <div class="auth-card__socials">
+        @for (provider of socialProviders; track provider.label) {
+          <button class="auth-card__social" type="button" (click)="openSocialProvider(provider)">
+            <fa-icon [icon]="provider.icon" aria-hidden="true" />
+            <span>{{ provider.label }}</span>
+          </button>
+        }
+      </div>
+
+      <p class="auth-card__switch">
+        Already have an account?
+        <a [routerLink]="['/login']" [queryParams]="{ returnUrl: returnUrl() }">Log in</a>
+      </p>
+    </article>
+  </div>
+</section>

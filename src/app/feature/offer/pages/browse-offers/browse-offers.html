@@ -1,25 +1,132 @@
-<section class="page-section page-section--top-tight offers-page">
+<section class="page-section page-section--top-tight browse-offers-page">
   <div class="container">
-    <div class="page-header offers-page__header">
-      <h1>Browse rescue offers</h1>
-      <p>Available pickup offers will appear here as businesses publish new surplus food collections.</p>
-    </div>
-
-    <section class="surface offers-empty">
-      <div class="offers-empty__copy">
-        <h2>No rescue offers are live right now</h2>
-        <p>Check back soon to reserve the next available pickup in your area.</p>
+    <div class="page-header page-header--split browse-offers-page__header">
+      <div>
+        <h1>Browse rescue offers</h1>
+        <p>Live pickup offers appear here as soon as active businesses publish new rescue collections.</p>
       </div>
 
-      <div class="button-row offers-empty__actions">
-        <app-action-button label="Return home" [icon]="icons.arrowRight" route="/" />
+      <div class="page-header__actions button-row">
+        <app-action-button
+          label="Refresh"
+          variant="ghost"
+          iconPosition="start"
+          [icon]="icons.rotateRight"
+          (pressed)="refreshOffers()"
+        />
 
-        @if (user()) {
-          <app-action-button label="Open workspace" variant="ghost" [icon]="icons.store" route="/workspace" />
-        } @else {
-          <app-action-button label="For business" variant="ghost" [icon]="icons.store" route="/for-business" />
+        @if (!user()) {
+          <app-action-button
+            label="Sign in to reserve"
+            iconPosition="start"
+            [icon]="icons.arrowRight"
+            (pressed)="loginToReserve()"
+          />
         }
       </div>
-    </section>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="alert-banner alert-banner--danger">{{ errorMessage() }}</div>
+    }
+
+    @if (loading()) {
+      <section class="surface browse-offers-page__state" aria-busy="true">
+        <span class="eyebrow">Browse</span>
+        <h2>Loading live offers</h2>
+        <p>We are checking the latest rescue collections now.</p>
+      </section>
+    } @else if (!offers().length) {
+      <section class="surface browse-offers-page__state browse-offers-page__state--empty">
+        <div>
+          <span class="eyebrow">Browse</span>
+          <h2>No rescue offers are live right now</h2>
+          <p>Check back soon. New offers will appear here the moment active businesses publish them.</p>
+        </div>
+
+        <div class="button-row">
+          <app-action-button label="Return home" [icon]="icons.arrowRight" route="/" />
+
+          @if (user()) {
+            <app-action-button label="Open workspace" variant="ghost" [icon]="icons.store" route="/workspace" />
+          } @else {
+            <app-action-button label="For business" variant="ghost" [icon]="icons.store" route="/for-business" />
+          }
+        </div>
+      </section>
+    } @else {
+      <section class="surface browse-offers-page__summary">
+        <div>
+          <strong>{{ liveOfferCount() }}</strong>
+          <p>offers are live right now</p>
+        </div>
+
+        <p>
+          {{ user()
+            ? 'Reserve any available offer directly from the catalog.'
+            : 'You can browse freely now and sign in only when you want to reserve.' }}
+        </p>
+      </section>
+
+      <div class="browse-offers-page__grid">
+        @for (offer of offers(); track offer.id) {
+          <article class="surface browse-offer-card">
+            <div class="browse-offer-card__media">
+              <img [src]="resolveOfferImage(offer)" [alt]="offer.title" />
+            </div>
+
+            <div class="browse-offer-card__body">
+              <div class="browse-offer-card__title-row">
+                <div>
+                  <h2>{{ offer.title }}</h2>
+                  <p>{{ offer.description || 'Fresh rescue collection ready for pickup.' }}</p>
+                </div>
+
+                <strong>{{ formatPrice(offer.price) }}</strong>
+              </div>
+
+              <div class="browse-offer-card__meta">
+                <div>
+                  <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
+                  <span>{{ offer.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }} - {{ offer.pickupTimeWindow.to | date: 'HH:mm' }}</span>
+                </div>
+
+                <div>
+                  <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+                  <span>
+                    {{ offer.pickupLocation.address.street }}, {{ offer.pickupLocation.address.city }},
+                    {{ offer.pickupLocation.address.country }}
+                  </span>
+                </div>
+
+                <div>
+                  <fa-icon [icon]="icons.list" aria-hidden="true" />
+                  <span>{{ offerItemsSummary(offer) }}</span>
+                </div>
+
+                <div>
+                  <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
+                  <span>{{ offer.quantityAvailable }} available</span>
+                </div>
+              </div>
+
+              @if (offer.pickupLocation.note) {
+                <p class="browse-offer-card__note">{{ offer.pickupLocation.note }}</p>
+              }
+
+              <div class="button-row browse-offer-card__actions">
+                <app-action-button
+                  [label]="user() ? 'Reserve offer' : 'Sign in to reserve'"
+                  iconPosition="start"
+                  [icon]="user() ? icons.bagShopping : icons.arrowRight"
+                  [disabled]="isReserving(offer.id)"
+                  (pressed)="reserveOffer(offer)"
+                />
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
   </div>
 </section>

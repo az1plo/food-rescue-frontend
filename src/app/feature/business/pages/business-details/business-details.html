@@ -15,13 +15,15 @@
       <section class="surface business-details-page__editor">
         <form class="business-form" [formGroup]="form" (ngSubmit)="saveBusiness()">
           <div class="section-heading">
-            <span class="eyebrow">{{ isCreateMode() ? 'Business details' : 'Edit business' }}</span>
-            <h2>{{ isCreateMode() ? 'Set up your venue profile' : 'Update business details' }}</h2>
+            <span class="eyebrow">{{ isCreateMode() ? 'Business details' : isSettingsPage() ? 'Business settings' : 'Edit business' }}</span>
+            <h2>{{ isCreateMode() ? 'Set up your venue profile' : isSettingsPage() ? 'Update business settings' : 'Update business details' }}</h2>
             <p>
               {{
                 isCreateMode()
                   ? 'Add the essentials now and continue refining the profile from the workspace.'
-                  : 'Keep the venue information current so the workspace stays ready for future publishing.'
+                  : isSettingsPage()
+                    ? 'Keep the business profile accurate so offers, reservations, and analytics stay tied to the right location.'
+                    : 'Keep the venue information current so the workspace stays ready for future publishing.'
               }}
             </p>
           </div>
@@ -88,9 +90,11 @@
 
           <div class="button-row business-form__actions">
             <button class="button button--primary" type="submit" [disabled]="detailLoading()">
-              {{ isCreateMode() ? 'Save business' : 'Save changes' }}
+              {{ isCreateMode() ? 'Save business' : isSettingsPage() ? 'Save settings' : 'Save changes' }}
             </button>
-            <button class="button button--ghost" type="button" (click)="cancelEdit()">Cancel</button>
+            <button class="button button--ghost" type="button" (click)="cancelEdit()">
+              {{ isSettingsPage() ? 'Back to dashboard' : 'Cancel' }}
+            </button>
           </div>
         </form>
       </section>
@@ -116,14 +120,49 @@
       <p>We are opening the selected business inside the workspace.</p>
     </section>
   } @else if (currentBusiness(); as business) {
+    @if (dashboardError() && !isSettingsPage()) {
+      <div class="alert-banner alert-banner--info">{{ dashboardError() }}</div>
+    }
+
     <div class="business-details-page__view-grid">
       <div class="business-details-page__content">
+        @if (!isSettingsPage() && dashboardStats().length) {
+          <section class="business-details-page__stats">
+            @for (stat of dashboardStats(); track stat.label) {
+              <article class="surface business-details-page__stat-card">
+                <span class="eyebrow">{{ stat.label }}</span>
+                <strong>{{ stat.value }}</strong>
+                <p>{{ stat.detail }}</p>
+              </article>
+            }
+          </section>
+        } @else if (dashboardLoading() && !isSettingsPage()) {
+          <section class="surface business-details-page__panel business-details-page__panel--description" aria-busy="true">
+            <span class="eyebrow">Business dashboard</span>
+            <p class="business-details-page__description">Refreshing live workspace metrics for this location.</p>
+          </section>
+        }
+
         <section class="surface business-details-page__panel business-details-page__panel--description">
-          <span class="eyebrow">Description</span>
+          <span class="eyebrow">{{ isSettingsPage() ? 'Business profile' : 'Description' }}</span>
           <p class="business-details-page__description">
             {{ business.description || 'No business description yet. Add a short summary so customers know what to expect.' }}
           </p>
         </section>
+
+        @if (!isSettingsPage() && dashboardInsights().length) {
+          <section class="surface business-details-page__panel business-details-page__panel--insights">
+            <span class="eyebrow">Live signals</span>
+            <div class="business-details-page__insights">
+              @for (insight of dashboardInsights(); track insight.title) {
+                <article class="business-details-page__insight" [attr.data-tone]="insight.tone">
+                  <strong>{{ insight.title }}</strong>
+                  <p>{{ insight.message }}</p>
+                </article>
+              }
+            </div>
+          </section>
+        }
 
         <div class="business-details-page__panels">
           <section class="surface business-details-page__panel">
@@ -165,28 +204,70 @@
       </div>
 
       <aside class="surface business-details-page__status">
-        <span class="eyebrow">Status</span>
+        <span class="eyebrow">{{ isSettingsPage() ? 'Settings' : 'Status' }}</span>
         <h3 [attr.data-tone]="statusTone()">{{ selectedStatusMeta()?.label }}</h3>
         <p>{{ selectedStatusMeta()?.description }}</p>
 
         <div class="business-details-page__status-actions">
-          <app-action-button
-            label="Edit business"
-            variant="secondary"
-            iconPosition="start"
-            [icon]="icons.pen"
-            (pressed)="startEditBusiness()"
-          />
+          @if (!isSettingsPage() && canViewOffers()) {
+            <app-action-button
+              label="Manage offers"
+              variant="secondary"
+              iconPosition="start"
+              [icon]="icons.list"
+              [route]="['/workspace', 'my-businesses', business.id, 'offers']"
+            />
+          }
+
+          @if (!isSettingsPage() && canViewReservations()) {
+            <app-action-button
+              label="Open reservations"
+              variant="ghost"
+              iconPosition="start"
+              [icon]="icons.calendarDays"
+              [route]="['/workspace', 'my-businesses', business.id, 'reservations']"
+            />
+          }
+
+          @if (!isSettingsPage() && canViewAnalytics()) {
+            <app-action-button
+              label="Open analytics"
+              variant="ghost"
+              iconPosition="start"
+              [icon]="icons.hashtag"
+              [route]="['/workspace', 'my-businesses', business.id, 'analytics']"
+            />
+          }
+
+          @if (!isSettingsPage() && canManageSettings()) {
+            <app-action-button
+              label="Open settings"
+              variant="ghost"
+              iconPosition="start"
+              [icon]="icons.user"
+              [route]="['/workspace', 'my-businesses', business.id, 'settings']"
+            />
+          }
 
           <app-action-button
-            label="Refresh details"
+            [label]="isSettingsPage() ? 'Refresh settings' : 'Refresh dashboard'"
             variant="ghost"
             iconPosition="start"
             [icon]="icons.rotateRight"
             (pressed)="refreshBusiness()"
           />
 
-          @if (canDeleteBusiness()) {
+          @if (isSettingsPage()) {
+            <app-action-button
+              label="Back to dashboard"
+              variant="secondary"
+              iconPosition="start"
+              [icon]="icons.arrowLeft"
+              [route]="['/workspace', 'my-businesses', business.id]"
+            />
+          }
+
+          @if (isSettingsPage() && canDeleteBusiness()) {
             <app-action-button
               label="Delete business"
               variant="danger"

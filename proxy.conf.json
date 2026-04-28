@@ -4,5 +4,23 @@
   },
   "/businesses": {
     "target": "http://localhost:8080"
+  },
+  "/offers": {
+    "target": "http://localhost:8080"
+  },
+  "/reservations": {
+    "target": "http://localhost:8080"
+  },
+  "/notifications": {
+    "target": "http://localhost:8080"
+  },
+  "/admin": {
+    "target": "http://localhost:8080"
+  },
+  "/users": {
+    "target": "http://localhost:8080"
+  },
+  "/auth/token": {
+    "target": "http://localhost:8080"
   }
 }

@@ -3,25 +3,33 @@ import { Router } from '@angular/router';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { UserModel } from '../models/user-model';
 import { UserRoleEnum } from '../models/user-role-enum';
-import { authCodeFlowConfig } from '../auth-code-flow.config';
+import { authClientConfig } from '../auth-code-flow.config';
+
+export type SocialIdentityProvider = 'google';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
+  private static readonly postIdentityLoginReturnUrlStorageKey = 'food-rescue.post-identity-login-return-url';
+
   private readonly oauthService = inject(OAuthService);
   private readonly router = inject(Router);
   private readonly user = signal<UserModel | null>(null);
   private readonly ready = signal(false);
 
   private loginAttempt: Promise<UserModel | null> | null = null;
-  private handledState: string | null = null;
 
   readonly isAuthenticated = computed(() => this.user() !== null);
 
   constructor() {
-    this.oauthService.configure(authCodeFlowConfig);
+    this.oauthService.configure(authClientConfig);
     this.oauthService.setupAutomaticSilentRefresh();
+    this.oauthService.events.subscribe((event) => {
+      if (event.type === 'token_received' || event.type === 'token_refreshed') {
+        this.syncUserFromTokens();
+      }
+    });
     void this.tryLogin();
   }
 
@@ -35,15 +43,51 @@ export class UserService {
 
   async login(returnUrl: string = this.router.url): Promise<void> {
     const targetUrl = this.normalizeReturnUrl(returnUrl);
-    await this.oauthService.loadDiscoveryDocumentAndLogin({ state: targetUrl });
-    this.syncUserFromClaims();
+    await this.router.navigate(['/login'], {
+      queryParams: {
+        returnUrl: targetUrl,
+      },
+    });
+  }
+
+  async loginWithCredentials(email: string, password: string, returnUrl: string = '/'): Promise<UserModel | null> {
+    await this.oauthService.fetchTokenUsingPasswordFlow(email.trim(), password);
+    const user = this.syncUserFromTokens();
+
+    if (user) {
+      await this.router.navigateByUrl(this.normalizeReturnUrl(returnUrl));
+    }
+
+    return user;
+  }
+
+  loginWithIdentityProvider(provider: SocialIdentityProvider, returnUrl: string = '/'): void {
+    const targetUrl = this.normalizeReturnUrl(returnUrl);
+    sessionStorage.setItem(UserService.postIdentityLoginReturnUrlStorageKey, targetUrl);
+    this.oauthService.initCodeFlow('', {
+      kc_idp_hint: provider,
+      prompt: 'select_account',
+    });
+  }
+
+  async completeIdentityProviderLogin(): Promise<UserModel | null> {
+    await this.oauthService.tryLoginCodeFlow();
+    const user = this.syncUserFromTokens();
+
+    if (user) {
+      await this.router.navigateByUrl(this.consumeIdentityProviderReturnUrl());
+    }
+
+    return user;
   }
 
   logout(): void {
-    this.oauthService.logOut();
+    sessionStorage.removeItem(UserService.postIdentityLoginReturnUrlStorageKey);
     this.user.set(null);
     this.ready.set(true);
-    void this.router.navigateByUrl('/');
+    this.oauthService.logOut({
+      client_id: authClientConfig.clientId,
+    });
   }
 
   async tryLogin(): Promise<UserModel | null> {
@@ -57,23 +101,36 @@ export class UserService {
   }
 
   private async tryLoginInternal(): Promise<UserModel | null> {
-    await this.oauthService.loadDiscoveryDocumentAndTryLogin();
-    return this.syncUserFromClaims();
+    if (this.oauthService.hasValidAccessToken()) {
+      return this.syncUserFromTokens();
+    }
+
+    if (this.oauthService.getRefreshToken()) {
+      try {
+        await this.oauthService.refreshToken();
+        return this.syncUserFromTokens();
+      } catch {
+        this.oauthService.logOut();
+      }
+    }
+
+    this.user.set(null);
+    this.ready.set(true);
+    return null;
   }
 
-  private syncUserFromClaims(): UserModel | null {
-    if (!this.oauthService.hasValidIdToken()) {
+  private syncUserFromTokens(): UserModel | null {
+    if (!this.oauthService.hasValidAccessToken()) {
       this.user.set(null);
       this.ready.set(true);
       return null;
     }
 
-    const claims = this.oauthService.getIdentityClaims() as Record<string, unknown> | null;
+    const claims = this.readStoredClaims();
     const user = claims ? this.mapUserClaims(claims) : null;
 
     this.user.set(user);
     this.ready.set(true);
-    this.restoreRequestedRoute();
 
     return user;
   }
@@ -114,7 +171,9 @@ export class UserService {
       }
     }
 
-    return undefined;
+    const subject = this.readStringClaim(claims, 'sub');
+    const email = this.readStringClaim(claims, 'email');
+    return subject || email ? UserRoleEnum.USER : undefined;
   }
 
   private readStringClaim(claims: Record<string, unknown>, key: string): string | null {
@@ -122,24 +181,48 @@ export class UserService {
     return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
   }
 
-  private restoreRequestedRoute(): void {
-    const state = this.oauthService.state;
-
-    if (!state || state === this.handledState || !state.startsWith('/')) {
-      return;
+  private readStoredClaims(): Record<string, unknown> | null {
+    const identityClaims = this.oauthService.getIdentityClaims() as Record<string, unknown> | null;
+    if (identityClaims) {
+      return identityClaims;
     }
 
-    this.handledState = state;
-
-    queueMicrotask(() => {
-      if (this.router.url !== state) {
-        void this.router.navigateByUrl(state);
-      }
-    });
+    return this.decodeJwtPayload(this.oauthService.getAccessToken());
   }
 
   private normalizeReturnUrl(returnUrl: string): string {
-    return returnUrl.startsWith('/') ? returnUrl : '/';
+    if (!returnUrl.startsWith('/') || returnUrl.startsWith('/login') || returnUrl.startsWith('/register')) {
+      return '/';
+    }
+
+    return returnUrl;
+  }
+
+  private consumeIdentityProviderReturnUrl(): string {
+    const storedValue = sessionStorage.getItem(UserService.postIdentityLoginReturnUrlStorageKey);
+    sessionStorage.removeItem(UserService.postIdentityLoginReturnUrlStorageKey);
+    return storedValue ? this.normalizeReturnUrl(storedValue) : '/';
+  }
+
+  private decodeJwtPayload(token: string): Record<string, unknown> | null {
+    if (!token) {
+      return null;
+    }
+
+    const parts = token.split('.');
+    if (parts.length < 2) {
+      return null;
+    }
+
+    try {
+      const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const normalizedBase64 = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+      const json = atob(normalizedBase64);
+      const payload = JSON.parse(json);
+      return this.isRecord(payload) ? payload : null;
+    } catch {
+      return null;
+    }
   }
 
   private isRecord(value: unknown): value is Record<string, unknown> {

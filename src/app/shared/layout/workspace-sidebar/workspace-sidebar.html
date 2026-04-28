@@ -5,16 +5,16 @@
     </a>
 
     <div class="workspace-sidebar__section">
-      <span class="eyebrow">Business workspace</span>
+      <span class="eyebrow">{{ sectionLabel() }}</span>
 
       <nav class="workspace-sidebar__nav" aria-label="Workspace navigation">
-        @for (item of navItems; track item.label) {
+        @for (item of navItems(); track item.label) {
           @if (item.route; as route) {
             <a
               class="workspace-sidebar__link"
               [routerLink]="route"
               routerLinkActive="is-active"
-              [routerLinkActiveOptions]="{ exact: false }"
+              [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
             >
               <fa-icon class="workspace-sidebar__link-icon" [icon]="item.icon" aria-hidden="true" />
               <span>{{ item.label }}</span>
@@ -30,7 +30,7 @@
     </div>
 
     <div class="workspace-sidebar__footer">
-      <a class="workspace-sidebar__footer-link" routerLink="/for-business">Back to public site</a>
+      <a class="workspace-sidebar__footer-link" routerLink="/">Back to public site</a>
     </div>
   </div>
 </aside>

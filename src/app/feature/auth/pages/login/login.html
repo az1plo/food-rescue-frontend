@@ -1,0 +1,84 @@
+<section class="page-section auth-page">
+  <div class="container auth-page__inner">
+    <article class="surface auth-card">
+      <div class="auth-card__brand">
+        <img src="/images/logo_footer.png" alt="Food Rescue" />
+      </div>
+
+      <div class="auth-card__copy">
+        <h1>Welcome back</h1>
+        <p>Sign in to manage your business workspace, track reservations, and keep rescuing food.</p>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="alert-banner alert-banner--danger auth-card__alert">{{ errorMessage() }}</div>
+      }
+
+      <form class="auth-form" [formGroup]="form" (ngSubmit)="signIn()">
+        <div class="auth-form__field">
+          <label class="form-label" for="login-email">Email address</label>
+          <div class="auth-form__control">
+            <fa-icon [icon]="icons.email" aria-hidden="true" />
+            <input id="login-email" class="form-control" type="email" formControlName="email" placeholder="Email address" />
+          </div>
+          <div class="field-message-slot">
+            @if (showFieldError('email')) {
+              <p class="field-error">Enter a valid email address.</p>
+            }
+          </div>
+        </div>
+
+        <div class="auth-form__field">
+          <label class="form-label" for="login-password">Password</label>
+          <div class="auth-form__control auth-form__control--with-action">
+            <fa-icon [icon]="icons.lock" aria-hidden="true" />
+            <input
+              id="login-password"
+              class="form-control"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Password"
+            />
+            <button
+              class="auth-form__toggle"
+              type="button"
+              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+              (click)="togglePasswordVisibility()"
+            >
+              <fa-icon [icon]="showPassword() ? icons.eyeSlash : icons.eye" aria-hidden="true" />
+            </button>
+          </div>
+          <div class="field-message-slot">
+            @if (showFieldError('password')) {
+              <p class="field-error">Enter your password.</p>
+            }
+          </div>
+        </div>
+
+        <button class="button button--primary auth-card__submit" type="submit" [disabled]="saving()">
+          {{ saving() ? 'Signing in...' : 'Log in' }}
+        </button>
+      </form>
+
+      <div class="auth-card__divider">
+        <span></span>
+        <strong>or continue with</strong>
+        <span></span>
+      </div>
+
+      <div class="auth-card__socials">
+        @for (provider of socialProviders; track provider.label) {
+          <button class="auth-card__social" type="button" (click)="openSocialProvider(provider)">
+            <fa-icon [icon]="provider.icon" aria-hidden="true" />
+            <span>{{ provider.label }}</span>
+          </button>
+        }
+      </div>
+
+      <p class="auth-card__switch">
+        Don't have an account yet?
+        <a [routerLink]="['/register']" [queryParams]="{ returnUrl: returnUrl() }">Create account</a>
+      </p>
+    </article>
+  </div>
+</section>

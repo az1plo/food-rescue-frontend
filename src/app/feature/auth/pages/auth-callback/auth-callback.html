@@ -1,0 +1,20 @@
+<section class="page-section auth-callback-page">
+  <div class="container">
+    <div class="surface auth-callback-card">
+      <span class="eyebrow">Google sign in</span>
+      <h1>{{ loading() ? 'Finishing your sign in' : errorMessage() ? 'Sign in needs attention' : 'Signed in' }}</h1>
+      @if (loading()) {
+        <p>We are securely completing your Google login and restoring your Food Rescue session.</p>
+      } @else if (errorMessage()) {
+        <p>{{ errorMessage() }}</p>
+        <div class="button-row">
+          <button class="button button--primary" type="button" (click)="backToLogin()">Back to log in</button>
+          <a class="button button--ghost" routerLink="/">Go home</a>
+        </div>
+      } @else {
+        <p>You can safely close this page if the app has not redirected yet.</p>
+        <a class="button button--primary" routerLink="/">Go home</a>
+      }
+    </div>
+  </div>
+</section>

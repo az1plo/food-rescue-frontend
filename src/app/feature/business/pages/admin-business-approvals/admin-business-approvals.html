@@ -1,0 +1,85 @@
+<section class="workspace-page admin-business-approvals-page">
+  <div class="admin-business-approvals-page__header">
+    <div>
+      <span class="eyebrow">Admin workspace</span>
+      <h1>Business approvals</h1>
+      <p>Review newly submitted business profiles and confirm the ones that are ready to go live.</p>
+    </div>
+
+    <app-action-button
+      label="Refresh queue"
+      variant="ghost"
+      iconPosition="start"
+      [icon]="icons.rotateRight"
+      (pressed)="refreshQueue()"
+    />
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert-banner alert-banner--danger">{{ errorMessage() }}</div>
+  }
+
+  <section class="surface admin-business-approvals-page__summary">
+    <app-circle-icon [icon]="icons.circleCheck" tone="warning" />
+    <div>
+      <strong>{{ approvalCount() }}</strong>
+      <p>Businesses currently waiting for approval.</p>
+    </div>
+  </section>
+
+  @if (loading()) {
+    <section class="surface admin-business-approvals-page__state" aria-busy="true">
+      <span class="eyebrow">Approval queue</span>
+      <h2>Loading pending businesses</h2>
+      <p>We are opening the moderation queue now.</p>
+    </section>
+  } @else if (!pendingBusinesses().length) {
+    <section class="surface admin-business-approvals-page__state">
+      <span class="eyebrow">Approval queue</span>
+      <h2>No pending businesses</h2>
+      <p>Everything is approved for now. Come back here when new businesses arrive.</p>
+    </section>
+  } @else {
+    <div class="admin-business-approvals-page__list">
+      @for (business of pendingBusinesses(); track business.id) {
+        <article class="surface approval-card">
+          <div class="approval-card__main">
+            <div class="approval-card__title">
+              <div>
+                <h2>{{ business.name }}</h2>
+                <p>{{ business.description || 'No description provided yet.' }}</p>
+              </div>
+              <span class="approval-card__status">Pending</span>
+            </div>
+
+            <div class="approval-card__meta">
+              <div>
+                <span class="eyebrow">Address</span>
+                <p>{{ business.address.street }}, {{ business.address.city }}, {{ business.address.postalCode }}, {{ business.address.country }}</p>
+              </div>
+              <div>
+                <span class="eyebrow">Submitted</span>
+                <p>{{ business.createdAt | date: 'd. M. y, HH:mm' }}</p>
+              </div>
+              <div>
+                <span class="eyebrow">Owner</span>
+                <p>#{{ business.ownerId }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="approval-card__actions">
+            <app-action-button label="View details" variant="ghost" [route]="['/workspace', 'my-businesses', business.id]" />
+            <app-action-button
+              label="Approve business"
+              iconPosition="start"
+              [icon]="icons.circleCheck"
+              [disabled]="isApproving(business.id)"
+              (pressed)="approveBusiness(business.id)"
+            />
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

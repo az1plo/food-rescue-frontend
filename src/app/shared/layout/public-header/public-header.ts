@@ -9,8 +9,10 @@ import {
   NgbDropdownToggle,
 } from '@ng-bootstrap/ng-bootstrap';
 import { filter } from 'rxjs';
-import { NotificationService } from '../../../core/services/notification.service';
+import { UserRoleEnum } from '../../../core/models/user-role-enum';
+import { NotificationInboxService } from '../../../core/services/notification-inbox.service';
 import { UserService } from '../../../core/services/user.service';
+import { BusinessWorkspaceStateService } from '../../../feature/business/services/business-workspace-state.service';
 import { appIcons } from '../../icons/app-icons';
 import { AccountMenuComponent } from '../../ui/account-menu/account-menu';
 
@@ -33,15 +35,31 @@ import { AccountMenuComponent } from '../../ui/account-menu/account-menu';
 export class PublicHeaderComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
-  private readonly notificationService = inject(NotificationService);
+  private readonly notificationInbox = inject(NotificationInboxService);
   private readonly userService = inject(UserService);
+  private readonly businessWorkspaceState = inject(BusinessWorkspaceStateService);
 
   protected readonly menuOpen = signal(false);
-  protected readonly notifications = this.notificationService.notifications;
-  protected readonly recentNotifications = computed(() => this.notifications().slice(0, 6));
-  protected readonly unreadCount = this.notificationService.unreadCount;
+  protected readonly notifications = this.notificationInbox.notifications;
+  protected readonly recentNotifications = this.notificationInbox.recentNotifications;
+  protected readonly unreadCount = this.notificationInbox.unreadCount;
+  protected readonly notificationsLoading = this.notificationInbox.loading;
+  protected readonly notificationsError = this.notificationInbox.errorMessage;
   protected readonly user = this.userService.getUser();
+  protected readonly userReady = this.userService.getReady();
   protected readonly icons = appIcons;
+  protected readonly canOpenWorkspace = computed(() => {
+    const currentUser = this.user();
+    if (!this.userReady() || !currentUser) {
+      return true;
+    }
+
+    if (currentUser.role === UserRoleEnum.ADMIN) {
+      return true;
+    }
+
+    return this.businessWorkspaceState.hasBusinesses();
+  });
 
   constructor() {
     this.router.events
@@ -77,17 +95,23 @@ export class PublicHeaderComponent {
     void this.userService.login('/workspace');
   }
 
-  protected markNotificationsRead(): void {
-    this.notificationService.markAllAsRead();
+  protected openNotifications(): void {
+    this.notificationInbox.ensureLoaded();
   }
 
-  protected clearNotifications(): void {
-    this.notificationService.clearAll();
+  protected refreshNotifications(event?: Event): void {
+    event?.stopPropagation();
+    this.notificationInbox.refresh();
   }
 
-  protected removeNotification(id: number, event: Event): void {
+  protected markNotificationsRead(event?: Event): void {
+    event?.stopPropagation();
+    this.notificationInbox.markAllAsRead();
+  }
+
+  protected markNotificationRead(id: number, event: Event): void {
     event.stopPropagation();
-    this.notificationService.remove(id);
+    this.notificationInbox.markAsRead(id);
   }
 
 }
