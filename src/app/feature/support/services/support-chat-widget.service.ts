@@ -14,6 +14,30 @@ const INITIAL_SUGGESTIONS = [
   'How can a business publish offers?',
 ] as const;
 
+function createMessageId(): string {
+  if (typeof crypto !== 'undefined') {
+    if (typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+
+    if (typeof crypto.getRandomValues === 'function') {
+      const bytes = crypto.getRandomValues(new Uint8Array(16));
+      bytes[6] = (bytes[6] & 0x0f) | 0x40;
+      bytes[8] = (bytes[8] & 0x3f) | 0x80;
+      const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+      return [
+        hex.slice(0, 8),
+        hex.slice(8, 12),
+        hex.slice(12, 16),
+        hex.slice(16, 20),
+        hex.slice(20),
+      ].join('-');
+    }
+  }
+
+  return `msg-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -29,7 +53,7 @@ export class SupportChatWidgetService {
   readonly conversationId = signal<string | null>(null);
   readonly messages = signal<SupportChatMessageModel[]>([
     {
-      id: crypto.randomUUID(),
+      id: createMessageId(),
       role: 'assistant',
       content:
         "Hi, I'm Mika. I can help with orders, pickup timing, marketplace browsing, and business onboarding.",
@@ -63,7 +87,7 @@ export class SupportChatWidgetService {
     this.open();
 
     const userMessage: SupportChatMessageModel = {
-      id: crypto.randomUUID(),
+      id: createMessageId(),
       role: 'user',
       content,
       createdAt: new Date().toISOString(),
@@ -90,7 +114,7 @@ export class SupportChatWidgetService {
           this.messages.update((messages) => [
             ...messages,
             {
-              id: crypto.randomUUID(),
+              id: createMessageId(),
               role: 'assistant',
               content: response.message,
               createdAt: response.generatedAt,
@@ -104,7 +128,7 @@ export class SupportChatWidgetService {
           this.messages.update((messages) => [
             ...messages,
             {
-              id: crypto.randomUUID(),
+              id: createMessageId(),
               role: 'assistant',
               content:
                 'I could not reach the live support brain just now, but you can try again or ask about orders, pickup times, or business publishing.',
