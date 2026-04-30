@@ -12,7 +12,7 @@ variables:
 build:
   stage: build
   tags:
-    - fsa
+    - fsa-makarevychv
   image: docker:latest
   services:
     - docker:dind
