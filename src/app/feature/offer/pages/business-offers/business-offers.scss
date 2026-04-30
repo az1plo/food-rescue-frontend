@@ -126,6 +126,27 @@
   white-space: nowrap;
 }
 
+.offer-workspace-card__price-stack,
+.offer-detail__price-stack {
+  display: grid;
+  justify-items: end;
+  gap: 0.35rem;
+}
+
+.offer-workspace-card__original-price {
+  color: var(--color-text-muted);
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-decoration: line-through;
+  text-decoration-thickness: 0.14rem;
+}
+
+.offer-detail__price-stack small {
+  color: var(--color-primary-strong);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
 .offer-workspace-card__status {
   display: inline-flex;
   align-items: center;

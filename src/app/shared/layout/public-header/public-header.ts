@@ -13,6 +13,7 @@ import { UserRoleEnum } from '../../../core/models/user-role-enum';
 import { NotificationInboxService } from '../../../core/services/notification-inbox.service';
 import { UserService } from '../../../core/services/user.service';
 import { BusinessWorkspaceStateService } from '../../../feature/business/services/business-workspace-state.service';
+import { OfferCartService } from '../../../feature/offer/services/offer-cart.service';
 import { appIcons } from '../../icons/app-icons';
 import { AccountMenuComponent } from '../../ui/account-menu/account-menu';
 
@@ -38,6 +39,7 @@ export class PublicHeaderComponent {
   private readonly notificationInbox = inject(NotificationInboxService);
   private readonly userService = inject(UserService);
   private readonly businessWorkspaceState = inject(BusinessWorkspaceStateService);
+  private readonly offerCart = inject(OfferCartService);
 
   protected readonly menuOpen = signal(false);
   protected readonly notifications = this.notificationInbox.notifications;
@@ -47,6 +49,7 @@ export class PublicHeaderComponent {
   protected readonly notificationsError = this.notificationInbox.errorMessage;
   protected readonly user = this.userService.getUser();
   protected readonly userReady = this.userService.getReady();
+  protected readonly cartCount = this.offerCart.count;
   protected readonly icons = appIcons;
   protected readonly canOpenWorkspace = computed(() => {
     const currentUser = this.user();

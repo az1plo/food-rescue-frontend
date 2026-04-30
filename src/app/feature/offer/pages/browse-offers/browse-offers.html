@@ -2,8 +2,9 @@
   <div class="container">
     <div class="page-header page-header--split browse-offers-page__header">
       <div>
-        <h1>Browse rescue offers</h1>
-        <p>Live pickup offers appear here as soon as active businesses publish new rescue collections.</p>
+        <span class="eyebrow">Public marketplace</span>
+        <h1>Browse rescue offers near you</h1>
+        <p>Search live offers, compare businesses, and jump between the list and map without leaving the catalog.</p>
       </div>
 
       <div class="page-header__actions button-row">
@@ -30,102 +31,360 @@
       <div class="alert-banner alert-banner--danger">{{ errorMessage() }}</div>
     }
 
+    @if (locationError()) {
+      <div class="alert-banner alert-banner--info">{{ locationError() }}</div>
+    }
+
+    <section class="surface browse-offers-page__toolbar">
+      <label class="browse-offers-page__search">
+        <fa-icon [icon]="icons.magnifyingGlass" aria-hidden="true" />
+        <input
+          #searchInput
+          type="search"
+          placeholder="Search offers, businesses, or cities"
+          [value]="searchText()"
+          (input)="onSearchInput(searchInput.value)"
+        />
+      </label>
+
+      <label class="browse-offers-page__select">
+        <span>Sort by</span>
+        <select #sortSelect class="form-control" [value]="sort()" (change)="updateSort(sortSelect.value)">
+          <option value="DISTANCE">Distance</option>
+          <option value="PICKUP_SOONEST">Pickup soonest</option>
+          <option value="PRICE_ASC">Lowest price</option>
+          <option value="NEWEST">Newest</option>
+        </select>
+      </label>
+
+      <button
+        type="button"
+        class="browse-toggle"
+        [class.browse-toggle--active]="includeUnavailable()"
+        (click)="toggleUnavailable()"
+      >
+        {{ includeUnavailable() ? 'Showing unavailable too' : 'Only available offers' }}
+      </button>
+
+      <div class="browse-segmented" role="tablist" aria-label="Browse view">
+        @for (mode of viewModes; track mode) {
+          <button
+            type="button"
+            class="browse-segmented__button"
+            [class.browse-segmented__button--active]="viewMode() === mode"
+            (click)="setViewMode(mode)"
+          >
+            <fa-icon [icon]="mode === 'MAP' ? icons.locationDot : icons.list" aria-hidden="true" />
+            <span>{{ mode === 'MAP' ? 'Map' : 'List' }}</span>
+          </button>
+        }
+      </div>
+
+      <div class="button-row browse-offers-page__toolbar-actions">
+        <app-action-button
+          [label]="viewerLocation() ? 'Refresh location' : 'Use my location'"
+          variant="ghost"
+          iconPosition="start"
+          [icon]="icons.locationDot"
+          [disabled]="locating()"
+          (pressed)="requestViewerLocation()"
+        />
+
+        @if (viewerLocation()) {
+          <app-action-button
+            label="Clear location"
+            variant="ghost"
+            iconPosition="start"
+            [icon]="icons.xmark"
+            (pressed)="clearViewerLocation()"
+          />
+        }
+      </div>
+
+      @if (viewMode() === 'MAP') {
+        <div class="browse-offers-page__scope">
+          <label class="browse-offers-page__select">
+            <span>City for map scope</span>
+            <select #citySelect class="form-control" [value]="selectedCity() ?? ''" (change)="updateSelectedCity(citySelect.value)">
+              <option value="">Choose city</option>
+              @for (option of cityOptions(); track option.city) {
+                <option [value]="option.city">{{ option.city }} ({{ option.businessCount }})</option>
+              }
+            </select>
+          </label>
+
+          @if (selectedCity()) {
+            <app-action-button
+              label="Clear city"
+              variant="ghost"
+              iconPosition="start"
+              [icon]="icons.xmark"
+              (pressed)="updateSelectedCity('')"
+            />
+          }
+
+          <label class="browse-offers-page__select browse-offers-page__radius">
+            <span>Radius</span>
+            <select
+              #radiusSelect
+              class="form-control"
+              [value]="radiusKm().toString()"
+              (change)="updateRadiusPreset(radiusSelect.value)"
+            >
+              @for (radiusOption of radiusPresetOptions; track radiusOption) {
+                <option [value]="radiusOption.toString()">{{ radiusOption }} km</option>
+              }
+            </select>
+          </label>
+
+          <span class="browse-offers-page__scope-hint">{{ mapScopeDescription() }}</span>
+        </div>
+      }
+
+      <div class="browse-offers-page__toolbar-meta">
+        <span>
+          Showing <strong>{{ summary().visibleOffers }}</strong> of <strong>{{ summary().totalOffers }}</strong> offers
+          from <strong>{{ summary().businesses }}</strong> businesses
+        </span>
+
+        @if (viewerLocation()) {
+          <span>Distance is calculated from your current location.</span>
+        } @else {
+          <span>Add your location to unlock real distance sorting and map context.</span>
+        }
+      </div>
+    </section>
+
     @if (loading()) {
       <section class="surface browse-offers-page__state" aria-busy="true">
         <span class="eyebrow">Browse</span>
         <h2>Loading live offers</h2>
-        <p>We are checking the latest rescue collections now.</p>
+        <p>We are building your rescue marketplace view now.</p>
       </section>
     } @else if (!offers().length) {
       <section class="surface browse-offers-page__state browse-offers-page__state--empty">
         <div>
           <span class="eyebrow">Browse</span>
-          <h2>No rescue offers are live right now</h2>
-          <p>Check back soon. New offers will appear here the moment active businesses publish them.</p>
+          <h2>No offers match this view right now</h2>
+          <p>Try a different search, switch unavailable offers on, or refresh after businesses publish new rescue bags.</p>
         </div>
 
         <div class="button-row">
+          <app-action-button label="Clear business focus" variant="ghost" [icon]="icons.xmark" (pressed)="clearSelectedBusiness()" />
           <app-action-button label="Return home" [icon]="icons.arrowRight" route="/" />
-
-          @if (user()) {
-            <app-action-button label="Open workspace" variant="ghost" [icon]="icons.store" route="/workspace" />
-          } @else {
-            <app-action-button label="For business" variant="ghost" [icon]="icons.store" route="/for-business" />
-          }
         </div>
       </section>
     } @else {
-      <section class="surface browse-offers-page__summary">
-        <div>
-          <strong>{{ liveOfferCount() }}</strong>
-          <p>offers are live right now</p>
-        </div>
-
-        <p>
-          {{ user()
-            ? 'Reserve any available offer directly from the catalog.'
-            : 'You can browse freely now and sign in only when you want to reserve.' }}
-        </p>
-      </section>
-
-      <div class="browse-offers-page__grid">
-        @for (offer of offers(); track offer.id) {
-          <article class="surface browse-offer-card">
-            <div class="browse-offer-card__media">
-              <img [src]="resolveOfferImage(offer)" [alt]="offer.title" />
-            </div>
-
-            <div class="browse-offer-card__body">
-              <div class="browse-offer-card__title-row">
+      <div class="browse-offers-page__content" [class.browse-offers-page__content--map]="viewMode() === 'MAP'">
+        <div class="browse-offers-page__catalog">
+          @if (selectedBusiness(); as cluster) {
+            <section class="surface browse-business-focus">
+              <div class="browse-business-focus__header">
                 <div>
-                  <h2>{{ offer.title }}</h2>
-                  <p>{{ offer.description || 'Fresh rescue collection ready for pickup.' }}</p>
+                  <span class="eyebrow">Selected business</span>
+                  <h2>{{ cluster.business.name }}</h2>
+                  <p>{{ cluster.business.description || 'This business has live rescue offers ready to explore.' }}</p>
                 </div>
 
-                <strong>{{ formatPrice(offer.price) }}</strong>
+                <div class="button-row">
+                  <app-action-button
+                    label="Show all businesses"
+                    variant="ghost"
+                    iconPosition="start"
+                    [icon]="icons.xmark"
+                    (pressed)="clearSelectedBusiness()"
+                  />
+                </div>
               </div>
 
-              <div class="browse-offer-card__meta">
-                <div>
+              <div class="browse-business-focus__meta">
+                <span>
+                  <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+                  {{ formatAddress(cluster.business.address) }}
+                </span>
+                <span>
+                  <fa-icon [icon]="icons.star" aria-hidden="true" />
+                  {{ formatRating(cluster.business.ratingAverage, cluster.business.ratingCount) }}
+                </span>
+                <span>
+                  <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
+                  {{ formatBusinessAvailability(cluster) }}
+                </span>
+                <span>
                   <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
-                  <span>{{ offer.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }} - {{ offer.pickupTimeWindow.to | date: 'HH:mm' }}</span>
+                  {{ cluster.offers.length }} matching {{ cluster.offers.length === 1 ? 'offer' : 'offers' }}
+                </span>
+              </div>
+            </section>
+          }
+
+          <div class="browse-offers-page__grid">
+            @for (offer of visibleOffers(); track trackOffer($index, offer)) {
+              <article
+                class="surface browse-offer-card"
+                [class.browse-offer-card--selected]="isSelectedOffer(offer.id)"
+                [attr.data-status]="offer.status"
+              >
+                <div class="browse-offer-card__media">
+                  <img [src]="resolveOfferImage(offer)" [alt]="offer.title" />
+
+                  <div class="browse-offer-card__media-top">
+                    <button type="button" class="browse-offer-card__distance-pill" (click)="focusOffer(offer)">
+                      <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+                      <span>{{ formatOfferDistanceBadge(offer) }}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="browse-offer-card__cart-toggle"
+                      [class.browse-offer-card__cart-toggle--active]="isInCart(offer.id)"
+                      [attr.aria-label]="isInCart(offer.id) ? 'Remove from cart' : 'Add to cart'"
+                      (click)="toggleOfferInCart(offer)"
+                    >
+                      <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
+                    </button>
+                  </div>
+
+                  <div class="browse-offer-card__media-bottom">
+                    <div class="browse-offer-card__badge-stack">
+                      @if (offerDiscountBadge(offer); as discountBadge) {
+                        <span class="browse-offer-card__discount-badge">{{ discountBadge }}</span>
+                      }
+
+                      @if (offerCardBadge(offer); as cardBadge) {
+                        <span class="browse-offer-card__badge">{{ cardBadge }}</span>
+                      }
+                    </div>
+
+                    <span class="browse-offer-card__rating-badge">
+                      <span>{{ formatRatingBadge(offer.business.ratingAverage, offer.business.ratingCount) }}</span>
+                      <fa-icon [icon]="icons.star" aria-hidden="true" />
+                    </span>
+                  </div>
                 </div>
 
+                <div class="browse-offer-card__body">
+                  <div class="browse-offer-card__identity">
+                    <h2>{{ offer.title }}</h2>
+
+                    <button type="button" class="browse-offer-card__business-link" (click)="focusOffer(offer)">
+                      {{ offer.business.name }}
+                    </button>
+                  </div>
+
+                  <div class="browse-offer-card__price-row">
+                    <div class="browse-offer-card__price-stack">
+                      <strong>{{ formatCardPrice(offer.price) }}</strong>
+                      @if (hasOfferDiscount(offer)) {
+                        <span class="browse-offer-card__original-price">{{ formatOriginalCardPrice(offer.originalPrice) }}</span>
+                      }
+                    </div>
+                    <span>{{ offer.quantityAvailable }} available</span>
+                  </div>
+
+                  <p class="browse-offer-card__address">{{ formatOfferAddress(offer) }}</p>
+
+                  @if (offer.pickupLocation.note) {
+                    <p class="browse-offer-card__note">{{ offer.pickupLocation.note }}</p>
+                  }
+
+                  <div class="browse-offer-card__footer">
+                    <div class="browse-offer-card__pickup">
+                      <fa-icon [icon]="icons.clock" aria-hidden="true" />
+
+                      <div>
+                        <strong>{{ formatOfferPickupWindow(offer) }}</strong>
+                        <span>{{ offerStatusLabel(offer.status) }}</span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      class="browse-offer-card__primary-action"
+                      [disabled]="isReserving(offer.id)"
+                      (click)="handleOfferCardAction(offer)"
+                    >
+                      <span>{{ offerCardActionLabel(offer) }}</span>
+                      <fa-icon [icon]="icons.arrowRight" aria-hidden="true" />
+                    </button>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        </div>
+
+        <aside class="browse-offers-page__map-column" [class.browse-offers-page__map-column--hidden]="viewMode() !== 'MAP'">
+          <section class="surface browse-map-panel">
+              <div class="browse-map-panel__header">
                 <div>
-                  <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
-                  <span>
-                    {{ offer.pickupLocation.address.street }}, {{ offer.pickupLocation.address.city }},
-                    {{ offer.pickupLocation.address.country }}
+                  <span class="eyebrow">Map</span>
+                  <h2>Explore businesses spatially</h2>
+                  <p>{{ mapScopeDescription() }}</p>
+                </div>
+
+                <div class="browse-map-panel__header-meta">
+                  <span>{{ mapScopedBusinesses().length }} mapped</span>
+                </div>
+              </div>
+
+            <div class="browse-map-panel__canvas-wrap">
+              <div #mapHost class="browse-map-panel__canvas" aria-label="Interactive map of rescue offers"></div>
+
+              @if (mapScopeRequired()) {
+                <div class="browse-map-panel__overlay">
+                  <strong>Choose a place for the map</strong>
+                  <span>Use your current location or pick a city to show offers within {{ radiusKm() }} km.</span>
+                </div>
+              } @else if (mapError()) {
+                <div class="browse-map-panel__overlay">
+                  <strong>Map unavailable</strong>
+                  <span>{{ mapError() }}</span>
+                </div>
+              } @else if (!mapScopedBusinesses().length) {
+                <div class="browse-map-panel__overlay">
+                  <strong>No businesses in scope yet</strong>
+                  <span>Try another city, radius, or refresh your current location to inspect a different area.</span>
+                </div>
+              }
+            </div>
+
+            @if (selectedBusiness(); as cluster) {
+              <div class="browse-map-panel__details">
+                <div class="browse-map-panel__details-header">
+                  <div>
+                    <h3>{{ cluster.business.name }}</h3>
+                    <p>{{ cluster.business.description || 'Live rescue offers from this business are listed below.' }}</p>
+                  </div>
+                  <span class="browse-map-panel__rating">
+                    <fa-icon [icon]="icons.star" aria-hidden="true" />
+                    {{ formatRating(cluster.business.ratingAverage, cluster.business.ratingCount) }}
                   </span>
                 </div>
 
-                <div>
-                  <fa-icon [icon]="icons.list" aria-hidden="true" />
-                  <span>{{ offerItemsSummary(offer) }}</span>
+                <div class="browse-map-panel__details-meta">
+                  <span>{{ formatAddress(cluster.business.address) }}</span>
+                  <span>{{ formatBusinessAvailability(cluster) }}</span>
+                  <span>{{ formatDistance(resolveClusterDistanceMeters(cluster)) }}</span>
                 </div>
 
-                <div>
-                  <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
-                  <span>{{ offer.quantityAvailable }} available</span>
+                <div class="browse-map-panel__offer-list">
+                  @for (offer of cluster.offers; track trackOffer($index, offer)) {
+                    <button type="button" class="browse-map-panel__offer-item" (click)="openOfferDetails(offer)">
+                      <strong>{{ offer.title }}</strong>
+                      <span>{{ formatPrice(offer.price) }}</span>
+                      <small>{{ offer.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }}</small>
+                    </button>
+                  }
                 </div>
               </div>
-
-              @if (offer.pickupLocation.note) {
-                <p class="browse-offer-card__note">{{ offer.pickupLocation.note }}</p>
-              }
-
-              <div class="button-row browse-offer-card__actions">
-                <app-action-button
-                  [label]="user() ? 'Reserve offer' : 'Sign in to reserve'"
-                  iconPosition="start"
-                  [icon]="user() ? icons.bagShopping : icons.arrowRight"
-                  [disabled]="isReserving(offer.id)"
-                  (pressed)="reserveOffer(offer)"
-                />
+            } @else {
+              <div class="browse-map-panel__hint">
+                Pick a business on the map or from the offer catalog to inspect its offers more closely.
               </div>
-            </div>
-          </article>
-        }
+            }
+          </section>
+        </aside>
       </div>
     }
   </div>

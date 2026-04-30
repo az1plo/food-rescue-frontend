@@ -107,6 +107,11 @@
                     <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
                     <span>{{ formatPrice(card.offer.price) }}</span>
                   </div>
+
+                  <div>
+                    <fa-icon [icon]="icons.list" aria-hidden="true" />
+                    <span>{{ card.reservation.quantity }} {{ card.reservation.quantity === 1 ? 'bag' : 'bags' }} reserved</span>
+                  </div>
                 }
 
                 @if (card.reservation.cancelledAt) {

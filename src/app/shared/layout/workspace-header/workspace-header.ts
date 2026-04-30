@@ -12,6 +12,7 @@ import { filter } from 'rxjs';
 import { NotificationInboxService } from '../../../core/services/notification-inbox.service';
 import { UserService } from '../../../core/services/user.service';
 import { BusinessWorkspaceStateService } from '../../../feature/business/services/business-workspace-state.service';
+import { OfferCartService } from '../../../feature/offer/services/offer-cart.service';
 import { appIcons } from '../../icons/app-icons';
 import { AccountMenuComponent } from '../../ui/account-menu/account-menu';
 
@@ -43,9 +44,11 @@ export class WorkspaceHeaderComponent {
   private readonly notificationInbox = inject(NotificationInboxService);
   private readonly userService = inject(UserService);
   private readonly businessWorkspaceState = inject(BusinessWorkspaceStateService);
+  private readonly offerCart = inject(OfferCartService);
 
   protected readonly icons = appIcons;
   protected readonly user = this.userService.getUser();
+  protected readonly cartCount = this.offerCart.count;
   protected readonly notifications = this.notificationInbox.notifications;
   protected readonly recentNotifications = this.notificationInbox.recentNotifications;
   protected readonly unreadCount = this.notificationInbox.unreadCount;

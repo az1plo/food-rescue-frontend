@@ -5,6 +5,8 @@ export interface AddressModel {
   city: string;
   postalCode: string;
   country: string;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface BusinessModel {

@@ -9,6 +9,7 @@ export interface ReservationModel {
   id: number;
   offerId: number;
   userId: number;
+  quantity: number;
   status: ReservationStatus;
   createdAt: string;
   cancelledAt: string | null;

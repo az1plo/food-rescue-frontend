@@ -19,6 +19,14 @@
       <span>View as customer</span>
     </button>
 
+    <a class="workspace-header__utility" routerLink="/cart" aria-label="Open cart">
+      <fa-icon class="workspace-header__utility-icon" [icon]="icons.bagShopping" aria-hidden="true" />
+
+      @if (cartCount()) {
+        <span class="workspace-header__utility-count">{{ cartCount() > 9 ? '9+' : cartCount() }}</span>
+      }
+    </a>
+
     @if (user(); as currentUser) {
       <app-account-menu [name]="currentUser.name" variant="workspace" />
     }

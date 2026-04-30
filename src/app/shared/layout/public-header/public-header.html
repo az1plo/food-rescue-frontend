@@ -1,7 +1,7 @@
 <header class="header">
   <div class="container header__inner">
-    <a class="brand" routerLink="/" aria-label="Food Rescue" (click)="closeMenu()">
-      <img class="brand__image" src="/images/logo_footer.png" alt="Food Rescue" />
+    <a class="brand" routerLink="/" aria-label="Savr" (click)="closeMenu()">
+      <img class="brand__image" src="/images/logo_footer.png" alt="Savr" />
     </a>
 
     <button
@@ -40,6 +40,13 @@
       </nav>
 
       <div class="header__actions">
+        <a class="header__utility" routerLink="/cart" aria-label="Open cart" (click)="closeMenu()">
+          <fa-icon class="header__utility-icon" [icon]="icons.bagShopping" aria-hidden="true" />
+          @if (cartCount()) {
+            <span class="header__utility-count">{{ cartCount() > 9 ? '9+' : cartCount() }}</span>
+          }
+        </a>
+
         @if (user(); as currentUser) {
           @if (canOpenWorkspace()) {
             <a class="button button--secondary header__workspace" routerLink="/workspace" (click)="closeMenu()">

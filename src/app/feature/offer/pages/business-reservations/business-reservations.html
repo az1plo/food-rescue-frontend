@@ -120,6 +120,10 @@
                 <span>Reserved {{ card.reservation.createdAt | date: 'd. M. y, HH:mm' }}</span>
               </div>
               <div>
+                <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
+                <span>{{ card.reservation.quantity }} {{ card.reservation.quantity === 1 ? 'bag' : 'bags' }} reserved</span>
+              </div>
+              <div>
                 <fa-icon [icon]="icons.clock" aria-hidden="true" />
                 <span>Pickup {{ card.offer.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }} - {{ card.offer.pickupTimeWindow.to | date: 'HH:mm' }}</span>
               </div>
@@ -135,7 +139,7 @@
                 <span>{{ offerItemsSummary(card) }}</span>
               </div>
               <div>
-                <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
+                <fa-icon [icon]="icons.eye" aria-hidden="true" />
                 <span>{{ formatPrice(card.offer.price) }}</span>
               </div>
 

@@ -1,0 +1,222 @@
+<section class="page-section page-section--top-tight offer-details-page">
+  <div class="container">
+    <div class="offer-details-page__topbar">
+      <app-action-button
+        label="Back to browse"
+        variant="ghost"
+        iconPosition="start"
+        [icon]="icons.arrowLeft"
+        (pressed)="goBackToBrowse()"
+      />
+    </div>
+
+    @if (errorMessage()) {
+      <div class="alert-banner alert-banner--danger">{{ errorMessage() }}</div>
+    }
+
+    @if (loading()) {
+      <section class="surface offer-details-page__state" aria-busy="true">
+        <span class="eyebrow">Offer</span>
+        <h1>Loading offer details</h1>
+        <p>We are preparing the full pickup story and related offers from this business.</p>
+      </section>
+    } @else if (currentOffer(); as offer) {
+      <div class="offer-details-page__layout">
+        <section class="surface offer-details-hero">
+          <div class="offer-details-hero__media">
+            <img [src]="currentImage()" [alt]="offer.title" />
+
+            <div class="offer-details-hero__overlay-top">
+              <span class="offer-details-hero__distance-pill">
+                <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+                <span>{{ formatDistance(offer.distanceMeters) }}</span>
+              </span>
+
+              <button
+                type="button"
+                class="offer-details-hero__cart-toggle"
+                [class.offer-details-hero__cart-toggle--active]="isCurrentOfferInCart()"
+                [attr.aria-label]="isCurrentOfferInCart() ? 'Remove from cart' : 'Add to cart'"
+                (click)="toggleCurrentOfferInCart()"
+              >
+                <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
+              </button>
+            </div>
+
+            <div class="offer-details-hero__overlay-bottom">
+              <div class="offer-details-hero__badge-stack">
+                @if (hasDiscount(offer.price, offer.originalPrice) && discountPercent(offer.price, offer.originalPrice); as savings) {
+                  <span class="offer-details-hero__discount-badge">Save {{ savings }}%</span>
+                }
+
+                <span class="offer-details-hero__status-badge">{{ offerStatusLabel(offer.status) }}</span>
+              </div>
+
+              <span class="offer-details-hero__rating-badge">
+                <span>{{ formatRating(offer.business.ratingAverage, offer.business.ratingCount) }}</span>
+                <fa-icon [icon]="icons.star" aria-hidden="true" />
+              </span>
+            </div>
+          </div>
+
+          <div class="offer-details-hero__body">
+            <div class="offer-details-hero__headline">
+              <div>
+                <span class="eyebrow">Rescue offer</span>
+                <h1>{{ offer.title }}</h1>
+                <p class="offer-details-hero__business">{{ offer.business.name }}</p>
+              </div>
+
+              <div class="offer-details-hero__pricing">
+                <strong>{{ formatPrice(offer.price) }}</strong>
+                @if (hasDiscount(offer.price, offer.originalPrice)) {
+                  <span>{{ formatPrice(offer.originalPrice ?? offer.price) }}</span>
+                }
+              </div>
+            </div>
+
+            <p class="offer-details-hero__description">{{ currentDescription() }}</p>
+
+            <div class="offer-details-hero__facts">
+              <span>
+                <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
+                {{ formatOfferPickupWindow(offer) }}
+              </span>
+              <span>
+                <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+                {{ formatAddress(offer) }}
+              </span>
+              <span>
+                <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
+                {{ offer.quantityAvailable }} available
+              </span>
+            </div>
+
+            @if (offer.pickupLocation.note) {
+              <div class="offer-details-hero__pickup-note">
+                <fa-icon [icon]="icons.circleInfo" aria-hidden="true" />
+                <span>{{ offer.pickupLocation.note }}</span>
+              </div>
+            }
+
+            <div class="offer-details-hero__actions">
+              <app-action-button
+                [label]="detailPrimaryActionLabel()"
+                iconPosition="start"
+                [icon]="offer.canReserve ? icons.arrowRight : icons.eye"
+                [disabled]="reserving() || !offer.canReserve"
+                (pressed)="reserveCurrentOffer()"
+              />
+
+              <app-action-button
+                label="Back to browse"
+                variant="ghost"
+                iconPosition="start"
+                [icon]="icons.arrowLeft"
+                (pressed)="goBackToBrowse()"
+              />
+            </div>
+          </div>
+        </section>
+
+        <div class="offer-details-page__content">
+          <section class="surface offer-details-panel">
+            <span class="eyebrow">Inside the offer</span>
+            <h2>What customers should expect</h2>
+
+            @if (currentItems().length) {
+              <div class="offer-details-panel__chip-list">
+                @for (item of currentItems(); track item.name + '-' + item.quantity) {
+                  <span>{{ itemSummary(item) }}</span>
+                }
+              </div>
+            } @else {
+              <p class="offer-details-panel__muted">The business has not listed specific contents yet, but the pickup description above still applies.</p>
+            }
+          </section>
+
+          <section class="surface offer-details-panel">
+            <span class="eyebrow">Business</span>
+            <h2>About {{ offer.business.name }}</h2>
+            <p>{{ offer.business.description || 'This business regularly publishes rescue offers to keep quality food moving instead of going to waste.' }}</p>
+
+            <div class="offer-details-panel__business-meta">
+              <span>
+                <fa-icon [icon]="icons.star" aria-hidden="true" />
+                {{ formatRating(offer.business.ratingAverage, offer.business.ratingCount) }}
+              </span>
+              <span>
+                <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+                {{ offer.business.address.street }}, {{ offer.business.address.city }}, {{ offer.business.address.country }}
+              </span>
+              <span>
+                <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
+                {{ offer.business.availableOfferCount }} live offers, {{ offer.business.unavailableOfferCount }} unavailable
+              </span>
+            </div>
+          </section>
+        </div>
+
+        <section class="surface offer-related-panel">
+          <div class="offer-related-panel__header">
+            <div>
+              <span class="eyebrow">More from this business</span>
+              <h2>Other rescue offers from {{ offer.business.name }}</h2>
+              <p>Explore similar pickups from the same business without losing your marketplace context.</p>
+            </div>
+          </div>
+
+          @if (relatedOffers().length) {
+            <div class="offer-related-panel__grid">
+              @for (relatedOffer of relatedOffers(); track relatedOffer.id) {
+                <article class="offer-related-card">
+                  <div class="offer-related-card__media">
+                    <img [src]="resolveRelatedOfferImage(relatedOffer)" [alt]="relatedOffer.title" />
+                    <span class="offer-related-card__distance">{{ formatDistance(relatedOffer.distanceMeters) }}</span>
+                  </div>
+
+                  <div class="offer-related-card__body">
+                    <div class="offer-related-card__title-row">
+                      <h3>{{ relatedOffer.title }}</h3>
+                      <strong>{{ formatPrice(relatedOffer.price) }}</strong>
+                    </div>
+
+                    @if (hasDiscount(relatedOffer.price, relatedOffer.originalPrice)) {
+                      <span class="offer-related-card__original-price">{{ formatPrice(relatedOffer.originalPrice ?? relatedOffer.price) }}</span>
+                    }
+
+                    <p>{{ relatedOffer.description || 'Another rescue pickup from this business.' }}</p>
+
+                    <div class="offer-related-card__meta">
+                      <span>{{ formatOfferPickupWindow(relatedOffer) }}</span>
+                      <span>{{ relatedOffer.quantityAvailable }} available</span>
+                    </div>
+
+                    <app-action-button
+                      label="View details"
+                      variant="secondary"
+                      iconPosition="start"
+                      [icon]="icons.arrowRight"
+                      (pressed)="openRelatedOffer(relatedOffer)"
+                    />
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="offer-related-panel__empty">
+              <h3>No other offers from this business right now</h3>
+              <p>This pickup is currently the only public marketplace offer available from this business.</p>
+            </div>
+          }
+        </section>
+      </div>
+    } @else {
+      <section class="surface offer-details-page__state">
+        <span class="eyebrow">Offer</span>
+        <h1>Offer not found</h1>
+        <p>This marketplace offer is no longer available or the link is outdated.</p>
+      </section>
+    }
+  </div>
+</section>

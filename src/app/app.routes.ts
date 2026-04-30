@@ -24,6 +24,8 @@ import { RegisterPage } from './feature/auth/pages/register/register';
 import { BusinessReservationsPage } from './feature/offer/pages/business-reservations/business-reservations';
 import { BusinessOffersPage } from './feature/offer/pages/business-offers/business-offers';
 import { BrowseOffersPage } from './feature/offer/pages/browse-offers/browse-offers';
+import { CartPage } from './feature/offer/pages/cart/cart';
+import { OfferDetailsPage } from './feature/offer/pages/offer-details/offer-details';
 import { WorkspaceReservationsPage } from './feature/offer/pages/workspace-reservations/workspace-reservations';
 
 export const routes: Routes = [
@@ -85,6 +87,8 @@ export const routes: Routes = [
       { path: 'auth/callback', component: AuthCallbackPage },
       { path: 'login', component: LoginPage },
       { path: 'register', component: RegisterPage },
+      { path: 'cart', component: CartPage },
+      { path: 'browse-offers/:id', component: OfferDetailsPage },
       { path: 'browse-offers', component: BrowseOffersPage },
       { path: 'my-reservations', component: WorkspaceReservationsPage, canActivate: [authRequiredGuard] },
       { path: 'how-it-works', component: HowItWorksPage },

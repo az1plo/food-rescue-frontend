@@ -100,7 +100,7 @@ export class RegisterPage {
       .subscribe({
         next: async () => {
           try {
-            this.notificationService.success('Your account was created successfully.', 'Welcome to Food Rescue');
+            this.notificationService.success('Your account was created successfully.', 'Welcome to Savr');
             await this.userService.loginWithCredentials(value.email, value.password, this.returnUrl());
           } catch (error) {
             this.notificationService.info('Account created. Sign in once more if automatic login did not finish.', 'Account ready');

@@ -1,0 +1,196 @@
+<section class="page-section page-section--top-tight cart-page">
+  <div class="container">
+    <div class="page-header page-header--split cart-page__header">
+      <div>
+        <span class="eyebrow">Saved cart</span>
+        <h1>Your rescue picks</h1>
+        <p>Save offers now, sign in later if needed, and reserve them one by one when you are ready.</p>
+      </div>
+
+      <div class="page-header__actions button-row">
+        <app-action-button
+          label="Continue browsing"
+          variant="ghost"
+          iconPosition="start"
+          [icon]="icons.arrowLeft"
+          (pressed)="continueBrowsing()"
+        />
+
+        @if (cartItems().length) {
+          <app-action-button
+            label="Clear cart"
+            variant="danger"
+            iconPosition="start"
+            [icon]="icons.trashCan"
+            (pressed)="clearCart()"
+          />
+        }
+      </div>
+    </div>
+
+    <div class="alert-banner alert-banner--info">
+      Adding an offer here does not reserve it. Availability and pickup slots can still change until you confirm the reservation.
+    </div>
+
+    @if (errorMessage()) {
+      <div class="alert-banner alert-banner--danger">{{ errorMessage() }}</div>
+    }
+
+    @if (!cartItems().length) {
+      <section class="surface cart-page__state cart-page__state--empty">
+        <span class="eyebrow">Cart</span>
+        <h2>Your cart is empty</h2>
+        <p>Browse the marketplace, save a few rescue offers, and come back here when you want to reserve them.</p>
+
+        <div class="button-row">
+          <app-action-button label="Browse offers" iconPosition="start" [icon]="icons.bagShopping" route="/browse-offers" />
+        </div>
+      </section>
+    } @else {
+      <section class="surface cart-page__summary">
+        <div>
+          <strong>{{ cartItems().length }}</strong>
+          <span>saved {{ cartItems().length === 1 ? 'offer' : 'offers' }}</span>
+        </div>
+        <div>
+          <strong>{{ availableEntryCount() }}</strong>
+          <span>ready to reserve</span>
+        </div>
+        <div>
+          <strong>{{ unavailableEntryCount() }}</strong>
+          <span>currently unavailable</span>
+        </div>
+        <div>
+          <strong>{{ missingEntryCount() }}</strong>
+          <span>no longer listed</span>
+        </div>
+      </section>
+
+      @if (loading()) {
+        <section class="surface cart-page__state" aria-busy="true">
+          <span class="eyebrow">Cart</span>
+          <h2>Refreshing your saved offers</h2>
+          <p>We are checking the latest availability and pickup windows now.</p>
+        </section>
+      } @else {
+        <div class="cart-page__list">
+          @for (entry of cartEntries(); track entry.offerId) {
+            <article class="surface cart-card" [attr.data-missing]="entry.offer === null">
+              @if (entry.offer; as offer) {
+                <div class="cart-card__media">
+                  <img [src]="resolveOfferImage(offer)" [alt]="offer.title" />
+                  <span class="cart-card__distance">{{ formatDistance(offer.distanceMeters) }}</span>
+                </div>
+
+                <div class="cart-card__body">
+                  <div class="cart-card__headline">
+                    <div>
+                      <h2>{{ offer.title }}</h2>
+                      <p>{{ offer.business.name }}</p>
+                    </div>
+
+                    <div class="cart-card__pricing">
+                      <strong>{{ formatPrice(offer.price) }}</strong>
+                      @if (hasDiscount(offer.price, offer.originalPrice)) {
+                        <span>{{ formatPrice(offer.originalPrice ?? offer.price) }}</span>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="cart-card__meta">
+                    <span>
+                      <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
+                      {{ formatOfferPickupWindow(offer) }}
+                    </span>
+                    <span>
+                      <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+                      {{ formatAddress(offer) }}
+                    </span>
+                    <span>
+                      <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
+                      {{ offer.quantityAvailable }} available
+                    </span>
+                    <span>
+                      <fa-icon [icon]="icons.clock" aria-hidden="true" />
+                      Saved {{ entry.addedAt | date: 'd. M., HH:mm' }}
+                    </span>
+                  </div>
+
+                  @if (offer.pickupLocation.note) {
+                    <div class="cart-card__note">{{ offer.pickupLocation.note }}</div>
+                  }
+
+                  <div class="cart-card__footer">
+                    <span class="cart-card__status" [attr.data-ready]="offer.canReserve">
+                      {{ offerStatusLabel(offer.status) }}
+                    </span>
+
+                    <div class="button-row">
+                      <app-action-button
+                        label="View details"
+                        variant="ghost"
+                        iconPosition="start"
+                        [icon]="icons.eye"
+                        (pressed)="openOfferDetails(offer)"
+                      />
+
+                      <app-action-button
+                        label="Remove"
+                        variant="danger"
+                        iconPosition="start"
+                        [icon]="icons.trashCan"
+                        (pressed)="removeOffer(entry.offerId)"
+                      />
+
+                      <app-action-button
+                        [label]="reserveButtonLabel(entry)"
+                        iconPosition="start"
+                        [icon]="offer.canReserve ? icons.arrowRight : icons.circleInfo"
+                        [disabled]="!offer.canReserve || isReserving(offer.id)"
+                        (pressed)="reserveOffer(entry)"
+                      />
+                    </div>
+                  </div>
+                </div>
+              } @else {
+                <div class="cart-card__body cart-card__body--missing">
+                  <div class="cart-card__headline">
+                    <div>
+                      <h2>Offer no longer listed</h2>
+                      <p>This saved item is no longer returned by the marketplace. It may have expired, sold out, or been removed.</p>
+                    </div>
+                  </div>
+
+                  <div class="cart-card__meta">
+                    <span>
+                      <fa-icon [icon]="icons.clock" aria-hidden="true" />
+                      Saved {{ entry.addedAt | date: 'd. M., HH:mm' }}
+                    </span>
+                    <span>
+                      <fa-icon [icon]="icons.hashtag" aria-hidden="true" />
+                      Offer #{{ entry.offerId }}
+                    </span>
+                  </div>
+
+                  <div class="cart-card__footer">
+                    <span class="cart-card__status" data-ready="false">Unavailable</span>
+
+                    <div class="button-row">
+                      <app-action-button
+                        label="Remove"
+                        variant="danger"
+                        iconPosition="start"
+                        [icon]="icons.trashCan"
+                        (pressed)="removeOffer(entry.offerId)"
+                      />
+                    </div>
+                  </div>
+                </div>
+              }
+            </article>
+          }
+        </div>
+      }
+    }
+  </div>
+</section>

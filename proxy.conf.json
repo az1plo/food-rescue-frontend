@@ -8,10 +8,16 @@
   "/offers": {
     "target": "http://localhost:8080"
   },
+  "/marketplace": {
+    "target": "http://localhost:8080"
+  },
   "/reservations": {
     "target": "http://localhost:8080"
   },
   "/notifications": {
+    "target": "http://localhost:8080"
+  },
+  "/support": {
     "target": "http://localhost:8080"
   },
   "/admin": {

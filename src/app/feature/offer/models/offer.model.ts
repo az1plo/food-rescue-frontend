@@ -24,6 +24,7 @@ export interface OfferModel {
   description: string | null;
   imageUrl: string | null;
   price: number;
+  originalPrice: number | null;
   quantityAvailable: number;
   status: OfferStatus;
   items: OfferItemModel[];
@@ -37,6 +38,7 @@ export interface OfferPayload {
   description: string | null;
   imageUrl: string | null;
   price: number;
+  originalPrice: number | null;
   quantityAvailable: number;
   items: OfferItemModel[];
   pickupLocation: PickupLocationModel;
@@ -49,6 +51,7 @@ export interface CreateOfferPayload extends OfferPayload {
 
 export interface CreateReservationPayload {
   offerId: number;
+  quantity: number;
 }
 
 export interface OfferStatusMeta {

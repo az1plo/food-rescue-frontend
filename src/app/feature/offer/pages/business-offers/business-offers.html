@@ -97,7 +97,12 @@
                       </span>
                     </div>
 
-                    <strong>{{ formatPrice(offer.price) }}</strong>
+                    <div class="offer-workspace-card__price-stack">
+                      <strong>{{ formatPrice(offer.price) }}</strong>
+                      @if (hasDiscount(offer.price, offer.originalPrice)) {
+                        <span class="offer-workspace-card__original-price">{{ formatPrice(offer.originalPrice ?? offer.price) }}</span>
+                      }
+                    </div>
                   </div>
 
                   <p>{{ offer.description || 'No description yet. Add a short summary so customers know what they are reserving.' }}</p>
@@ -193,6 +198,25 @@
                 <div class="field-message-slot">
                   @if (showFieldError('price')) {
                     <p class="field-error">Enter a valid price.</p>
+                  }
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="offer-original-price">Original price</label>
+                <input
+                  id="offer-original-price"
+                  class="form-control"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  formControlName="originalPrice"
+                />
+                <div class="field-message-slot">
+                  @if (showFieldError('originalPrice') || (submitAttempted() && isOriginalPriceInvalid())) {
+                    <p class="field-error">Original price must be empty or greater than or equal to the current price.</p>
+                  } @else {
+                    <p class="field-hint">Optional. Used to show the crossed price and discount on marketplace cards.</p>
                   }
                 </div>
               </div>
@@ -368,7 +392,13 @@
                     </span>
                   </div>
 
-                  <strong>{{ formatPrice(offer.price) }}</strong>
+                  <div class="offer-detail__price-stack">
+                    <strong>{{ formatPrice(offer.price) }}</strong>
+                    @if (hasDiscount(offer.price, offer.originalPrice)) {
+                      <span class="offer-workspace-card__original-price">{{ formatPrice(offer.originalPrice ?? offer.price) }}</span>
+                      <small>Save {{ discountPercent(offer.price, offer.originalPrice) }}%</small>
+                    }
+                  </div>
                 </div>
 
                 <p>{{ offer.description || 'No description yet. Use the editor to explain what customers can expect.' }}</p>

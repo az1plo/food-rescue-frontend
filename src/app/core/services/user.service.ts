@@ -11,7 +11,8 @@ export type SocialIdentityProvider = 'google';
   providedIn: 'root',
 })
 export class UserService {
-  private static readonly postIdentityLoginReturnUrlStorageKey = 'food-rescue.post-identity-login-return-url';
+  private static readonly postIdentityLoginReturnUrlStorageKey = 'savr.post-identity-login-return-url';
+  private static readonly legacyPostIdentityLoginReturnUrlStorageKey = 'food-rescue.post-identity-login-return-url';
 
   private readonly oauthService = inject(OAuthService);
   private readonly router = inject(Router);
@@ -83,6 +84,7 @@ export class UserService {
 
   logout(): void {
     sessionStorage.removeItem(UserService.postIdentityLoginReturnUrlStorageKey);
+    sessionStorage.removeItem(UserService.legacyPostIdentityLoginReturnUrlStorageKey);
     this.user.set(null);
     this.ready.set(true);
     this.oauthService.logOut({
@@ -199,8 +201,10 @@ export class UserService {
   }
 
   private consumeIdentityProviderReturnUrl(): string {
-    const storedValue = sessionStorage.getItem(UserService.postIdentityLoginReturnUrlStorageKey);
+    const storedValue = sessionStorage.getItem(UserService.postIdentityLoginReturnUrlStorageKey)
+      ?? sessionStorage.getItem(UserService.legacyPostIdentityLoginReturnUrlStorageKey);
     sessionStorage.removeItem(UserService.postIdentityLoginReturnUrlStorageKey);
+    sessionStorage.removeItem(UserService.legacyPostIdentityLoginReturnUrlStorageKey);
     return storedValue ? this.normalizeReturnUrl(storedValue) : '/';
   }
 

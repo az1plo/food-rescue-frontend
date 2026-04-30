@@ -1,0 +1,111 @@
+<div class="support-chat-widget" [class.support-chat-widget--open]="isOpen()">
+  @if (isOpen()) {
+    <section class="support-chat-widget__panel surface" aria-label="AI support chat">
+      <header class="support-chat-widget__header">
+        <div class="support-chat-widget__identity">
+          <div class="support-chat-widget__avatar" aria-hidden="true">
+            <div class="support-chat-widget__avatar-core">
+              <fa-icon [icon]="icons.leaf" aria-hidden="true" />
+            </div>
+            <span class="support-chat-widget__avatar-dot"></span>
+          </div>
+
+          <div>
+            <strong>{{ assistantName() }}</strong>
+            <span>AI support for offers, pickup, and business help</span>
+          </div>
+        </div>
+
+        <button type="button" class="support-chat-widget__close" (click)="close()" aria-label="Close support">
+          <fa-icon [icon]="icons.xmark" aria-hidden="true" />
+        </button>
+      </header>
+
+      <div #messageList class="support-chat-widget__body">
+        @for (message of messages(); track message.id) {
+          <article
+            class="support-chat-widget__message"
+            [class.support-chat-widget__message--assistant]="message.role === 'assistant'"
+            [class.support-chat-widget__message--user]="message.role === 'user'"
+          >
+            @if (message.role === 'assistant') {
+              <div class="support-chat-widget__message-avatar" aria-hidden="true">
+                <fa-icon [icon]="icons.leaf" aria-hidden="true" />
+              </div>
+            }
+
+            <div class="support-chat-widget__bubble">
+              <p>{{ message.content }}</p>
+              <time>{{ message.createdAt | date: 'HH:mm' }}</time>
+
+              @if (message.role === 'assistant' && message.suggestions?.length) {
+                <div class="support-chat-widget__suggestions">
+                  @for (suggestion of message.suggestions; track suggestion) {
+                    <button type="button" (click)="sendSuggestion(suggestion)">{{ suggestion }}</button>
+                  }
+                </div>
+              }
+            </div>
+          </article>
+        }
+
+        @if (isSending()) {
+          <article
+            class="support-chat-widget__message support-chat-widget__message--assistant support-chat-widget__message--typing"
+            aria-live="polite"
+            aria-label="Assistant is typing"
+          >
+            <div class="support-chat-widget__message-avatar" aria-hidden="true">
+              <fa-icon [icon]="icons.leaf" aria-hidden="true" />
+            </div>
+
+            <div class="support-chat-widget__bubble support-chat-widget__bubble--typing">
+              <div class="support-chat-widget__typing-indicator" aria-hidden="true">
+                <span [class.support-chat-widget__typing-dot--active]="typingPhase() === 0"></span>
+                <span [class.support-chat-widget__typing-dot--active]="typingPhase() === 1"></span>
+                <span [class.support-chat-widget__typing-dot--active]="typingPhase() === 2"></span>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <div class="support-chat-widget__error">{{ errorMessage() }}</div>
+      }
+
+      <footer class="support-chat-widget__composer">
+        <textarea
+          class="support-chat-widget__input"
+          #composer
+          rows="1"
+          placeholder="Ask about reservations, pickup, or publishing offers..."
+          [value]="draft()"
+          [disabled]="isSending()"
+          (input)="updateDraft(composer.value)"
+          (keydown)="handleComposerKeydown($event)"
+        ></textarea>
+
+        <button
+          type="button"
+          class="support-chat-widget__send"
+          [disabled]="isSending() || !draft().trim()"
+          (click)="submit()"
+          aria-label="Send support message"
+        >
+          <fa-icon [icon]="icons.paperPlane" aria-hidden="true" />
+        </button>
+      </footer>
+    </section>
+  }
+
+  <button type="button" class="support-chat-widget__launcher" (click)="toggle()" [attr.aria-label]="launcherLabel()">
+    <span class="support-chat-widget__launcher-avatar" aria-hidden="true">
+      <fa-icon [icon]="icons.commentDots" aria-hidden="true" />
+    </span>
+    <span class="support-chat-widget__launcher-copy">
+      <strong>Support</strong>
+      <small>Ask {{ assistantName() }}</small>
+    </span>
+  </button>
+</div>

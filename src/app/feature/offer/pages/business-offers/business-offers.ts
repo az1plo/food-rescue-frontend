@@ -83,6 +83,7 @@ export class BusinessOffersPage {
     description: ['', [Validators.maxLength(1000)]],
     imageUrl: ['', [Validators.maxLength(1024)]],
     price: [4.9, [Validators.required, Validators.min(0)]],
+    originalPrice: this.fb.control<number | null>(null, [Validators.min(0)]),
     quantityAvailable: [1, [Validators.required, Validators.min(1)]],
     pickupStreet: ['', [Validators.required, Validators.maxLength(255)]],
     pickupCity: ['', [Validators.required, Validators.maxLength(100)]],
@@ -132,6 +133,7 @@ export class BusinessOffersPage {
       description: '',
       imageUrl: this.imageOptions[0]?.url ?? '',
       price: 4.9,
+      originalPrice: null,
       quantityAvailable: 1,
       pickupStreet: business.address.street,
       pickupCity: business.address.city,
@@ -174,7 +176,7 @@ export class BusinessOffersPage {
     this.submitAttempted.set(true);
     this.errorMessage.set(null);
 
-    if (this.form.invalid || this.isPickupWindowInvalid()) {
+    if (this.form.invalid || this.isPickupWindowInvalid() || this.isOriginalPriceInvalid()) {
       return;
     }
 
@@ -300,6 +302,16 @@ export class BusinessOffersPage {
     return new Date(pickupFrom).getTime() >= new Date(pickupTo).getTime();
   }
 
+  protected isOriginalPriceInvalid(): boolean {
+    const { price, originalPrice } = this.form.getRawValue();
+
+    if (originalPrice === null) {
+      return false;
+    }
+
+    return originalPrice < price;
+  }
+
   protected statusMetaFor(status: OfferStatus): OfferStatusMeta {
     return OFFER_STATUS_META[status];
   }
@@ -314,6 +326,18 @@ export class BusinessOffersPage {
 
   protected formatPrice(price: number): string {
     return `${price.toFixed(2)} EUR`;
+  }
+
+  protected hasDiscount(price: number, originalPrice: number | null): boolean {
+    return typeof originalPrice === 'number' && originalPrice > price;
+  }
+
+  protected discountPercent(price: number, originalPrice: number | null): number | null {
+    if (!this.hasDiscount(price, originalPrice) || originalPrice === null) {
+      return null;
+    }
+
+    return Math.round(((originalPrice - price) / originalPrice) * 100);
   }
 
   protected offerItemsSummary(offer: OfferModel): string {
@@ -360,6 +384,7 @@ export class BusinessOffersPage {
       description: rawValue.description.trim() || null,
       imageUrl: rawValue.imageUrl.trim() || null,
       price: rawValue.price,
+      originalPrice: rawValue.originalPrice,
       quantityAvailable: rawValue.quantityAvailable,
       items: rawValue.items.map((item) => ({
         name: item.name.trim(),
@@ -387,6 +412,7 @@ export class BusinessOffersPage {
       description: offer.description ?? '',
       imageUrl: offer.imageUrl ?? '',
       price: offer.price,
+      originalPrice: offer.originalPrice,
       quantityAvailable: offer.quantityAvailable,
       pickupStreet: offer.pickupLocation.address.street,
       pickupCity: offer.pickupLocation.address.city,

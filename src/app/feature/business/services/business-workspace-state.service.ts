@@ -11,6 +11,9 @@ import { BusinessApiService } from './business-api.service';
   providedIn: 'root',
 })
 export class BusinessWorkspaceStateService {
+  private static readonly storageKeyPrefix = 'savr:workspace:';
+  private static readonly legacyStorageKeyPrefix = 'food-rescue:workspace:';
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly userService = inject(UserService);
   private readonly businessApi = inject(BusinessApiService);
@@ -98,6 +101,7 @@ export class BusinessWorkspaceStateService {
     }
 
     localStorage.setItem(this.storageKey(user), id.toString());
+    localStorage.removeItem(this.legacyStorageKey(user));
     this.activeBusinessId.set(id);
     this.knownBusinessesState.update((items) =>
       items.map((item) =>
@@ -116,6 +120,7 @@ export class BusinessWorkspaceStateService {
 
     if (user) {
       localStorage.removeItem(this.storageKey(user));
+      localStorage.removeItem(this.legacyStorageKey(user));
     }
 
     this.activeBusinessId.set(null);
@@ -158,13 +163,29 @@ export class BusinessWorkspaceStateService {
   }
 
   private readStoredBusinessId(user: UserModel): number | null {
-    const rawValue = localStorage.getItem(this.storageKey(user));
+    const rawValue = localStorage.getItem(this.storageKey(user))
+      ?? localStorage.getItem(this.legacyStorageKey(user));
     if (!rawValue) {
       return null;
     }
 
     const parsedValue = Number(rawValue);
-    return Number.isInteger(parsedValue) && parsedValue > 0 ? parsedValue : null;
+    if (Number.isInteger(parsedValue) && parsedValue > 0) {
+      localStorage.setItem(this.storageKey(user), parsedValue.toString());
+      return parsedValue;
+    }
+
+    return null;
+  }
+
+  private legacyStorageKey(user: UserModel): string {
+    const identity = user.email ?? user.subject ?? user.name;
+    return `${BusinessWorkspaceStateService.legacyStorageKeyPrefix}${identity}`;
+  }
+
+  private storageKey(user: UserModel): string {
+    const identity = user.email ?? user.subject ?? user.name;
+    return `${BusinessWorkspaceStateService.storageKeyPrefix}${identity}`;
   }
 
   private normalizeKnownBusinesses(items: BusinessWorkspaceListItem[]): BusinessWorkspaceListItem[] {
@@ -182,10 +203,5 @@ export class BusinessWorkspaceStateService {
       ...item,
       lastViewedAt: existingById.get(item.id)?.lastViewedAt ?? item.lastViewedAt,
     })).slice(0, 12);
-  }
-
-  private storageKey(user: UserModel): string {
-    const identity = user.email ?? user.subject ?? user.name;
-    return `food-rescue:workspace:${identity}`;
   }
 }
