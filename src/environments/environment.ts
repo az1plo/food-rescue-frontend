@@ -1,8 +1,8 @@
 export const environment = {
-  keyCloakUrl: 'https://app.fullstackacademy.sk/auth',
+  keyCloakUrl: 'http://68.219.101.242/auth',
   keyCloakRealm: 'FSA',
-  beUrl: 'https://app.fullstackacademy.sk',
-  appUrl: 'https://app.fullstackacademy.sk',
+  beUrl: 'http://68.219.101.242',
+  appUrl: 'http://68.219.101.242',
   googleMapsApiKey: '',
 };
   
