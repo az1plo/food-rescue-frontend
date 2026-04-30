@@ -14,10 +14,10 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import { environment } from '../../../../../environments/environment';
 import { NotificationInboxService } from '../../../../core/services/notification-inbox.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { UserService } from '../../../../core/services/user.service';
+import { runtimeConfig } from '../../../../core/config/runtime-config';
 import { appIcons } from '../../../../shared/icons/app-icons';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
 import {
@@ -248,7 +248,7 @@ export class BrowseOffersPage implements OnDestroy {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
-  private readonly googleMapsApiKey = environment.googleMapsApiKey.trim();
+  private readonly googleMapsApiKey = runtimeConfig.googleMapsApiKey;
 
   private googleMaps: GoogleMapsApi | null = null;
   private map: any | null = null;
@@ -1027,7 +1027,7 @@ export class BrowseOffersPage implements OnDestroy {
     }
 
     if (!this.googleMapsApiKey) {
-      this.mapError.set('Google Maps API key is missing. Add environment.googleMapsApiKey to enable the map.');
+      this.mapError.set('Google Maps API key is missing. Add it to public/app-config.local.json or public/app-config.json to enable the map.');
       return;
     }
 

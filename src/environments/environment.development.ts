@@ -3,5 +3,5 @@ export const environment = {
   keyCloakRealm: 'FSA',
   beUrl: 'http://localhost:4200',
   appUrl: 'http://localhost:4200',
-  googleMapsApiKey: 'AIzaSyChV04qEjJdtblKlB7FFx0xBFB-p1eWQcI',
+  googleMapsApiKey: '',
 };
