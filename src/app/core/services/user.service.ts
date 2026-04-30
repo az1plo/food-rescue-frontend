@@ -85,11 +85,20 @@ export class UserService {
   logout(): void {
     sessionStorage.removeItem(UserService.postIdentityLoginReturnUrlStorageKey);
     sessionStorage.removeItem(UserService.legacyPostIdentityLoginReturnUrlStorageKey);
+    const idToken = this.oauthService.getIdToken();
     this.user.set(null);
     this.ready.set(true);
-    this.oauthService.logOut({
-      client_id: authClientConfig.clientId,
-    });
+    const logoutParameters: Record<string, string> = {};
+
+    if (authClientConfig.clientId) {
+      logoutParameters['client_id'] = authClientConfig.clientId;
+    }
+
+    if (idToken) {
+      logoutParameters['id_token_hint'] = idToken;
+    }
+
+    this.oauthService.logOut(logoutParameters);
   }
 
   async tryLogin(): Promise<UserModel | null> {
