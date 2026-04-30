@@ -1,8 +1,8 @@
 export const environment = {
-  keyCloakUrl: 'http://68.219.101.242/auth',
+  keyCloakUrl: 'https://app.68.219.101.242.nip.io/auth',
   keyCloakRealm: 'FSA',
-  beUrl: 'http://68.219.101.242',
-  appUrl: 'http://68.219.101.242',
+  beUrl: 'https://app.68.219.101.242.nip.io',
+  appUrl: 'https://app.68.219.101.242.nip.io',
   googleMapsApiKey: '',
 };
   
