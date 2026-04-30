@@ -2,8 +2,8 @@
   <div class="container">
     <div class="page-header page-header--split workspace-reservations-page__header">
       <div>
-        <h1>Your reservations</h1>
-        <p>Track active pickups, recent cancellations, and completed rescue collections in one place.</p>
+        <h1>My pickups</h1>
+        <p>Track paid pickup passes, recent cancellations, and completed rescue collections in one place.</p>
       </div>
 
       <div class="page-header__actions button-row">
@@ -12,7 +12,7 @@
           variant="ghost"
           iconPosition="start"
           [icon]="icons.rotateRight"
-          (pressed)="refreshReservations()"
+          (pressed)="refreshOrders()"
         />
         <app-action-button label="Browse offers" [icon]="icons.arrowRight" route="/browse-offers" />
       </div>
@@ -24,16 +24,16 @@
 
     @if (loading()) {
       <section class="surface workspace-reservations-page__state" aria-busy="true">
-        <span class="eyebrow">Reservations</span>
-        <h2>Loading your reservation history</h2>
+        <span class="eyebrow">Pickups</span>
+        <h2>Loading your pickup history</h2>
         <p>We are fetching the latest statuses from the backend now.</p>
       </section>
     } @else if (!cards().length) {
       <section class="surface workspace-reservations-page__state workspace-reservations-page__state--empty">
         <div>
-          <span class="eyebrow">Reservations</span>
-          <h2>No reservations yet</h2>
-          <p>Reserve your first rescue offer and it will appear here with live backend status updates.</p>
+          <span class="eyebrow">Pickups</span>
+          <h2>No pickup orders yet</h2>
+          <p>Pay for your first rescue offer and it will appear here with its pickup pass and live backend status updates.</p>
         </div>
 
         <div class="button-row">
@@ -44,11 +44,11 @@
       <section class="surface workspace-reservations-page__summary">
         <article>
           <strong>{{ summary().total }}</strong>
-          <span>Total reservations</span>
+          <span>Total orders</span>
         </article>
         <article>
           <strong>{{ summary().active }}</strong>
-          <span>Active pickups</span>
+          <span>Waiting for pickup</span>
         </article>
         <article>
           <strong>{{ summary().completed }}</strong>
@@ -61,7 +61,7 @@
       </section>
 
       <div class="workspace-reservations-page__grid">
-        @for (card of cards(); track card.reservation.id) {
+        @for (card of cards(); track card.order.id) {
           <article class="surface reservation-card" [attr.data-tone]="card.statusMeta.tone">
             <div class="reservation-card__media">
               <img [src]="resolveOfferImage(card)" [alt]="resolveOfferTitle(card)" />
@@ -70,83 +70,110 @@
             <div class="reservation-card__body">
               <div class="reservation-card__topline">
                 <div>
-                  <span class="eyebrow">Reservation #{{ card.reservation.id }}</span>
+                  <span class="eyebrow">{{ cardEyebrow(card.order) }}</span>
                   <h2>{{ resolveOfferTitle(card) }}</h2>
                   <p>{{ resolveOfferDescription(card) }}</p>
                 </div>
 
                 <span class="reservation-card__status" [attr.data-tone]="card.statusMeta.tone">
-                  {{ card.statusMeta.label }}
+                  {{ cardStatusLabel(card.order) }}
                 </span>
               </div>
 
               <div class="reservation-card__meta">
                 <div>
                   <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
-                  <span>Reserved {{ card.reservation.createdAt | date: 'd. M. y, HH:mm' }}</span>
+                  <span>Ordered {{ card.order.createdAt | date: 'd. M. y, HH:mm' }}</span>
                 </div>
 
-                @if (card.offer) {
-                  <div>
-                    <fa-icon [icon]="icons.clock" aria-hidden="true" />
-                    <span>
-                      Pickup {{ card.offer.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }} -
-                      {{ card.offer.pickupTimeWindow.to | date: 'HH:mm' }}
-                    </span>
-                  </div>
+                <div>
+                  <fa-icon [icon]="icons.store" aria-hidden="true" />
+                  <span>{{ card.order.businessName }}</span>
+                </div>
 
-                  <div>
-                    <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
-                    <span>
-                      {{ card.offer.pickupLocation.address.street }}, {{ card.offer.pickupLocation.address.city }},
-                      {{ card.offer.pickupLocation.address.country }}
-                    </span>
-                  </div>
+                <div>
+                  <fa-icon [icon]="icons.clock" aria-hidden="true" />
+                  <span>
+                    Pickup {{ card.order.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }} -
+                    {{ card.order.pickupTimeWindow.to | date: 'HH:mm' }}
+                  </span>
+                </div>
 
-                  <div>
-                    <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
-                    <span>{{ formatPrice(card.offer.price) }}</span>
-                  </div>
+                <div>
+                  <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+                  <span>
+                    {{ card.order.pickupLocation.address.street }}, {{ card.order.pickupLocation.address.city }},
+                    {{ card.order.pickupLocation.address.country }}
+                  </span>
+                </div>
 
-                  <div>
-                    <fa-icon [icon]="icons.list" aria-hidden="true" />
-                    <span>{{ card.reservation.quantity }} {{ card.reservation.quantity === 1 ? 'bag' : 'bags' }} reserved</span>
-                  </div>
-                }
+                <div>
+                  <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
+                  <span>{{ formatPrice(card.order.item.unitPrice) }}</span>
+                </div>
 
-                @if (card.reservation.cancelledAt) {
+                <div>
+                  <fa-icon [icon]="icons.list" aria-hidden="true" />
+                  <span>{{ card.order.item.quantity }} {{ card.order.item.quantity === 1 ? 'bag' : 'bags' }} in this order</span>
+                </div>
+
+                <div>
+                  <fa-icon [icon]="icons.creditCard" aria-hidden="true" />
+                  <span>{{ paymentSummary(card.order) }}</span>
+                </div>
+
+                @if (card.order.cancelledAt) {
                   <div>
                     <fa-icon [icon]="icons.circleExclamation" aria-hidden="true" />
-                    <span>Cancelled {{ card.reservation.cancelledAt | date: 'd. M. y, HH:mm' }}</span>
+                    <span>Cancelled {{ card.order.cancelledAt | date: 'd. M. y, HH:mm' }}</span>
                   </div>
                 }
 
-                @if (card.reservation.pickupConfirmation?.confirmedAt) {
+                @if (card.order.pickupConfirmation?.confirmedAt) {
                   <div>
                     <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
-                    <span>Confirmed {{ card.reservation.pickupConfirmation?.confirmedAt | date: 'd. M. y, HH:mm' }}</span>
+                    <span>Confirmed {{ card.order.pickupConfirmation?.confirmedAt | date: 'd. M. y, HH:mm' }}</span>
                   </div>
                 }
               </div>
 
-              @if (!card.offer && !loadingOfferDetails()) {
-                <p class="reservation-card__fallback">
-                  Offer detail is not fully available anymore, but reservation status still comes from the backend.
-                </p>
+              @if (canShowPickupPass(card)) {
+                <section class="reservation-card__pickup-pass-panel">
+                  <div class="reservation-card__pickup-pass-copy">
+                    <strong>Pickup pass ready</strong>
+                    <p>Show this QR/token to the business so they can confirm the handoff and release the simulated payout.</p>
+                  </div>
+
+                  <div class="button-row reservation-card__pickup-pass-actions">
+                    <app-action-button
+                      [label]="pickupPassButtonLabel(card.order.id)"
+                      variant="secondary"
+                      iconPosition="start"
+                      [icon]="icons.qrcode"
+                      [disabled]="isLoadingPickupPass(card.order.id)"
+                      (pressed)="togglePickupPass(card)"
+                    />
+                  </div>
+
+                  @if (isPickupPassOpen(card.order.id)) {
+                    @if (pickupPass(card.order.id); as pass) {
+                      <app-pickup-pass-card
+                        [title]="'Pickup QR'"
+                        [subtitle]="'Paid order'"
+                        [payload]="pass.qrPayload"
+                        [token]="pass.pickupToken"
+                        [amountLabel]="formatPrice(pass.amount)"
+                      />
+                    } @else {
+                      <p class="reservation-card__fallback">
+                        Pickup pass is still loading or could not be generated for this order.
+                      </p>
+                    }
+                  }
+                </section>
               }
 
               <div class="button-row reservation-card__actions">
-                @if (canCancelReservation(card.reservation)) {
-                  <app-action-button
-                    label="Cancel reservation"
-                    variant="danger"
-                    iconPosition="start"
-                    [icon]="icons.xmark"
-                    [disabled]="isCancelling(card.reservation.id)"
-                    (pressed)="cancelReservation(card.reservation)"
-                  />
-                }
-
                 <app-action-button
                   label="Browse offers"
                   variant="ghost"

@@ -55,7 +55,7 @@ export class WorkspaceSidebarComponent {
         { label: 'All businesses', icon: this.icons.arrowLeft, route: '/workspace/my-businesses', exact: true },
         { label: 'Dashboard', icon: this.icons.globe, route: `/workspace/my-businesses/${currentBusinessId}`, exact: true },
         { label: 'Offers', icon: this.icons.list, route: `/workspace/my-businesses/${currentBusinessId}/offers`, exact: false },
-        { label: 'Reservations', icon: this.icons.calendarDays, route: `/workspace/my-businesses/${currentBusinessId}/reservations`, exact: false },
+        { label: 'Orders', icon: this.icons.calendarDays, route: `/workspace/my-businesses/${currentBusinessId}/orders`, exact: false },
         { label: 'Analytics', icon: this.icons.hashtag, route: `/workspace/my-businesses/${currentBusinessId}/analytics`, exact: false },
         { label: 'Settings', icon: this.icons.user, route: `/workspace/my-businesses/${currentBusinessId}/settings`, exact: false },
       ];

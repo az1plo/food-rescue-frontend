@@ -23,7 +23,7 @@ export class WorkspaceReservationsRedirectPage {
 
           if (targetBusinessId) {
             this.businessWorkspaceState.rememberBusinessId(targetBusinessId);
-            void this.router.navigate(['/workspace', 'my-businesses', targetBusinessId, 'reservations'], {
+            void this.router.navigate(['/workspace', 'my-businesses', targetBusinessId, 'orders'], {
               replaceUrl: true,
             });
             return;

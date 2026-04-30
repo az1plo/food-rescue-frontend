@@ -103,9 +103,17 @@
               <app-action-button
                 [label]="detailPrimaryActionLabel()"
                 iconPosition="start"
-                [icon]="offer.canReserve ? icons.arrowRight : icons.eye"
-                [disabled]="reserving() || !offer.canReserve"
-                (pressed)="reserveCurrentOffer()"
+                [icon]="offer.canReserve ? icons.creditCard : icons.eye"
+                [disabled]="!offer.canReserve"
+                (pressed)="startCheckoutForCurrentOffer()"
+              />
+
+              <app-action-button
+                [label]="detailCartActionLabel()"
+                variant="secondary"
+                iconPosition="start"
+                [icon]="detailCartActionIcon()"
+                (pressed)="toggleCurrentOfferInCart()"
               />
 
               <app-action-button

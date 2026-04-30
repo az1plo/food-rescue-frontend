@@ -109,8 +109,8 @@ export class HomePage {
     },
     {
       icon: appIcons.bagShopping,
-      title: 'Reserve',
-      description: 'Book your favorite offer in a few taps.',
+      title: 'Pay',
+      description: 'Check out online and secure your pickup in a few taps.',
     },
     {
       icon: appIcons.calendarDays,

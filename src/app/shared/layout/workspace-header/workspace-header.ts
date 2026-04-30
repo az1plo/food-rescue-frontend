@@ -114,8 +114,8 @@ export class WorkspaceHeaderComponent {
       return breadcrumbs;
     }
 
-    if (url === '/workspace/reservations') {
-      breadcrumbs.push({ label: 'Reservations' });
+    if (url === '/workspace/orders' || url === '/workspace/reservations') {
+      breadcrumbs.push({ label: 'Orders' });
       return breadcrumbs;
     }
 
@@ -155,12 +155,13 @@ export class WorkspaceHeaderComponent {
 
     const isOffersRoute = url.startsWith(`/workspace/my-businesses/${businessId}/offers`);
     const isAnalyticsRoute = url.startsWith(`/workspace/my-businesses/${businessId}/analytics`);
-    const isReservationsRoute = url.startsWith(`/workspace/my-businesses/${businessId}/reservations`);
+    const isOrdersRoute = url.startsWith(`/workspace/my-businesses/${businessId}/orders`)
+      || url.startsWith(`/workspace/my-businesses/${businessId}/reservations`);
     const isSettingsRoute = url.startsWith(`/workspace/my-businesses/${businessId}/settings`);
     breadcrumbs.push({
       label: businessName,
       route:
-        isOffersRoute || isAnalyticsRoute || isReservationsRoute || isSettingsRoute
+        isOffersRoute || isAnalyticsRoute || isOrdersRoute || isSettingsRoute
           ? ['/workspace', 'my-businesses', businessId]
           : undefined,
     });
@@ -169,8 +170,8 @@ export class WorkspaceHeaderComponent {
       breadcrumbs.push({ label: 'Offers' });
     } else if (isAnalyticsRoute) {
       breadcrumbs.push({ label: 'Analytics' });
-    } else if (isReservationsRoute) {
-      breadcrumbs.push({ label: 'Reservations' });
+    } else if (isOrdersRoute) {
+      breadcrumbs.push({ label: 'Orders' });
     } else if (isSettingsRoute) {
       breadcrumbs.push({ label: 'Settings' });
     }

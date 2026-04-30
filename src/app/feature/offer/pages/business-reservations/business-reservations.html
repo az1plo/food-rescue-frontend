@@ -1,9 +1,9 @@
 <section class="workspace-page business-reservations-page">
   <div class="business-reservations-page__header">
     <div>
-      <span class="eyebrow">Business reservations</span>
-      <h1>{{ business()?.name || 'Reservations' }}</h1>
-      <p>Track orders for this business, see who reserved each offer, and confirm pickups directly from the workspace.</p>
+      <span class="eyebrow">Business orders</span>
+      <h1>{{ business()?.name || 'Orders' }}</h1>
+      <p>Track paid pickups for this business and confirm collection directly from the workspace.</p>
     </div>
 
     <div class="button-row">
@@ -25,11 +25,11 @@
       }
 
       <app-action-button
-        label="Refresh reservations"
+        label="Refresh orders"
         variant="ghost"
         iconPosition="start"
         [icon]="icons.rotateRight"
-        (pressed)="refreshReservations()"
+        (pressed)="refreshOrders()"
       />
     </div>
   </div>
@@ -40,16 +40,16 @@
 
   @if (loading()) {
     <section class="surface business-reservations-page__state" aria-busy="true">
-      <span class="eyebrow">Reservations</span>
+      <span class="eyebrow">Orders</span>
       <h2>Loading business orders</h2>
-      <p>We are fetching reservations attached to this business and matching them to the offer catalog.</p>
+      <p>We are fetching paid orders and current pickup states for this business.</p>
     </section>
   } @else if (!cards().length) {
     <section class="surface business-reservations-page__state business-reservations-page__state--empty">
       <div>
         <span class="eyebrow">Orders</span>
-        <h2>No reservations yet</h2>
-        <p>This business does not have any customer reservations yet. As soon as an offer is claimed, it will appear here.</p>
+        <h2>No orders yet</h2>
+        <p>This business does not have any customer orders yet. As soon as an offer is paid, it will appear here.</p>
       </div>
 
       @if (business(); as currentBusiness) {
@@ -91,47 +91,47 @@
     </section>
 
     <div class="business-reservations-page__grid">
-      @for (card of cards(); track card.reservation.id) {
+      @for (card of cards(); track card.order.id) {
         <article class="surface reservation-card" [attr.data-tone]="card.statusMeta.tone">
           <div class="reservation-card__media">
-            <img [src]="resolveOfferImage(card)" [alt]="card.offer.title" />
+            <img [src]="resolveOfferImage(card)" [alt]="card.order.item.title" />
           </div>
 
           <div class="reservation-card__body">
             <div class="reservation-card__topline">
               <div>
-                <span class="eyebrow">Reservation #{{ card.reservation.id }}</span>
-                <h2>{{ card.offer.title }}</h2>
-                <p>{{ card.offer.description || 'No customer-facing description was saved for this offer.' }}</p>
+                <span class="eyebrow">{{ cardEyebrow(card) }}</span>
+                <h2>{{ card.order.item.title }}</h2>
+                <p>{{ card.order.pickupLocation.note || 'Paid order awaiting collection from this business.' }}</p>
               </div>
 
               <span class="reservation-card__status" [attr.data-tone]="card.statusMeta.tone">
-                {{ card.statusMeta.label }}
+                {{ cardStatusLabel(card) }}
               </span>
             </div>
 
-            <div class="reservation-card__meta">
-              <div>
-                <fa-icon [icon]="icons.user" aria-hidden="true" />
-                <span>Customer #{{ card.reservation.userId }}</span>
+              <div class="reservation-card__meta">
+                <div>
+                  <fa-icon [icon]="icons.user" aria-hidden="true" />
+                  <span>Customer #{{ card.order.userId }}</span>
               </div>
               <div>
                 <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
-                <span>Reserved {{ card.reservation.createdAt | date: 'd. M. y, HH:mm' }}</span>
+                <span>Ordered {{ card.order.createdAt | date: 'd. M. y, HH:mm' }}</span>
               </div>
               <div>
                 <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
-                <span>{{ card.reservation.quantity }} {{ card.reservation.quantity === 1 ? 'bag' : 'bags' }} reserved</span>
+                <span>{{ card.order.item.quantity }} {{ card.order.item.quantity === 1 ? 'bag' : 'bags' }} in this order</span>
               </div>
               <div>
                 <fa-icon [icon]="icons.clock" aria-hidden="true" />
-                <span>Pickup {{ card.offer.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }} - {{ card.offer.pickupTimeWindow.to | date: 'HH:mm' }}</span>
+                <span>Pickup {{ card.order.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }} - {{ card.order.pickupTimeWindow.to | date: 'HH:mm' }}</span>
               </div>
               <div>
                 <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
                 <span>
-                  {{ card.offer.pickupLocation.address.street }}, {{ card.offer.pickupLocation.address.city }},
-                  {{ card.offer.pickupLocation.address.country }}
+                  {{ card.order.pickupLocation.address.street }}, {{ card.order.pickupLocation.address.city }},
+                  {{ card.order.pickupLocation.address.country }}
                 </span>
               </div>
               <div>
@@ -140,32 +140,63 @@
               </div>
               <div>
                 <fa-icon [icon]="icons.eye" aria-hidden="true" />
-                <span>{{ formatPrice(card.offer.price) }}</span>
+                <span>{{ formatPrice(card.order.item.unitPrice) }}</span>
               </div>
 
-              @if (card.reservation.cancelledAt) {
+              @if (card.order.payment) {
                 <div>
-                  <fa-icon [icon]="icons.circleExclamation" aria-hidden="true" />
-                  <span>Cancelled {{ card.reservation.cancelledAt | date: 'd. M. y, HH:mm' }}</span>
+                  <fa-icon [icon]="icons.creditCard" aria-hidden="true" />
+                  <span>{{ paymentSummary(card) }}</span>
+                </div>
+                <div>
+                  <fa-icon [icon]="icons.qrcode" aria-hidden="true" />
+                  <span>{{ payoutSummary(card) }}</span>
                 </div>
               }
 
-              @if (card.reservation.pickupConfirmation?.confirmedAt) {
+              @if (card.order.cancelledAt) {
+                <div>
+                  <fa-icon [icon]="icons.circleExclamation" aria-hidden="true" />
+                  <span>Cancelled {{ card.order.cancelledAt | date: 'd. M. y, HH:mm' }}</span>
+                </div>
+              }
+
+              @if (card.order.pickupConfirmation?.confirmedAt) {
                 <div>
                   <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
-                  <span>Pickup confirmed {{ card.reservation.pickupConfirmation?.confirmedAt | date: 'd. M. y, HH:mm' }}</span>
+                  <span>Pickup confirmed {{ card.order.pickupConfirmation?.confirmedAt | date: 'd. M. y, HH:mm' }}</span>
                 </div>
               }
             </div>
 
+            @if (card.order.status === 'ACTIVE' && card.order.payment) {
+              <section class="reservation-card__pickup-verification">
+                <div class="reservation-card__pickup-copy">
+                  <strong>Pickup verification</strong>
+                  <p>Scan the customer QR or paste the pickup token below to release the order and simulated payout.</p>
+                </div>
+
+                <label class="reservation-card__pickup-field">
+                  <span>Pickup token</span>
+                  <input
+                    type="text"
+                    [value]="pickupTokenValue(card.order.id)"
+                    [disabled]="isConfirming(card.order.id)"
+                    placeholder="SAVR-AB12CD34EF56"
+                    (input)="updatePickupToken(card.order.id, $any($event.target).value)"
+                  />
+                </label>
+              </section>
+            }
+
             <div class="button-row reservation-card__actions">
-              @if (card.reservation.status === 'ACTIVE') {
+              @if (card.order.status === 'ACTIVE') {
                 <app-action-button
-                  label="Confirm pickup"
+                  [label]="confirmPickupLabel(card)"
                   variant="secondary"
                   iconPosition="start"
                   [icon]="icons.circleCheck"
-                  [disabled]="isConfirming(card.reservation.id)"
+                  [disabled]="!canConfirmPickup(card)"
                   (pressed)="confirmPickup(card)"
                 />
               }
@@ -175,7 +206,7 @@
                 variant="ghost"
                 iconPosition="start"
                 [icon]="icons.arrowRight"
-                [route]="['/workspace', 'my-businesses', card.offer.businessId, 'offers']"
+                [route]="['/workspace', 'my-businesses', card.order.businessId, 'offers']"
               />
             </div>
           </div>

@@ -2,175 +2,194 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { catchError, forkJoin, of } from 'rxjs';
 import { NotificationInboxService } from '../../../../core/services/notification-inbox.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { appIcons } from '../../../../shared/icons/app-icons';
+import { PickupPassCardComponent } from '../../../../shared/ui/pickup-pass-card/pickup-pass-card';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
-import { OfferModel, resolveOfferImage } from '../../models/offer.model';
-import { ReservationModel, ReservationStatusMeta, RESERVATION_STATUS_META } from '../../models/reservation.model';
-import { OfferApiService } from '../../services/offer-api.service';
-import { ReservationApiService } from '../../services/reservation-api.service';
+import { resolveOfferImage } from '../../models/offer.model';
+import {
+  OrderModel,
+  OrderPickupPassModel,
+  OrderStatusMeta,
+  ORDER_STATUS_META,
+} from '../../models/order.model';
+import { OrderApiService } from '../../services/order-api.service';
 
-interface ReservationCardViewModel {
-  reservation: ReservationModel;
-  offer: OfferModel | null;
-  statusMeta: ReservationStatusMeta;
+interface OrderCardViewModel {
+  order: OrderModel;
+  statusMeta: OrderStatusMeta;
 }
 
 @Component({
   selector: 'app-workspace-reservations-page',
-  imports: [DatePipe, FontAwesomeModule, ActionButtonComponent],
+  imports: [DatePipe, FontAwesomeModule, ActionButtonComponent, PickupPassCardComponent],
   templateUrl: './workspace-reservations.html',
   styleUrl: './workspace-reservations.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WorkspaceReservationsPage {
   private readonly destroyRef = inject(DestroyRef);
-  private readonly reservationApi = inject(ReservationApiService);
-  private readonly offerApi = inject(OfferApiService);
+  private readonly orderApi = inject(OrderApiService);
   private readonly notificationService = inject(NotificationService);
   private readonly notificationInbox = inject(NotificationInboxService);
 
   protected readonly icons = appIcons;
-  protected readonly reservations = signal<ReservationModel[]>([]);
-  protected readonly offerLookup = signal<Record<number, OfferModel | null>>({});
+  protected readonly orders = signal<OrderModel[]>([]);
   protected readonly loading = signal(true);
-  protected readonly loadingOfferDetails = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
-  protected readonly cancellingIds = signal<number[]>([]);
-  protected readonly cards = computed<ReservationCardViewModel[]>(() =>
-    this.reservations().map((reservation) => ({
-      reservation,
-      offer: this.offerLookup()[reservation.offerId] ?? null,
-      statusMeta: RESERVATION_STATUS_META[reservation.status],
+  protected readonly pickupPassLookup = signal<Record<number, OrderPickupPassModel | null>>({});
+  protected readonly expandedPickupPassIds = signal<number[]>([]);
+  protected readonly loadingPickupPassIds = signal<number[]>([]);
+  protected readonly cards = computed<OrderCardViewModel[]>(() =>
+    this.orders().map((order) => ({
+      order,
+      statusMeta: ORDER_STATUS_META[order.status],
     })),
   );
   protected readonly summary = computed(() => ({
-    total: this.reservations().length,
-    active: this.reservations().filter((reservation) => reservation.status === 'ACTIVE').length,
-    completed: this.reservations().filter((reservation) => reservation.status === 'PICKED_UP').length,
-    cancelled: this.reservations().filter((reservation) => reservation.status === 'CANCELLED').length,
+    total: this.orders().length,
+    active: this.orders().filter((order) => order.status === 'ACTIVE').length,
+    completed: this.orders().filter((order) => order.status === 'PICKED_UP').length,
+    cancelled: this.orders().filter((order) => order.status === 'CANCELLED').length,
   }));
 
   constructor() {
-    this.loadReservations();
+    this.loadOrders();
   }
 
-  protected refreshReservations(): void {
-    this.loadReservations();
+  protected refreshOrders(): void {
+    this.loadOrders();
   }
 
-  protected cancelReservation(reservation: ReservationModel): void {
-    if (!this.canCancelReservation(reservation) || this.isCancelling(reservation.id)) {
+  protected canShowPickupPass(card: OrderCardViewModel): boolean {
+    return card.order.status === 'ACTIVE' && card.order.payment !== null;
+  }
+
+  protected togglePickupPass(card: OrderCardViewModel): void {
+    if (!this.canShowPickupPass(card)) {
       return;
     }
 
-    this.cancellingIds.update((ids) => [...ids, reservation.id]);
-    this.reservationApi
-      .cancelReservation(reservation.id)
+    const orderId = card.order.id;
+    if (this.isPickupPassOpen(orderId)) {
+      this.expandedPickupPassIds.update((ids) => ids.filter((id) => id !== orderId));
+      return;
+    }
+
+    this.expandedPickupPassIds.update((ids) => [...ids, orderId]);
+
+    if (this.pickupPassLookup()[orderId] !== undefined || this.isLoadingPickupPass(orderId)) {
+      return;
+    }
+
+    this.loadingPickupPassIds.update((ids) => [...ids, orderId]);
+    this.orderApi
+      .getPickupPass(orderId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
-          this.cancellingIds.update((ids) => ids.filter((id) => id !== reservation.id));
-          this.notificationService.info('Reservation was cancelled successfully.', 'Reservation updated');
-          this.notificationInbox.refresh();
-          this.loadReservations();
+        next: (pickupPass) => {
+          this.pickupPassLookup.update((lookup) => ({
+            ...lookup,
+            [orderId]: pickupPass,
+          }));
+          this.loadingPickupPassIds.update((ids) => ids.filter((id) => id !== orderId));
         },
         error: () => {
-          this.cancellingIds.update((ids) => ids.filter((id) => id !== reservation.id));
-          this.notificationService.error('Reservation could not be cancelled right now.');
+          this.pickupPassLookup.update((lookup) => ({
+            ...lookup,
+            [orderId]: null,
+          }));
+          this.loadingPickupPassIds.update((ids) => ids.filter((id) => id !== orderId));
+          this.notificationService.error('Pickup pass could not be loaded right now.');
         },
       });
   }
 
-  protected canCancelReservation(reservation: ReservationModel): boolean {
-    return RESERVATION_STATUS_META[reservation.status].cancelable;
+  protected isPickupPassOpen(reservationId: number): boolean {
+    return this.expandedPickupPassIds().includes(reservationId);
   }
 
-  protected isCancelling(reservationId: number): boolean {
-    return this.cancellingIds().includes(reservationId);
+  protected isLoadingPickupPass(reservationId: number): boolean {
+    return this.loadingPickupPassIds().includes(reservationId);
   }
 
-  protected resolveOfferTitle(card: ReservationCardViewModel): string {
-    return card.offer?.title ?? `Offer #${card.reservation.offerId}`;
+  protected pickupPass(reservationId: number): OrderPickupPassModel | null {
+    return this.pickupPassLookup()[reservationId] ?? null;
   }
 
-  protected resolveOfferDescription(card: ReservationCardViewModel): string {
-    if (card.offer?.description?.trim()) {
-      return card.offer.description;
+  protected paymentSummary(order: OrderModel): string {
+    const payment = order.payment;
+    if (!payment) {
+      return 'Payment record unavailable.';
     }
 
-    return card.offer
-      ? 'Pickup details are attached to this reservation.'
-      : 'Offer details are limited right now, but the reservation status is still tracked here.';
+    return `${payment.amount.toFixed(2)} ${payment.currency} paid with card ending ${payment.cardLast4}.`;
   }
 
-  protected resolveOfferImage(card: ReservationCardViewModel): string {
-    return resolveOfferImage(card.offer?.imageUrl, card.offer?.id ?? card.reservation.offerId);
+  protected pickupPassButtonLabel(reservationId: number): string {
+    if (this.isLoadingPickupPass(reservationId)) {
+      return 'Loading pickup QR...';
+    }
+
+    return this.isPickupPassOpen(reservationId) ? 'Hide pickup QR' : 'Show pickup QR';
+  }
+
+  protected cardEyebrow(order: OrderModel): string {
+    return `Order #${order.id}`;
+  }
+
+  protected cardStatusLabel(order: OrderModel): string {
+    if (order.status === 'ACTIVE') {
+      return 'Awaiting pickup';
+    }
+
+    return ORDER_STATUS_META[order.status].label;
+  }
+
+  protected resolveOfferTitle(card: OrderCardViewModel): string {
+    return card.order.item.title;
+  }
+
+  protected resolveOfferDescription(card: OrderCardViewModel): string {
+    if (card.order.pickupLocation.note?.trim()) {
+      return card.order.pickupLocation.note;
+    }
+
+    return `Paid order from ${card.order.businessName}.`;
+  }
+
+  protected resolveOfferImage(card: OrderCardViewModel): string {
+    return resolveOfferImage(card.order.item.imageUrl, card.order.item.offerId);
   }
 
   protected formatPrice(price: number | null | undefined): string {
     return typeof price === 'number' ? `${price.toFixed(2)} EUR` : 'Price unavailable';
   }
 
-  private loadReservations(): void {
+  private loadOrders(): void {
     this.loading.set(true);
     this.errorMessage.set(null);
-    this.offerLookup.set({});
-    this.loadingOfferDetails.set(false);
+    this.pickupPassLookup.set({});
+    this.expandedPickupPassIds.set([]);
+    this.loadingPickupPassIds.set([]);
 
-    this.reservationApi
-      .getReservations()
+    this.orderApi
+      .getOrders()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (reservations) => {
-          const sortedReservations = [...reservations].sort(
+        next: (orders) => {
+          const sortedOrders = [...orders].sort(
             (first, second) => this.toTimestamp(second.createdAt) - this.toTimestamp(first.createdAt),
           );
 
-          this.reservations.set(sortedReservations);
+          this.orders.set(sortedOrders);
           this.loading.set(false);
-          this.loadOfferDetails(sortedReservations);
         },
         error: () => {
           this.loading.set(false);
-          this.reservations.set([]);
-          this.errorMessage.set('We could not load your reservations right now. Please try again.');
-        },
-      });
-  }
-
-  private loadOfferDetails(reservations: ReservationModel[]): void {
-    const offerIds = [...new Set(reservations.map((reservation) => reservation.offerId))];
-    if (!offerIds.length) {
-      this.offerLookup.set({});
-      return;
-    }
-
-    this.loadingOfferDetails.set(true);
-
-    forkJoin(
-      offerIds.map((offerId) =>
-        this.offerApi.getOffer(offerId).pipe(
-          catchError(() => of<OfferModel | null>(null)),
-        ),
-      ),
-    )
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (offers) => {
-          const nextLookup = offerIds.reduce<Record<number, OfferModel | null>>((lookup, offerId, index) => {
-            lookup[offerId] = offers[index];
-            return lookup;
-          }, {});
-
-          this.offerLookup.set(nextLookup);
-          this.loadingOfferDetails.set(false);
-        },
-        error: () => {
-          this.offerLookup.set({});
-          this.loadingOfferDetails.set(false);
+          this.orders.set([]);
+          this.errorMessage.set('We could not load your pickup history right now. Please try again.');
         },
       });
   }

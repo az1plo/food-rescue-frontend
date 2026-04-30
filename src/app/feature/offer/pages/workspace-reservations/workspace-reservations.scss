@@ -136,6 +136,29 @@
   font-size: 1.3rem;
 }
 
+.reservation-card__pickup-pass-panel {
+  display: grid;
+  gap: 1.2rem;
+  padding: 1.5rem;
+  border-radius: 1.8rem;
+  background: rgba(242, 246, 238, 0.78);
+  border: 1px solid rgba(216, 226, 210, 0.92);
+}
+
+.reservation-card__pickup-pass-copy {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.reservation-card__pickup-pass-copy strong,
+.reservation-card__pickup-pass-copy p {
+  margin: 0;
+}
+
+.reservation-card__pickup-pass-copy p {
+  color: var(--color-text-muted);
+}
+
 .reservation-card__actions {
   align-items: center;
 }

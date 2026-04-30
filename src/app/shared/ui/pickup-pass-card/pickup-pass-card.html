@@ -1,0 +1,24 @@
+<article class="pickup-pass-card">
+  <div class="pickup-pass-card__qr" aria-hidden="true">
+    <svg [attr.viewBox]="viewBox" role="img" focusable="false">
+      <rect x="0" y="0" width="21" height="21" rx="1.4" ry="1.4"></rect>
+      @for (cell of cells(); track cell.key) {
+        <rect [attr.x]="cell.x" [attr.y]="cell.y" width="1" height="1"></rect>
+      }
+    </svg>
+  </div>
+
+  <div class="pickup-pass-card__copy">
+    @if (subtitle()) {
+      <span class="eyebrow">{{ subtitle() }}</span>
+    }
+
+    <h3>{{ title() }}</h3>
+
+    @if (amountLabel()) {
+      <p>{{ amountLabel() }}</p>
+    }
+
+    <code>{{ token() }}</code>
+  </div>
+</article>

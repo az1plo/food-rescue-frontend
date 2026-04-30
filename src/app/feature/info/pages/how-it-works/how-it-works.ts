@@ -37,8 +37,8 @@ export class HowItWorksPage {
     {
       icon: appIcons.bagShopping,
       step: 2,
-      title: 'Reserve online',
-      description: 'Reserve your offer directly on the website in a few clicks.',
+      title: 'Pay online',
+      description: 'Add your offer to the cart and complete checkout directly on the website.',
     },
     {
       icon: appIcons.calendarDays,
@@ -76,8 +76,8 @@ export class HowItWorksPage {
     {
       icon: appIcons.bell,
       step: 4,
-      title: 'Receive reservations',
-      description: 'Customers reserve your offers through the website.',
+      title: 'Receive paid orders',
+      description: 'Customers pay for your offers through the website.',
     },
     {
       icon: appIcons.bagShopping,

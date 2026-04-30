@@ -1,0 +1,73 @@
+.pickup-pass-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1.4rem;
+  align-items: center;
+  padding: 1.6rem;
+  border: 1px solid rgba(216, 226, 210, 0.92);
+  border-radius: 2rem;
+  background:
+    radial-gradient(circle at top right, rgba(214, 236, 220, 0.6), transparent 40%),
+    linear-gradient(135deg, rgba(252, 253, 251, 0.98), rgba(244, 248, 242, 0.98));
+}
+
+.pickup-pass-card__qr {
+  padding: 0.9rem;
+  border-radius: 1.6rem;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(223, 231, 219, 0.92);
+}
+
+.pickup-pass-card__qr svg {
+  display: block;
+  width: 12.8rem;
+  height: 12.8rem;
+}
+
+.pickup-pass-card__qr rect:first-child {
+  fill: #ffffff;
+}
+
+.pickup-pass-card__qr rect:not(:first-child) {
+  fill: #173923;
+}
+
+.pickup-pass-card__copy {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.pickup-pass-card__copy h3,
+.pickup-pass-card__copy p {
+  margin: 0;
+}
+
+.pickup-pass-card__copy p {
+  color: var(--color-text-muted);
+}
+
+.pickup-pass-card__copy code {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 3.6rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  background: rgba(23, 57, 35, 0.08);
+  color: #173923;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 639px) {
+  .pickup-pass-card {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .pickup-pass-card__copy {
+    justify-items: center;
+  }
+}

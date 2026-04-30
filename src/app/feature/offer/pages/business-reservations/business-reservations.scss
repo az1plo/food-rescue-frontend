@@ -141,6 +141,55 @@
   color: var(--color-primary-strong);
 }
 
+.reservation-card__pickup-verification {
+  display: grid;
+  gap: 1rem;
+  padding: 1.4rem;
+  border-radius: 1.7rem;
+  background: rgba(242, 246, 238, 0.78);
+  border: 1px solid rgba(216, 226, 210, 0.92);
+}
+
+.reservation-card__pickup-copy {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.reservation-card__pickup-copy strong,
+.reservation-card__pickup-copy p {
+  margin: 0;
+}
+
+.reservation-card__pickup-field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.reservation-card__pickup-field span {
+  color: #244931;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.reservation-card__pickup-field input {
+  width: 100%;
+  min-height: 4.8rem;
+  padding: 0 1.25rem;
+  border: 1px solid rgba(216, 226, 210, 0.96);
+  border-radius: 1.4rem;
+  background: #ffffff;
+  color: var(--color-text);
+  font: inherit;
+}
+
+.reservation-card__pickup-field input:focus {
+  outline: none;
+  border-color: rgba(47, 143, 78, 0.56);
+  box-shadow: 0 0 0 0.35rem rgba(47, 143, 78, 0.12);
+}
+
 .reservation-card__actions {
   align-items: center;
 }

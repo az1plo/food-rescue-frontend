@@ -22,7 +22,7 @@
                 isCreateMode()
                   ? 'Add the essentials now and continue refining the profile from the workspace.'
                   : isSettingsPage()
-                    ? 'Keep the business profile accurate so offers, reservations, and analytics stay tied to the right location.'
+                    ? 'Keep the business profile accurate so offers, orders, and analytics stay tied to the right location.'
                     : 'Keep the venue information current so the workspace stays ready for future publishing.'
               }}
             </p>
@@ -221,11 +221,11 @@
 
           @if (!isSettingsPage() && canViewReservations()) {
             <app-action-button
-              label="Open reservations"
+              label="Open orders"
               variant="ghost"
               iconPosition="start"
               [icon]="icons.calendarDays"
-              [route]="['/workspace', 'my-businesses', business.id, 'reservations']"
+              [route]="['/workspace', 'my-businesses', business.id, 'orders']"
             />
           }
 

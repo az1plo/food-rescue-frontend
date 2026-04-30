@@ -2,9 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signa
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { NotificationInboxService } from '../../../../core/services/notification-inbox.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { UserService } from '../../../../core/services/user.service';
 import { appIcons } from '../../../../shared/icons/app-icons';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
 import { MarketplaceOfferModel } from '../../models/marketplace-offer.model';
@@ -12,7 +10,6 @@ import { OfferItemModel, OfferModel, OfferStatus, resolveOfferImage } from '../.
 import { MarketplaceOfferApiService } from '../../services/marketplace-offer-api.service';
 import { OfferApiService } from '../../services/offer-api.service';
 import { OfferCartService } from '../../services/offer-cart.service';
-import { ReservationApiService } from '../../services/reservation-api.service';
 
 interface ViewerLocation {
   latitude: number;
@@ -35,16 +32,11 @@ export class OfferDetailsPage {
   private readonly destroyRef = inject(DestroyRef);
   private readonly marketplaceOfferApi = inject(MarketplaceOfferApiService);
   private readonly offerApi = inject(OfferApiService);
-  private readonly reservationApi = inject(ReservationApiService);
-  private readonly notificationInbox = inject(NotificationInboxService);
   private readonly notificationService = inject(NotificationService);
-  private readonly userService = inject(UserService);
   private readonly offerCart = inject(OfferCartService);
 
-  protected readonly user = this.userService.getUser();
   protected readonly icons = appIcons;
   protected readonly loading = signal(true);
-  protected readonly reserving = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly marketplaceOffer = signal<MarketplaceOfferModel | null>(null);
   protected readonly detailedOffer = signal<OfferModel | null>(null);
@@ -117,39 +109,17 @@ export class OfferDetailsPage {
     this.notificationService.info(`"${offer.title}" was removed from your cart.`, 'Cart updated');
   }
 
-  protected reserveCurrentOffer(): void {
+  protected startCheckoutForCurrentOffer(): void {
     const offer = this.currentOffer();
-    if (!offer || !offer.canReserve || this.reserving()) {
+    if (!offer || !offer.canReserve) {
       return;
     }
 
-    if (!this.user()) {
-      void this.userService.login(this.router.url);
-      return;
+    if (!this.isCurrentOfferInCart()) {
+      this.offerCart.addOffer(offer.id);
     }
 
-    this.reserving.set(true);
-    this.reservationApi
-      .createReservation({ offerId: offer.id, quantity: 1 })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.notificationService.success(`"${offer.title}" was reserved successfully.`, 'Reservation confirmed');
-          this.notificationInbox.refresh();
-          this.reserving.set(false);
-          this.loadOffer(offer.id);
-        },
-        error: (error: { status?: number } | undefined) => {
-          this.reserving.set(false);
-
-          if (error?.status === 401) {
-            void this.userService.login(this.router.url);
-            return;
-          }
-
-          this.notificationService.error('This offer could not be reserved right now. Please refresh and try again.');
-        },
-      });
+    void this.router.navigateByUrl('/cart');
   }
 
   protected resolveRelatedOfferImage(offer: MarketplaceOfferModel): string {
@@ -186,15 +156,19 @@ export class OfferDetailsPage {
       return 'View details';
     }
 
-    if (this.reserving()) {
-      return 'Reserving...';
-    }
-
     if (!offer.canReserve) {
       return offer.status === 'EXPIRED' ? 'Expired' : 'Unavailable';
     }
 
-    return this.user() ? 'Reserve now' : 'Sign in to reserve';
+    return this.isCurrentOfferInCart() ? 'Go to checkout' : 'Buy now';
+  }
+
+  protected detailCartActionLabel(): string {
+    return this.isCurrentOfferInCart() ? 'Remove from cart' : 'Add to cart';
+  }
+
+  protected detailCartActionIcon() {
+    return this.isCurrentOfferInCart() ? this.icons.xmark : this.icons.bagShopping;
   }
 
   protected formatDistance(distanceMeters: number | null): string {

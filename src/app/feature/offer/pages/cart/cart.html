@@ -2,9 +2,9 @@
   <div class="container">
     <div class="page-header page-header--split cart-page__header">
       <div>
-        <span class="eyebrow">Saved cart</span>
-        <h1>Your rescue picks</h1>
-        <p>Save offers now, sign in later if needed, and reserve them one by one when you are ready.</p>
+        <span class="eyebrow">Checkout</span>
+        <h1>Your rescue cart</h1>
+        <p>Collect a few offers, pay once from here, and pick everything up with QR/token passes after checkout.</p>
       </div>
 
       <div class="page-header__actions button-row">
@@ -29,7 +29,7 @@
     </div>
 
     <div class="alert-banner alert-banner--info">
-      Adding an offer here does not reserve it. Availability and pickup slots can still change until you confirm the reservation.
+      Adding an offer to the cart does not hold it. The backend only creates the pickup order when payment succeeds.
     </div>
 
     @if (errorMessage()) {
@@ -40,7 +40,7 @@
       <section class="surface cart-page__state cart-page__state--empty">
         <span class="eyebrow">Cart</span>
         <h2>Your cart is empty</h2>
-        <p>Browse the marketplace, save a few rescue offers, and come back here when you want to reserve them.</p>
+        <p>Browse the marketplace, save a few rescue offers, and come back here when you are ready to pay.</p>
 
         <div class="button-row">
           <app-action-button label="Browse offers" iconPosition="start" [icon]="icons.bagShopping" route="/browse-offers" />
@@ -54,7 +54,7 @@
         </div>
         <div>
           <strong>{{ availableEntryCount() }}</strong>
-          <span>ready to reserve</span>
+          <span>ready to pay</span>
         </div>
         <div>
           <strong>{{ unavailableEntryCount() }}</strong>
@@ -63,6 +63,82 @@
         <div>
           <strong>{{ missingEntryCount() }}</strong>
           <span>no longer listed</span>
+        </div>
+      </section>
+
+      <section class="surface cart-page__checkout">
+        <div class="cart-page__checkout-copy">
+          <span class="eyebrow">Payment</span>
+          <h2>Pay now and unlock pickup passes</h2>
+          <p>
+            Checkout is the only customer-facing flow. We create the backend order record here, simulate the card
+            payment, and prepare a pickup QR/token pass for collection.
+          </p>
+        </div>
+
+        <div class="cart-page__checkout-form">
+          @if (!user()) {
+            <div class="cart-page__checkout-security">
+              <strong>Sign in before entering payment details.</strong>
+              <p>
+                Checkout stays locked until your Savr account is authenticated. We only create pickup orders and attach
+                payment details to a signed-in customer.
+              </p>
+            </div>
+          }
+
+          <label class="cart-page__checkout-field">
+            <span>Cardholder name</span>
+            <input
+              type="text"
+              autocomplete="cc-name"
+              [value]="cardHolderName()"
+              [disabled]="checkoutFieldsDisabled()"
+              placeholder="Jamie Smith"
+              (input)="updateCardHolderName($any($event.target).value)"
+            />
+          </label>
+
+          <label class="cart-page__checkout-field">
+            <span>Card number</span>
+            <input
+              type="text"
+              inputmode="numeric"
+              autocomplete="cc-number"
+              [value]="formattedCardNumber()"
+              [disabled]="checkoutFieldsDisabled()"
+              placeholder="4242 4242 4242 4242"
+              (input)="updateCardNumber($any($event.target).value)"
+            />
+          </label>
+
+          <div class="cart-page__checkout-summary">
+            <div>
+              <strong>{{ checkoutReadyEntries().length }}</strong>
+              <span>offers ready for checkout</span>
+            </div>
+            <div>
+              <strong>{{ formatPrice(checkoutTotal()) }}</strong>
+              <span>simulated card charge</span>
+            </div>
+          </div>
+
+          <div class="button-row cart-page__checkout-actions">
+            <app-action-button
+              [label]="checkoutButtonLabel()"
+              iconPosition="start"
+              [icon]="icons.creditCard"
+              [disabled]="!canStartCheckout()"
+              (pressed)="simulateCheckout()"
+            />
+          </div>
+
+          @if (!checkoutReadyEntries().length) {
+            <p class="cart-page__checkout-note">
+              No saved offers are currently ready for checkout. As soon as an item becomes available again, you can pay
+              for it here.
+            </p>
+          }
         </div>
       </section>
 
@@ -140,14 +216,6 @@
                         iconPosition="start"
                         [icon]="icons.trashCan"
                         (pressed)="removeOffer(entry.offerId)"
-                      />
-
-                      <app-action-button
-                        [label]="reserveButtonLabel(entry)"
-                        iconPosition="start"
-                        [icon]="offer.canReserve ? icons.arrowRight : icons.circleInfo"
-                        [disabled]="!offer.canReserve || isReserving(offer.id)"
-                        (pressed)="reserveOffer(entry)"
                       />
                     </div>
                   </div>

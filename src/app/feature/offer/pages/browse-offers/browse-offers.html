@@ -18,10 +18,10 @@
 
         @if (!user()) {
           <app-action-button
-            label="Sign in to reserve"
+            label="Sign in"
             iconPosition="start"
             [icon]="icons.arrowRight"
-            (pressed)="loginToReserve()"
+            (pressed)="loginToAccount()"
           />
         }
       </div>
@@ -301,7 +301,6 @@
                     <button
                       type="button"
                       class="browse-offer-card__primary-action"
-                      [disabled]="isReserving(offer.id)"
                       (click)="handleOfferCardAction(offer)"
                     >
                       <span>{{ offerCardActionLabel(offer) }}</span>

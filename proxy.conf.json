@@ -8,6 +8,9 @@
   "/offers": {
     "target": "http://localhost:8080"
   },
+  "/orders": {
+    "target": "http://localhost:8080"
+  },
   "/marketplace": {
     "target": "http://localhost:8080"
   },

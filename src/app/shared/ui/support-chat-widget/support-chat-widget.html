@@ -12,7 +12,7 @@
 
           <div>
             <strong>{{ assistantName() }}</strong>
-            <span>AI support for offers, pickup, and business help</span>
+            <span>AI support for orders, pickup, and business help</span>
           </div>
         </div>
 
@@ -79,7 +79,7 @@
           class="support-chat-widget__input"
           #composer
           rows="1"
-          placeholder="Ask about reservations, pickup, or publishing offers..."
+          placeholder="Ask about orders, pickup, or publishing offers..."
           [value]="draft()"
           [disabled]="isSending()"
           (input)="updateDraft(composer.value)"

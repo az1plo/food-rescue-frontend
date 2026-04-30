@@ -49,11 +49,6 @@ export interface CreateOfferPayload extends OfferPayload {
   businessId: number;
 }
 
-export interface CreateReservationPayload {
-  offerId: number;
-  quantity: number;
-}
-
 export interface OfferStatusMeta {
   label: string;
   tone: 'success' | 'warning' | 'danger' | 'default';

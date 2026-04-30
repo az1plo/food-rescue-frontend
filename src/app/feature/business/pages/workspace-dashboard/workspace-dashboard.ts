@@ -90,12 +90,12 @@ export class WorkspaceDashboardPage {
       {
         label: 'Open orders',
         value: totalActiveReservations.toString(),
-        detail: 'Reservations still waiting for pickup confirmation.',
+        detail: 'Paid or active pickup orders still waiting for confirmation.',
       },
       {
         label: 'Recovered revenue',
         value: this.formatCurrency(totalRecoveredRevenue),
-        detail: `${this.formatCurrency(totalPendingRevenue)} still reserved and pending pickup.`,
+        detail: `${this.formatCurrency(totalPendingRevenue)} still paid and pending pickup.`,
       },
     ];
   });
@@ -227,7 +227,7 @@ export class WorkspaceDashboardPage {
 
   protected attentionMessage(card: WorkspaceDashboardBusinessCard): string {
     if (card.business.status !== 'ACTIVE') {
-      return `${card.statusMeta.label}. Offers and reservations will stay limited until the status is active again.`;
+      return `${card.statusMeta.label}. Offers and orders will stay limited until the status is active again.`;
     }
 
     if (!card.analytics) {
@@ -235,14 +235,14 @@ export class WorkspaceDashboardPage {
     }
 
     if (card.analytics.overview.activeReservations > 0) {
-      return `${card.analytics.overview.activeReservations} pickup reservations are still waiting for completion.`;
+      return `${card.analytics.overview.activeReservations} pickup orders are still waiting for completion.`;
     }
 
     if (card.analytics.overview.availableOffers === 0) {
       return 'There are no live offers for customers right now.';
     }
 
-    return `${this.formatPercent(card.analytics.overview.cancellationRate)} of reservations were cancelled. It may be worth reviewing pickup timing.`;
+    return `${this.formatPercent(card.analytics.overview.cancellationRate)} of orders were cancelled. It may be worth reviewing pickup timing.`;
   }
 
   protected businessAddress(card: WorkspaceDashboardBusinessCard): string {

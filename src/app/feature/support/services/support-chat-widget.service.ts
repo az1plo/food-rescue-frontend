@@ -9,7 +9,7 @@ import {
 import { SupportChatApiService } from './support-chat-api.service';
 
 const INITIAL_SUGGESTIONS = [
-  'How do I reserve an offer?',
+  'How do I pay for an offer?',
   'What does pickup time mean?',
   'How can a business publish offers?',
 ] as const;
@@ -32,7 +32,7 @@ export class SupportChatWidgetService {
       id: crypto.randomUUID(),
       role: 'assistant',
       content:
-        "Hi, I'm Mika. I can help with reservations, pickup timing, marketplace browsing, and business onboarding.",
+        "Hi, I'm Mika. I can help with orders, pickup timing, marketplace browsing, and business onboarding.",
       createdAt: new Date().toISOString(),
       suggestions: [...INITIAL_SUGGESTIONS],
     },
@@ -107,7 +107,7 @@ export class SupportChatWidgetService {
               id: crypto.randomUUID(),
               role: 'assistant',
               content:
-                'I could not reach the live support brain just now, but you can try again or ask about reservations, pickup times, or business publishing.',
+                'I could not reach the live support brain just now, but you can try again or ask about orders, pickup times, or business publishing.',
               createdAt: new Date().toISOString(),
               suggestions: [...INITIAL_SUGGESTIONS],
             },

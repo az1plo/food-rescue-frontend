@@ -138,9 +138,10 @@ export class SupportChatWidgetComponent {
 
     const computedStyle = window.getComputedStyle(composer);
     const maxHeight = Number.parseFloat(computedStyle.maxHeight);
+    const borderHeight = Number.parseFloat(computedStyle.borderTopWidth) + Number.parseFloat(computedStyle.borderBottomWidth);
     const nextHeight = Number.isFinite(maxHeight)
-      ? Math.min(composer.scrollHeight, maxHeight)
-      : composer.scrollHeight;
+      ? Math.min(composer.scrollHeight + borderHeight, maxHeight)
+      : composer.scrollHeight + borderHeight;
 
     composer.style.height = `${nextHeight}px`;
     composer.style.overflowY = composer.scrollHeight > nextHeight ? 'auto' : 'hidden';

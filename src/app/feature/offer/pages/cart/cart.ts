@@ -10,9 +10,9 @@ import { appIcons } from '../../../../shared/icons/app-icons';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
 import { MarketplaceOfferModel } from '../../models/marketplace-offer.model';
 import { OfferStatus, resolveOfferImage } from '../../models/offer.model';
+import { OfferCheckoutService } from '../../services/offer-checkout.service';
 import { MarketplaceOfferApiService } from '../../services/marketplace-offer-api.service';
 import { OfferCartItem, OfferCartService } from '../../services/offer-cart.service';
-import { ReservationApiService } from '../../services/reservation-api.service';
 
 interface CartEntryViewModel {
   offerId: number;
@@ -31,8 +31,8 @@ export class CartPage {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly offerCart = inject(OfferCartService);
+  private readonly offerCheckout = inject(OfferCheckoutService);
   private readonly marketplaceOfferApi = inject(MarketplaceOfferApiService);
-  private readonly reservationApi = inject(ReservationApiService);
   private readonly notificationInbox = inject(NotificationInboxService);
   private readonly notificationService = inject(NotificationService);
   private readonly userService = inject(UserService);
@@ -43,9 +43,11 @@ export class CartPage {
   protected readonly user = this.userService.getUser();
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
-  protected readonly reservingIds = signal<number[]>([]);
   protected readonly cartItems = this.offerCart.items;
   protected readonly offers = signal<MarketplaceOfferModel[]>([]);
+  protected readonly cardHolderName = signal('');
+  protected readonly cardNumberDigits = signal('');
+  protected readonly processingCheckout = signal(false);
 
   protected readonly cartEntries = computed<CartEntryViewModel[]>(() => {
     const offersById = new Map(this.offers().map((offer) => [offer.id, offer]));
@@ -65,6 +67,13 @@ export class CartPage {
   protected readonly missingEntryCount = computed(
     () => this.cartEntries().filter((entry) => entry.offer === null).length,
   );
+  protected readonly checkoutReadyEntries = computed(
+    () => this.cartEntries().filter((entry) => entry.offer?.canReserve),
+  );
+  protected readonly checkoutTotal = computed(
+    () => this.checkoutReadyEntries().reduce((sum, entry) => sum + (entry.offer?.price ?? 0), 0),
+  );
+  protected readonly formattedCardNumber = computed(() => this.formatCardNumber(this.cardNumberDigits()));
 
   constructor() {
     effect(() => {
@@ -90,60 +99,104 @@ export class CartPage {
     this.notificationService.info('Your cart is now empty.', 'Cart cleared');
   }
 
-  protected reserveOffer(entry: CartEntryViewModel): void {
-    const offer = entry.offer;
-    if (!offer || !offer.canReserve || this.isReserving(offer.id)) {
+  protected updateCardHolderName(value: string): void {
+    this.cardHolderName.set(value);
+  }
+
+  protected updateCardNumber(value: string): void {
+    this.cardNumberDigits.set(value.replace(/\D/g, '').slice(0, 16));
+  }
+
+  protected checkoutFieldsDisabled(): boolean {
+    return this.processingCheckout() || !this.user();
+  }
+
+  protected canStartCheckout(): boolean {
+    if (this.processingCheckout() || !this.checkoutReadyEntries().length) {
+      return false;
+    }
+
+    if (!this.user()) {
+      return true;
+    }
+
+    return this.hasPaymentDetails();
+  }
+
+  protected checkoutButtonLabel(): string {
+    if (this.processingCheckout()) {
+      return 'Processing payment...';
+    }
+
+    if (!this.user()) {
+      return 'Sign in to pay';
+    }
+
+    const readyCount = this.checkoutReadyEntries().length;
+    if (!readyCount) {
+      return 'No offers ready';
+    }
+
+    return `Pay for ${readyCount} ${readyCount === 1 ? 'order' : 'orders'}`;
+  }
+
+  protected async simulateCheckout(): Promise<void> {
+    if (this.processingCheckout()) {
       return;
     }
 
     if (!this.user()) {
-      void this.userService.login('/cart');
+      await this.userService.login('/cart');
       return;
     }
 
-    this.reservingIds.update((ids) => [...ids, offer.id]);
-    this.reservationApi
-      .createReservation({ offerId: offer.id, quantity: 1 })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.notificationService.success(`"${offer.title}" was reserved successfully.`, 'Reservation confirmed');
-          this.notificationInbox.refresh();
-          this.offerCart.removeOffer(offer.id);
-          this.removeReservingId(offer.id);
-        },
-        error: (error: { status?: number } | undefined) => {
-          this.removeReservingId(offer.id);
-
-          if (error?.status === 401) {
-            void this.userService.login('/cart');
-            return;
-          }
-
-          this.notificationService.error('This offer could not be reserved right now. Please refresh and try again.');
-        },
-      });
-  }
-
-  protected isReserving(offerId: number): boolean {
-    return this.reservingIds().includes(offerId);
-  }
-
-  protected reserveButtonLabel(entry: CartEntryViewModel): string {
-    const offer = entry.offer;
-    if (!offer) {
-      return 'No longer listed';
+    if (!this.hasPaymentDetails()) {
+      this.notificationService.info('Add a cardholder name and at least the last four card digits to continue to payment.');
+      return;
     }
 
-    if (this.isReserving(offer.id)) {
-      return 'Reserving...';
+    this.processingCheckout.set(true);
+    this.errorMessage.set(null);
+    const readyEntries = this.checkoutReadyEntries();
+    const checkoutResult = await this.offerCheckout.checkoutOffers(
+      readyEntries
+        .map((entry) => entry.offer)
+        .filter((offer): offer is MarketplaceOfferModel => offer !== null)
+        .map((offer) => ({
+          offerId: offer.id,
+          quantity: 1,
+        })),
+      {
+        cardHolderName: this.cardHolderName().trim(),
+        cardLast4: this.cardNumberDigits().slice(-4),
+      },
+    );
+
+    this.processingCheckout.set(false);
+    this.notificationInbox.refresh();
+
+    if (checkoutResult.completedOfferIds.length) {
+      for (const offerId of checkoutResult.completedOfferIds) {
+        this.offerCart.removeOffer(offerId);
+      }
+
+      this.notificationService.success(
+        `${checkoutResult.completedOfferIds.length} ${checkoutResult.completedOfferIds.length === 1 ? 'order is' : 'orders are'} paid successfully. Pickup passes are now ready in My pickups.`,
+        'Payment accepted',
+      );
+      void this.router.navigateByUrl('/my-pickups');
     }
 
-    if (!offer.canReserve) {
-      return offer.status === 'EXPIRED' ? 'Expired' : 'Unavailable';
+    if (checkoutResult.failedOfferIds.length) {
+      this.notificationService.error(
+        `${checkoutResult.failedOfferIds.length} ${checkoutResult.failedOfferIds.length === 1 ? 'offer could not' : 'offers could not'} be paid. No pickup order was created for those items.`,
+        'Checkout incomplete',
+      );
     }
 
-    return this.user() ? 'Reserve now' : 'Sign in to reserve';
+    if (checkoutResult.unauthorized) {
+      await this.userService.login('/cart');
+    }
   }
 
   protected formatPrice(price: number): string {
@@ -263,8 +316,12 @@ export class CartPage {
       });
   }
 
-  private removeReservingId(offerId: number): void {
-    this.reservingIds.update((ids) => ids.filter((currentId) => currentId !== offerId));
+  private hasPaymentDetails(): boolean {
+    return this.cardHolderName().trim().length >= 2 && this.cardNumberDigits().length >= 4;
+  }
+
+  private formatCardNumber(value: string): string {
+    return value.replace(/(.{4})/g, '$1 ').trim();
   }
 
   private isSameCalendarDay(first: Date, second: Date): boolean {

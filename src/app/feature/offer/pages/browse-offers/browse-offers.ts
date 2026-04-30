@@ -14,7 +14,6 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import { NotificationInboxService } from '../../../../core/services/notification-inbox.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { UserService } from '../../../../core/services/user.service';
 import { runtimeConfig } from '../../../../core/config/runtime-config';
@@ -29,7 +28,6 @@ import {
 import { OfferStatus, resolveOfferImage } from '../../models/offer.model';
 import { MarketplaceOfferApiService } from '../../services/marketplace-offer-api.service';
 import { OfferCartService } from '../../services/offer-cart.service';
-import { ReservationApiService } from '../../services/reservation-api.service';
 
 interface ViewerLocation {
   latitude: number;
@@ -239,8 +237,6 @@ function resolveDistanceMeters(
 })
 export class BrowseOffersPage implements OnDestroy {
   private readonly marketplaceOfferApi = inject(MarketplaceOfferApiService);
-  private readonly reservationApi = inject(ReservationApiService);
-  private readonly notificationInbox = inject(NotificationInboxService);
   private readonly notificationService = inject(NotificationService);
   private readonly userService = inject(UserService);
   private readonly offerCart = inject(OfferCartService);
@@ -283,7 +279,6 @@ export class BrowseOffersPage implements OnDestroy {
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly locationError = signal<string | null>(null);
   protected readonly mapError = signal<string | null>(null);
-  protected readonly reservingIds = signal<number[]>([]);
   protected readonly locating = signal(false);
   protected readonly searchText = signal('');
   protected readonly selectedCity = signal<string | null>(null);
@@ -613,41 +608,7 @@ export class BrowseOffersPage implements OnDestroy {
     this.notificationService.info(`"${offer.title}" was removed from your cart.`, 'Cart updated');
   }
 
-  protected reserveOffer(offer: MarketplaceOfferModel): void {
-    if (!offer.canReserve || this.isReserving(offer.id)) {
-      return;
-    }
-
-    if (!this.user()) {
-      void this.userService.login('/browse-offers');
-      return;
-    }
-
-    this.reservingIds.update((ids) => [...ids, offer.id]);
-    this.reservationApi
-      .createReservation({ offerId: offer.id, quantity: 1 })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.notificationService.success(`"${offer.title}" was reserved successfully.`, 'Reservation confirmed');
-          this.notificationInbox.refresh();
-          this.removeReservingId(offer.id);
-          this.loadOffers();
-        },
-        error: (error: { status?: number } | undefined) => {
-          this.removeReservingId(offer.id);
-
-          if (error?.status === 401) {
-            void this.userService.login('/browse-offers');
-            return;
-          }
-
-          this.notificationService.error('This offer could not be reserved right now. Please refresh and try again.');
-        },
-      });
-  }
-
-  protected loginToReserve(): void {
+  protected loginToAccount(): void {
     void this.userService.login('/browse-offers');
   }
 
@@ -705,10 +666,6 @@ export class BrowseOffersPage implements OnDestroy {
       this.sort.set('PICKUP_SOONEST');
     }
     this.loadOffers();
-  }
-
-  protected isReserving(offerId: number): boolean {
-    return this.reservingIds().includes(offerId);
   }
 
   protected isInCart(offerId: number): boolean {
@@ -884,23 +841,11 @@ export class BrowseOffersPage implements OnDestroy {
   }
 
   protected offerCardActionLabel(offer: MarketplaceOfferModel): string {
-    if (this.isReserving(offer.id)) {
-      return 'Reserving...';
-    }
-
     return 'View details';
   }
 
   protected handleOfferCardAction(offer: MarketplaceOfferModel): void {
     this.openOfferDetails(offer);
-  }
-
-  protected reserveButtonLabel(offer: MarketplaceOfferModel): string {
-    if (!offer.canReserve) {
-      return offer.status === 'EXPIRED' ? 'Expired' : 'Unavailable';
-    }
-
-    return this.user() ? 'Reserve now' : 'Sign in to reserve';
   }
 
   protected offerStatusLabel(status: OfferStatus): string {
@@ -983,10 +928,6 @@ export class BrowseOffersPage implements OnDestroy {
       this.selectedBusinessId.set(null);
       this.selectedOfferId.set(null);
     }
-  }
-
-  private removeReservingId(offerId: number): void {
-    this.reservingIds.update((ids) => ids.filter((currentId) => currentId !== offerId));
   }
 
   private readStoredViewerLocation(): ViewerLocation | null {

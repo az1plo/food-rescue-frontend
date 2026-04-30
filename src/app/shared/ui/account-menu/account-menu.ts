@@ -27,8 +27,8 @@ export class AccountMenuComponent {
   readonly subtitle = input<string | null>(null);
   readonly variant = input<'public' | 'workspace'>('public');
 
-  protected openReservations(): void {
-    void this.router.navigateByUrl('/my-reservations');
+  protected openPickups(): void {
+    void this.router.navigateByUrl('/my-pickups');
   }
 
   protected logout(): void {

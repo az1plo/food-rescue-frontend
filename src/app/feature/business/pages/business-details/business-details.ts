@@ -107,7 +107,7 @@ export class BusinessDetailsPage {
       {
         label: 'Order queue',
         value: analytics.overview.activeReservations.toString(),
-        detail: 'Reservations still waiting for pickup.',
+        detail: 'Orders still waiting for pickup.',
       },
       {
         label: 'Recovered revenue',
@@ -117,7 +117,7 @@ export class BusinessDetailsPage {
       {
         label: 'Pickup success',
         value: this.formatPercent(analytics.overview.pickupSuccessRate),
-        detail: 'Share of reservations that reached pickup.',
+        detail: 'Share of orders that reached pickup.',
       },
     ];
   });
