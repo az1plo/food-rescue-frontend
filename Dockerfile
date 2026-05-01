@@ -23,6 +23,10 @@ FROM nginx:alpine
 # Copy the custom nginx configuration file
 COPY nginx.conf /etc/nginx/nginx.conf
 
+# Generate runtime config from env vars when the container starts
+COPY docker-entrypoint.d/40-runtime-config.sh /docker-entrypoint.d/40-runtime-config.sh
+RUN chmod +x /docker-entrypoint.d/40-runtime-config.sh
+
 # Copy the Angular app to the Nginx webserver's root directory
 COPY --from=build /app/dist/coursequest-ui/browser /usr/share/nginx/html
 
