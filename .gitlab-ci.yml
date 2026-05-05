@@ -44,7 +44,7 @@ deploy:
     - echo "$KUBECONFIG_BASE64" | base64 -d > ~/.kube/config
   script:
     - git clone --depth 1 "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_NAMESPACE}/${INFRA_REPO_NAME}.git" infra
-    - sed -i "s|image: .*${IMAGE_NAME}:.*|image: ${ACR_REGISTRY}/${IMAGE_NAME}:${IMAGE_VERSION}|g" "infra/${K8S_DEPLOYMENT_FILE}"
+    - 'sed -i "s|image: .*${IMAGE_NAME}:.*|image: ${ACR_REGISTRY}/${IMAGE_NAME}:${IMAGE_VERSION}|g" "infra/${K8S_DEPLOYMENT_FILE}"'
     - kubectl apply -f "infra/${K8S_MANIFEST_DIR}"
     - kubectl rollout status deployment/${DEPLOYMENT_NAME} -n ${K8S_NAMESPACE} --timeout=180s
   rules:
