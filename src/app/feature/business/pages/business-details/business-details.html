@@ -1,5 +1,13 @@
 <section class="workspace-page business-details-page">
   <div class="business-details-page__header">
+    <div class="business-details-page__header-brand" [class.business-details-page__header-brand--placeholder]="!businessIconPreviewUrl()">
+      @if (businessIconPreviewUrl(); as iconUrl) {
+        <img [src]="iconUrl" [alt]="businessIconAlt()" />
+      } @else {
+        <span>{{ businessIconMark() }}</span>
+      }
+    </div>
+
     <div class="business-details-page__header-copy">
       <h1>{{ pageTitle() }}</h1>
       <p>{{ pageDescription() }}</p>
@@ -27,6 +35,42 @@
               }}
             </p>
           </div>
+
+          <section class="business-icon-editor">
+            <div class="business-icon-editor__preview" [class.business-icon-editor__preview--placeholder]="!businessIconPreviewUrl()">
+              @if (businessIconPreviewUrl(); as iconUrl) {
+                <img [src]="iconUrl" [alt]="businessIconAlt()" />
+              } @else {
+                <span>{{ businessIconMark() }}</span>
+              }
+            </div>
+
+            <div class="business-icon-editor__copy">
+              <label class="form-label" for="business-icon-upload">Business icon</label>
+              <p>Upload a square PNG, JPG, or WEBP logo. If you skip it, the site falls back to the business initials.</p>
+
+              <div class="button-row business-icon-editor__actions">
+                <label class="button button--ghost business-icon-editor__upload" for="business-icon-upload">
+                  <fa-icon [icon]="icons.upload" aria-hidden="true" />
+                  <span>{{ businessIconPreviewUrl() ? 'Replace icon' : 'Upload icon' }}</span>
+                </label>
+
+                @if (selectedBusinessIconAsset()) {
+                  <button class="button button--ghost" type="button" (click)="clearSelectedBusinessIcon()">
+                    {{ currentBusiness()?.iconUrl ? 'Use saved icon' : 'Remove selected icon' }}
+                  </button>
+                }
+              </div>
+
+              <input
+                id="business-icon-upload"
+                class="business-icon-editor__input"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                (change)="onBusinessIconSelected($event)"
+              />
+            </div>
+          </section>
 
           <div class="form-grid">
             <div class="form-field form-field--full">
@@ -179,6 +223,20 @@
               <div>
                 <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
                 <span>{{ business.address.country }}</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="surface business-details-page__panel">
+            <span class="eyebrow">Customer rating</span>
+            <div class="business-details-page__detail-list">
+              <div>
+                <fa-icon [icon]="icons.star" aria-hidden="true" />
+                <span>{{ businessRatingValue(business) }}</span>
+              </div>
+              <div>
+                <fa-icon [icon]="icons.userGroup" aria-hidden="true" />
+                <span>{{ businessRatingCountLabel(business) }}</span>
               </div>
             </div>
           </section>

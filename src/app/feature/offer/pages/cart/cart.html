@@ -1,93 +1,421 @@
 <section class="page-section page-section--top-tight cart-page">
   <div class="container">
-    <div class="page-header page-header--split cart-page__header">
-      <div>
-        <span class="eyebrow">Checkout</span>
-        <h1>Your rescue cart</h1>
-        <p>Collect a few offers, pay once from here, and pick everything up with QR/token passes after checkout.</p>
-      </div>
+    <header class="cart-page__header">
+      <button type="button" class="cart-page__back-link" (click)="continueBrowsing()">
+        <fa-icon [icon]="icons.arrowLeft" aria-hidden="true" />
+        <span>Back to offers</span>
+      </button>
 
-      <div class="page-header__actions button-row">
-        <app-action-button
-          label="Continue browsing"
-          variant="ghost"
-          iconPosition="start"
-          [icon]="icons.arrowLeft"
-          (pressed)="continueBrowsing()"
-        />
+      <div class="cart-page__heading-row">
+        <div class="cart-page__heading-copy">
+          <h1>Your rescue cart</h1>
+          <p>Review your rescued items, pickup windows, and checkout details before reserving.</p>
+        </div>
 
         @if (cartItems().length) {
-          <app-action-button
-            label="Clear cart"
-            variant="danger"
-            iconPosition="start"
-            [icon]="icons.trashCan"
-            (pressed)="clearCart()"
-          />
+          <button type="button" class="cart-page__clear-link" (click)="clearCart()">Clear cart</button>
         }
       </div>
-    </div>
-
-    <div class="alert-banner alert-banner--info">
-      Adding an offer to the cart does not hold it. The backend only creates the pickup order when payment succeeds.
-    </div>
-
-    @if (errorMessage()) {
-      <div class="alert-banner alert-banner--danger">{{ errorMessage() }}</div>
-    }
+    </header>
 
     @if (!cartItems().length) {
       <section class="surface cart-page__state cart-page__state--empty">
-        <span class="eyebrow">Cart</span>
-        <h2>Your cart is empty</h2>
-        <p>Browse the marketplace, save a few rescue offers, and come back here when you are ready to pay.</p>
-
-        <div class="button-row">
-          <app-action-button label="Browse offers" iconPosition="start" [icon]="icons.bagShopping" route="/browse-offers" />
+        <div class="cart-page__state-copy">
+          <span class="cart-page__state-icon" aria-hidden="true">
+            <fa-icon [icon]="icons.bagShopping" />
+          </span>
+          <h2>Your cart is empty</h2>
+          <p>Browse the marketplace to add a few rescue offers, then come back here when you are ready to reserve them.</p>
         </div>
+
+        <button type="button" class="button button--primary cart-page__state-button" (click)="continueBrowsing()">
+          Browse offers
+        </button>
+      </section>
+    } @else if (hasBlockingLoadError()) {
+      <section class="surface cart-page__state">
+        <div class="cart-page__state-copy">
+          <span class="cart-page__state-icon cart-page__state-icon--muted" aria-hidden="true">
+            <fa-icon [icon]="icons.circleInfo" />
+          </span>
+          <h2>Your cart needs a quick refresh</h2>
+          <p>We could not load the latest offer details right now. You can keep browsing and come back in a moment.</p>
+        </div>
+
+        <button type="button" class="button button--ghost cart-page__state-button" (click)="continueBrowsing()">
+          Keep browsing
+        </button>
       </section>
     } @else {
-      <section class="surface cart-page__summary">
-        <div>
-          <strong>{{ cartItems().length }}</strong>
-          <span>saved {{ cartItems().length === 1 ? 'offer' : 'offers' }}</span>
-        </div>
-        <div>
-          <strong>{{ availableEntryCount() }}</strong>
-          <span>ready to pay</span>
-        </div>
-        <div>
-          <strong>{{ unavailableEntryCount() }}</strong>
-          <span>currently unavailable</span>
-        </div>
-        <div>
-          <strong>{{ missingEntryCount() }}</strong>
-          <span>no longer listed</span>
-        </div>
-      </section>
+      <div class="cart-page__layout">
+        <main class="cart-page__main">
+          <section class="cart-page__list">
+            @if (loading() && !offers().length) {
+              @for (skeletonId of loadingSkeletonIds; track skeletonId) {
+                <article class="surface cart-card cart-card--skeleton" aria-hidden="true">
+                  <div class="cart-card__skeleton-media"></div>
+                  <div class="cart-card__skeleton-content">
+                    <span class="cart-card__skeleton-line cart-card__skeleton-line--sm"></span>
+                    <span class="cart-card__skeleton-line cart-card__skeleton-line--md"></span>
+                    <span class="cart-card__skeleton-line"></span>
+                    <span class="cart-card__skeleton-line cart-card__skeleton-line--xs"></span>
+                  </div>
+                </article>
+              }
+            } @else {
+              @for (entry of cartEntries(); track entry.offerId) {
+                <article class="surface cart-card" [attr.data-missing]="entry.offer === null">
+                  @if (entry.offer; as offer) {
+                    <div
+                      class="cart-card__media"
+                      role="button"
+                      tabindex="0"
+                      aria-label="Open offer details"
+                      (click)="openOfferDetails(offer)"
+                      (keydown.enter)="openOfferDetails(offer)"
+                      (keydown.space)="openOfferDetails(offer); $event.preventDefault()"
+                    >
+                      <img class="cart-card__image" [src]="resolveOfferImage(offer)" [alt]="offer.title" />
+                    </div>
 
-      <section class="surface cart-page__checkout">
-        <div class="cart-page__checkout-copy">
-          <span class="eyebrow">Payment</span>
-          <h2>Pay now and unlock pickup passes</h2>
-          <p>
-            Checkout is the only customer-facing flow. We create the backend order record here, simulate the card
-            payment, and prepare a pickup QR/token pass for collection.
-          </p>
-        </div>
+                    <div class="cart-card__content">
+                      <div class="cart-card__top-row">
+                        <div class="cart-card__business">
+                          @if (businessIconUrl(offer.business.iconUrl); as businessIconUrl) {
+                            <img class="cart-card__avatar-image" [src]="businessIconUrl" [alt]="offer.business.name" />
+                          } @else {
+                            <span class="cart-card__avatar">{{ businessInitials(offer.business.name) }}</span>
+                          }
 
-        <div class="cart-page__checkout-form">
-          @if (!user()) {
-            <div class="cart-page__checkout-security">
-              <strong>Sign in before entering payment details.</strong>
-              <p>
-                Checkout stays locked until your Savr account is authenticated. We only create pickup orders and attach
-                payment details to a signed-in customer.
-              </p>
+                          <div class="cart-card__business-copy">
+                            <strong>{{ offer.business.name }}</strong>
+                            <span>{{ businessLocationLabel(offer) }}</span>
+                          </div>
+                        </div>
+
+                        <div class="cart-card__price-block">
+                          <div class="cart-card__price-line">
+                            <strong>{{ formatPrice(entryPriceTotal(offer)) }}</strong>
+
+                            @if (hasDiscount(offer.price, offer.originalPrice)) {
+                              <span class="cart-card__old-price">{{ formatPrice(entryOriginalPriceTotal(offer)) }}</span>
+                            }
+                          </div>
+
+                          @if (hasDiscount(offer.price, offer.originalPrice)) {
+                            <span class="cart-card__discount-pill">{{ discountPercent(offer.price, offer.originalPrice) }}% off</span>
+                          }
+                        </div>
+                      </div>
+
+                      <div class="cart-card__title-row">
+                        <button type="button" class="cart-card__title-button" (click)="openOfferDetails(offer)">
+                          {{ offer.title }}
+                        </button>
+
+                        @if (!isOfferReadyForCheckout(offer)) {
+                          <span class="cart-card__status-badge">{{ cartEntryStatusLabel(offer) }}</span>
+                        }
+                      </div>
+
+                      <div class="cart-card__pickup-row">
+                        <fa-icon [icon]="icons.clock" aria-hidden="true" />
+
+                        <div class="cart-card__pickup-copy">
+                          <span>{{ formatOfferPickupWindow(offer).startsWith('Today') ? 'Pick up today' : 'Pickup schedule' }}</span>
+                          <strong>{{ formatOfferPickupWindow(offer) }}</strong>
+                        </div>
+                      </div>
+
+                      <div class="cart-card__footer">
+                        <label class="cart-card__quantity-field">
+                          <span>Quantity</span>
+                          <select
+                            [value]="selectedQuantity(entry.offerId, offer)"
+                            [disabled]="!isOfferReadyForCheckout(offer) || processingCheckout()"
+                            aria-label="Selected quantity"
+                            (change)="updateEntryQuantity(entry.offerId, offer, $any($event.target).value)"
+                          >
+                            @for (quantity of quantityOptions(offer); track quantity) {
+                              <option [value]="quantity">{{ quantity }}</option>
+                            }
+                          </select>
+                          <small class="cart-card__availability">{{ availabilityLabel(offer) }}</small>
+                        </label>
+
+                        <button type="button" class="cart-card__remove-button" (click)="removeOffer(entry.offerId)">
+                          <fa-icon [icon]="icons.trashCan" aria-hidden="true" />
+                          <span>Remove</span>
+                        </button>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="cart-card__missing">
+                      <span class="cart-card__missing-icon" aria-hidden="true">
+                        <fa-icon [icon]="icons.circleInfo" />
+                      </span>
+
+                      <div class="cart-card__missing-copy">
+                        <h2>Offer no longer listed</h2>
+                        <p>This saved item is no longer available in the marketplace feed. You can remove it and keep browsing for another rescue.</p>
+                      </div>
+
+                      <button type="button" class="cart-card__remove-button" (click)="removeOffer(entry.offerId)">
+                        <fa-icon [icon]="icons.trashCan" aria-hidden="true" />
+                        <span>Remove</span>
+                      </button>
+                    </div>
+                  }
+                </article>
+              }
+            }
+          </section>
+
+          <section class="cart-page__suggestions">
+            <div class="cart-page__section-header">
+              <h2>Add one more rescue</h2>
+
+              <button type="button" class="cart-page__section-link" (click)="continueBrowsing()">
+                <span>See more offers</span>
+                <fa-icon [icon]="icons.arrowRight" aria-hidden="true" />
+              </button>
             </div>
-          }
 
-          <label class="cart-page__checkout-field">
+            @if (suggestedOffers().length) {
+              <div class="cart-page__suggestion-grid">
+                @for (offer of suggestedOffers(); track offer.id) {
+                  <article
+                    class="surface cart-page__suggestion-card"
+                    role="button"
+                    tabindex="0"
+                    aria-label="Open offer details"
+                    (click)="openOfferDetails(offer)"
+                    (keydown.enter)="openOfferDetails(offer)"
+                    (keydown.space)="openOfferDetails(offer); $event.preventDefault()"
+                  >
+                    <div class="cart-page__suggestion-card-content">
+                      <div class="cart-page__suggestion-media">
+                        <img [src]="resolveOfferImage(offer)" [alt]="offer.title" />
+
+                        @if (offer.quantityAvailable > 0) {
+                          <span class="cart-page__suggestion-badge">{{ offer.quantityAvailable }} left</span>
+                        }
+
+                        <button
+                          type="button"
+                          class="cart-page__suggestion-cart-toggle"
+                          aria-label="Add offer to cart"
+                          (click)="addSuggestedOffer(offer, $event)"
+                        >
+                          <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
+                        </button>
+                      </div>
+
+                      <div class="cart-page__suggestion-body">
+                        <div class="cart-page__suggestion-brand">
+                          @if (businessIconUrl(offer.business.iconUrl); as businessIconUrl) {
+                            <img class="cart-page__suggestion-avatar-image" [src]="businessIconUrl" [alt]="offer.business.name" />
+                          } @else {
+                            <span class="cart-page__suggestion-avatar">{{ businessInitials(offer.business.name) }}</span>
+                          }
+
+                          <div class="cart-page__suggestion-brand-copy">
+                            <strong>{{ offer.business.name }}</strong>
+                            <span>{{ businessLocationLabel(offer) }}</span>
+                          </div>
+                        </div>
+
+                        <h3>{{ offer.title }}</h3>
+                        <p class="cart-page__suggestion-pickup">{{ formatOfferPickupWindow(offer) }}</p>
+
+                        <div class="cart-page__suggestion-footer">
+                          <div class="cart-page__suggestion-price">
+                            <strong>{{ formatPrice(offer.price) }}</strong>
+
+                            @if (hasDiscount(offer.price, offer.originalPrice)) {
+                              <span>{{ formatPrice(offer.originalPrice ?? offer.price) }}</span>
+                            }
+                          </div>
+
+                          @if (offer.business.ratingAverage !== null) {
+                            <span class="cart-page__suggestion-rating">
+                              <fa-icon [icon]="icons.star" aria-hidden="true" />
+                              {{ formatRating(offer.business.ratingAverage) }}
+                            </span>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                }
+              </div>
+            } @else {
+              <div class="surface cart-page__suggestion-empty">
+                <div>
+                  <h3>Add one more rescue</h3>
+                  <p>See more offers nearby and build a slightly bigger pickup run without leaving the marketplace.</p>
+                </div>
+
+                <button type="button" class="button button--ghost cart-page__suggestion-empty-button" (click)="continueBrowsing()">
+                  See more offers
+                </button>
+              </div>
+            }
+          </section>
+        </main>
+
+        <aside class="cart-page__sidebar">
+          @if (loading() && !offers().length) {
+            <section class="surface cart-page__panel cart-page__panel--skeleton" aria-hidden="true">
+              <span class="cart-page__panel-line cart-page__panel-line--title"></span>
+              <span class="cart-page__panel-line"></span>
+              <span class="cart-page__panel-line"></span>
+              <span class="cart-page__panel-line"></span>
+              <span class="cart-page__panel-line cart-page__panel-line--button"></span>
+            </section>
+
+            <section class="surface cart-page__panel cart-page__panel--skeleton" aria-hidden="true">
+              <span class="cart-page__panel-line cart-page__panel-line--title"></span>
+              <span class="cart-page__panel-line"></span>
+              <span class="cart-page__panel-line"></span>
+              <span class="cart-page__panel-line cart-page__panel-line--sm"></span>
+            </section>
+          } @else {
+            <section class="surface cart-page__panel cart-page__summary-card">
+              <div class="cart-page__panel-header">
+                <h2>Order summary</h2>
+              </div>
+
+              <div class="cart-page__summary-rows">
+              <div class="cart-page__summary-row">
+                  <span>Subtotal ({{ checkoutItemCount() }} {{ checkoutItemCount() === 1 ? 'item' : 'items' }})</span>
+                  <strong>{{ formatPrice(subtotal()) }}</strong>
+                </div>
+
+                <div class="cart-page__summary-row">
+                  <span>Service fee</span>
+                  <strong>{{ formatPrice(serviceFee()) }}</strong>
+                </div>
+
+                <div class="cart-page__summary-row">
+                  <span>Estimated tax</span>
+                  <strong>{{ formatPrice(estimatedTax()) }}</strong>
+                </div>
+              </div>
+
+              <div class="cart-page__summary-divider"></div>
+
+              <div class="cart-page__summary-row cart-page__summary-row--savings">
+                <span>Total savings</span>
+                <strong>{{ formatPrice(totalSavings()) }}</strong>
+              </div>
+
+              <div class="cart-page__summary-row cart-page__summary-row--total">
+                <span>Total</span>
+
+                <div class="cart-page__summary-total-stack">
+                  @if (totalSavings() > 0) {
+                    <span class="cart-page__summary-total-old">{{ formatPrice(checkoutOriginalTotal()) }}</span>
+                  }
+
+                  <strong>{{ formatPrice(checkoutGrandTotal()) }}</strong>
+                </div>
+              </div>
+
+              <div class="cart-page__summary-actions">
+                <button
+                  type="button"
+                  class="button button--primary cart-page__summary-button"
+                  [disabled]="!canStartCheckout()"
+                  (click)="openCheckoutModal()"
+                >
+                  Reserve now
+                </button>
+
+                <button type="button" class="button button--ghost cart-page__summary-button" (click)="continueBrowsing()">
+                  Keep browsing
+                </button>
+              </div>
+
+            </section>
+
+            <section class="surface cart-page__panel cart-page__schedule-card">
+              <div class="cart-page__panel-header">
+                <h2>Pickup schedule</h2>
+              </div>
+
+              @if (pickupScheduleEntries().length) {
+                <div class="cart-page__schedule-list">
+                  @for (entry of pickupScheduleEntries(); track entry.offerId) {
+                    <div class="cart-page__schedule-item">
+                      <div class="cart-page__schedule-brand">
+                        @if (businessIconUrl(entry.offer.business.iconUrl); as businessIconUrl) {
+                          <img class="cart-page__schedule-avatar-image" [src]="businessIconUrl" [alt]="entry.offer.business.name" />
+                        } @else {
+                          <span class="cart-page__schedule-avatar">{{ businessInitials(entry.offer.business.name) }}</span>
+                        }
+
+                        <div class="cart-page__schedule-copy">
+                          <strong [title]="entry.offer.business.name">{{ entry.offer.business.name }}</strong>
+                          <span [title]="entry.offer.title">{{ entry.offer.title }}</span>
+                        </div>
+                      </div>
+
+                      <span class="cart-page__schedule-time" [title]="formatOfferPickupWindow(entry.offer)">
+                        {{ formatOfferPickupWindow(entry.offer) }}
+                      </span>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="cart-page__schedule-empty">Your ready pickups will appear here as soon as offers can be reserved.</p>
+              }
+
+              <div class="cart-page__schedule-note">
+                <span class="cart-page__schedule-note-icon" aria-hidden="true">
+                  <fa-icon [icon]="icons.clock" />
+                </span>
+
+                <div>
+                  <strong>Plan ahead</strong>
+                  <p>Pickups are at each business location. Please arrive within your pickup window.</p>
+                </div>
+              </div>
+            </section>
+          }
+        </aside>
+      </div>
+    }
+  </div>
+
+  @if (checkoutModalOpen()) {
+    <div class="cart-checkout-modal" role="presentation" (click)="closeCheckoutModal()">
+      <section
+        class="surface cart-checkout-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cart-checkout-modal-title"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="cart-checkout-modal__header">
+          <div>
+            <span class="eyebrow">Secure checkout</span>
+            <h2 id="cart-checkout-modal-title">Payment details</h2>
+            <p>Your reservation is only created after payment succeeds. We only keep mock-safe checkout details for this checkout flow.</p>
+          </div>
+
+          <button type="button" class="cart-checkout-modal__close" aria-label="Close payment details" (click)="closeCheckoutModal()">
+            <fa-icon [icon]="icons.xmark" aria-hidden="true" />
+          </button>
+        </div>
+
+        <div class="cart-checkout-modal__total">
+          <span>Total</span>
+          <strong>{{ formatPrice(checkoutGrandTotal()) }}</strong>
+        </div>
+
+        <div class="cart-checkout-modal__form">
+          <label class="cart-checkout-modal__field">
             <span>Cardholder name</span>
             <input
               type="text"
@@ -99,166 +427,66 @@
             />
           </label>
 
-          <label class="cart-page__checkout-field">
+          <label class="cart-checkout-modal__field">
             <span>Card number</span>
             <input
               type="text"
               inputmode="numeric"
               autocomplete="cc-number"
-              [value]="formattedCardNumber()"
               [disabled]="checkoutFieldsDisabled()"
               placeholder="4242 4242 4242 4242"
-              (input)="updateCardNumber($any($event.target).value)"
+              (input)="updateCardNumber($any($event.target))"
             />
           </label>
 
-          <div class="cart-page__checkout-summary">
-            <div>
-              <strong>{{ checkoutReadyEntries().length }}</strong>
-              <span>offers ready for checkout</span>
-            </div>
-            <div>
-              <strong>{{ formatPrice(checkoutTotal()) }}</strong>
-              <span>simulated card charge</span>
-            </div>
-          </div>
+          <div class="cart-checkout-modal__field-grid">
+            <label class="cart-checkout-modal__field">
+              <span>Expiry</span>
+              <input
+                type="text"
+                inputmode="numeric"
+                autocomplete="cc-exp"
+                [value]="cardExpiry()"
+                [disabled]="checkoutFieldsDisabled()"
+                placeholder="MM/YY"
+                (input)="updateCardExpiry($any($event.target).value)"
+              />
+            </label>
 
-          <div class="button-row cart-page__checkout-actions">
-            <app-action-button
-              [label]="checkoutButtonLabel()"
-              iconPosition="start"
-              [icon]="icons.creditCard"
-              [disabled]="!canStartCheckout()"
-              (pressed)="simulateCheckout()"
-            />
+            <label class="cart-checkout-modal__field">
+              <span>CVC</span>
+              <input
+                type="password"
+                inputmode="numeric"
+                autocomplete="off"
+                maxlength="4"
+                [disabled]="checkoutFieldsDisabled()"
+                placeholder="CVC"
+              />
+            </label>
           </div>
+        </div>
 
-          @if (!checkoutReadyEntries().length) {
-            <p class="cart-page__checkout-note">
-              No saved offers are currently ready for checkout. As soon as an item becomes available again, you can pay
-              for it here.
-            </p>
-          }
+        <div class="cart-checkout-modal__actions">
+          <button
+            type="button"
+            class="button button--primary cart-checkout-modal__button"
+            [disabled]="!canConfirmCheckout()"
+            (click)="simulateCheckout()"
+          >
+            {{ checkoutConfirmLabel() }}
+          </button>
+
+          <button
+            type="button"
+            class="button button--ghost cart-checkout-modal__button cart-checkout-modal__button--ghost"
+            [disabled]="processingCheckout()"
+            (click)="closeCheckoutModal()"
+          >
+            Cancel
+          </button>
         </div>
       </section>
-
-      @if (loading()) {
-        <section class="surface cart-page__state" aria-busy="true">
-          <span class="eyebrow">Cart</span>
-          <h2>Refreshing your saved offers</h2>
-          <p>We are checking the latest availability and pickup windows now.</p>
-        </section>
-      } @else {
-        <div class="cart-page__list">
-          @for (entry of cartEntries(); track entry.offerId) {
-            <article class="surface cart-card" [attr.data-missing]="entry.offer === null">
-              @if (entry.offer; as offer) {
-                <div class="cart-card__media">
-                  <img [src]="resolveOfferImage(offer)" [alt]="offer.title" />
-                  <span class="cart-card__distance">{{ formatDistance(offer.distanceMeters) }}</span>
-                </div>
-
-                <div class="cart-card__body">
-                  <div class="cart-card__headline">
-                    <div>
-                      <h2>{{ offer.title }}</h2>
-                      <p>{{ offer.business.name }}</p>
-                    </div>
-
-                    <div class="cart-card__pricing">
-                      <strong>{{ formatPrice(offer.price) }}</strong>
-                      @if (hasDiscount(offer.price, offer.originalPrice)) {
-                        <span>{{ formatPrice(offer.originalPrice ?? offer.price) }}</span>
-                      }
-                    </div>
-                  </div>
-
-                  <div class="cart-card__meta">
-                    <span>
-                      <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
-                      {{ formatOfferPickupWindow(offer) }}
-                    </span>
-                    <span>
-                      <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
-                      {{ formatAddress(offer) }}
-                    </span>
-                    <span>
-                      <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
-                      {{ offer.quantityAvailable }} available
-                    </span>
-                    <span>
-                      <fa-icon [icon]="icons.clock" aria-hidden="true" />
-                      Saved {{ entry.addedAt | date: 'd. M., HH:mm' }}
-                    </span>
-                  </div>
-
-                  @if (offer.pickupLocation.note) {
-                    <div class="cart-card__note">{{ offer.pickupLocation.note }}</div>
-                  }
-
-                  <div class="cart-card__footer">
-                    <span class="cart-card__status" [attr.data-ready]="offer.canReserve">
-                      {{ offerStatusLabel(offer.status) }}
-                    </span>
-
-                    <div class="button-row">
-                      <app-action-button
-                        label="View details"
-                        variant="ghost"
-                        iconPosition="start"
-                        [icon]="icons.eye"
-                        (pressed)="openOfferDetails(offer)"
-                      />
-
-                      <app-action-button
-                        label="Remove"
-                        variant="danger"
-                        iconPosition="start"
-                        [icon]="icons.trashCan"
-                        (pressed)="removeOffer(entry.offerId)"
-                      />
-                    </div>
-                  </div>
-                </div>
-              } @else {
-                <div class="cart-card__body cart-card__body--missing">
-                  <div class="cart-card__headline">
-                    <div>
-                      <h2>Offer no longer listed</h2>
-                      <p>This saved item is no longer returned by the marketplace. It may have expired, sold out, or been removed.</p>
-                    </div>
-                  </div>
-
-                  <div class="cart-card__meta">
-                    <span>
-                      <fa-icon [icon]="icons.clock" aria-hidden="true" />
-                      Saved {{ entry.addedAt | date: 'd. M., HH:mm' }}
-                    </span>
-                    <span>
-                      <fa-icon [icon]="icons.hashtag" aria-hidden="true" />
-                      Offer #{{ entry.offerId }}
-                    </span>
-                  </div>
-
-                  <div class="cart-card__footer">
-                    <span class="cart-card__status" data-ready="false">Unavailable</span>
-
-                    <div class="button-row">
-                      <app-action-button
-                        label="Remove"
-                        variant="danger"
-                        iconPosition="start"
-                        [icon]="icons.trashCan"
-                        (pressed)="removeOffer(entry.offerId)"
-                      />
-                    </div>
-                  </div>
-                </div>
-              }
-            </article>
-          }
-        </div>
-      }
-    }
-  </div>
+    </div>
+  }
 </section>

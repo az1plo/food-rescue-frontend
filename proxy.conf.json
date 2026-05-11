@@ -1,11 +1,17 @@
 {
-  "/discussion-messages": {
-    "target": "http://localhost:8080"
-  },
   "/businesses": {
     "target": "http://localhost:8080"
   },
+  "/business-icons": {
+    "target": "http://localhost:8080"
+  },
   "/offers": {
+    "target": "http://localhost:8080"
+  },
+  "/offer-assistant": {
+    "target": "http://localhost:8080"
+  },
+  "/offer-images": {
     "target": "http://localhost:8080"
   },
   "/orders": {

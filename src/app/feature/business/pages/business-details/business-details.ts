@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { combineLatest, switchMap } from 'rxjs';
+import { combineLatest, firstValueFrom, switchMap } from 'rxjs';
 import { UserRoleEnum } from '../../../../core/models/user-role-enum';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { UserService } from '../../../../core/services/user.service';
@@ -13,12 +13,16 @@ import { ActionButtonComponent } from '../../../../shared/ui/action-button/actio
 import { BusinessAnalyticsModel } from '../../models/business-analytics.model';
 import {
   BUSINESS_STATUS_META,
+  buildBusinessMark,
   BusinessModel,
+  BusinessIconUploadPayload,
   BusinessPayload,
   BusinessStatusMeta,
+  resolveBusinessIconUrl,
 } from '../../models/business.model';
 import { BusinessAnalyticsApiService } from '../../services/business-analytics-api.service';
 import { BusinessApiService } from '../../services/business-api.service';
+import { BusinessIconApiService } from '../../services/business-icon-api.service';
 import { BusinessWorkspaceStateService } from '../../services/business-workspace-state.service';
 
 type BusinessDetailsMode = 'view' | 'create' | 'edit';
@@ -29,6 +33,16 @@ interface BusinessDashboardStat {
   value: string;
   detail: string;
 }
+
+interface BusinessIconAsset {
+  fileName: string;
+  contentType: string;
+  imageBase64: string;
+  previewUrl: string;
+}
+
+const BUSINESS_ICON_MAX_BYTES = 4 * 1024 * 1024;
+const BUSINESS_ICON_CONTENT_TYPES = ['image/png', 'image/jpeg', 'image/webp'] as const;
 
 @Component({
   selector: 'app-business-details-page',
@@ -44,6 +58,7 @@ export class BusinessDetailsPage {
   private readonly fb = inject(FormBuilder);
   private readonly businessAnalyticsApi = inject(BusinessAnalyticsApiService);
   private readonly businessApi = inject(BusinessApiService);
+  private readonly businessIconApi = inject(BusinessIconApiService);
   private readonly businessWorkspaceState = inject(BusinessWorkspaceStateService);
   private readonly notificationService = inject(NotificationService);
   private readonly userService = inject(UserService);
@@ -58,6 +73,7 @@ export class BusinessDetailsPage {
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly dashboardError = signal<string | null>(null);
   protected readonly dashboardAnalytics = signal<BusinessAnalyticsModel | null>(null);
+  protected readonly selectedBusinessIconAsset = signal<BusinessIconAsset | null>(null);
   protected readonly icons = appIcons;
   protected readonly countries = ['Slovakia', 'Czechia', 'Austria', 'Hungary', 'Poland'];
 
@@ -122,6 +138,16 @@ export class BusinessDetailsPage {
     ];
   });
   protected readonly dashboardInsights = computed(() => this.dashboardAnalytics()?.insights.slice(0, 3) ?? []);
+  protected readonly businessIconPreviewUrl = computed(
+    () => this.selectedBusinessIconAsset()?.previewUrl ?? resolveBusinessIconUrl(this.currentBusiness()?.iconUrl),
+  );
+  protected readonly businessIconMark = computed(() =>
+    buildBusinessMark(this.currentBusiness()?.name ?? this.form.controls.name.value),
+  );
+  protected readonly businessIconAlt = computed(() => {
+    const businessName = this.currentBusiness()?.name ?? (this.form.controls.name.value.trim() || 'Business');
+    return `${businessName} icon`;
+  });
 
   protected readonly pageTitle = computed(() => {
     if (this.isCreateMode()) {
@@ -203,6 +229,7 @@ export class BusinessDetailsPage {
 
         this.errorMessage.set(null);
         this.currentBusiness.set(resolvedBusiness);
+        this.selectedBusinessIconAsset.set(null);
         this.patchForm(resolvedBusiness);
 
         if (resolvedRouteMode === 'settings') {
@@ -229,6 +256,7 @@ export class BusinessDetailsPage {
     this.mode.set('edit');
     this.submitAttempted.set(false);
     this.errorMessage.set(null);
+    this.selectedBusinessIconAsset.set(null);
     this.patchForm(business);
   }
 
@@ -249,6 +277,7 @@ export class BusinessDetailsPage {
     this.mode.set('view');
     this.submitAttempted.set(false);
     this.errorMessage.set(null);
+    this.selectedBusinessIconAsset.set(null);
 
     const business = this.currentBusiness();
     if (business) {
@@ -256,7 +285,7 @@ export class BusinessDetailsPage {
     }
   }
 
-  protected saveBusiness(): void {
+  protected async saveBusiness(): Promise<void> {
     this.submitAttempted.set(true);
     this.errorMessage.set(null);
 
@@ -266,7 +295,7 @@ export class BusinessDetailsPage {
 
     const payload = this.buildPayload();
     if (this.isCreateMode()) {
-      this.createBusiness(payload);
+      await this.createBusiness(payload);
       return;
     }
 
@@ -276,26 +305,27 @@ export class BusinessDetailsPage {
     }
 
     this.detailLoading.set(true);
-    this.businessApi.updateBusiness(business.id, payload).subscribe({
-      next: (updatedBusiness) => {
-        this.detailLoading.set(false);
-        this.mode.set(this.isSettingsPage() ? 'edit' : 'view');
-        this.currentBusiness.set(updatedBusiness);
-        this.patchForm(updatedBusiness);
-        this.businessWorkspaceState.rememberBusinessId(updatedBusiness.id);
-        this.businessWorkspaceState.rememberBusinessSummary(updatedBusiness);
-        this.notificationService.success('Business details were updated.', 'Business saved');
+    try {
+      let updatedBusiness = await firstValueFrom(this.businessApi.updateBusiness(business.id, payload));
+      updatedBusiness = (await this.uploadSelectedBusinessIcon(updatedBusiness.id, 'updated')) ?? updatedBusiness;
 
-        if (!this.isSettingsPage()) {
-          this.loadDashboardAnalytics(updatedBusiness.id);
-        }
-      },
-      error: () => {
-        this.detailLoading.set(false);
-        this.errorMessage.set('We could not save the changes right now. Please try again.');
-        this.notificationService.error('Business changes could not be saved.');
-      },
-    });
+      this.mode.set(this.isSettingsPage() ? 'edit' : 'view');
+      this.currentBusiness.set(updatedBusiness);
+      this.selectedBusinessIconAsset.set(null);
+      this.patchForm(updatedBusiness);
+      this.businessWorkspaceState.rememberBusinessId(updatedBusiness.id);
+      this.businessWorkspaceState.rememberBusinessSummary(updatedBusiness);
+      this.notificationService.success('Business details were updated.', 'Business saved');
+
+      if (!this.isSettingsPage()) {
+        this.loadDashboardAnalytics(updatedBusiness.id);
+      }
+    } catch {
+      this.errorMessage.set('We could not save the changes right now. Please try again.');
+      this.notificationService.error('Business changes could not be saved.');
+    } finally {
+      this.detailLoading.set(false);
+    }
   }
 
   protected refreshBusiness(): void {
@@ -342,6 +372,45 @@ export class BusinessDetailsPage {
     return this.submitAttempted() && control.invalid;
   }
 
+  protected async onBusinessIconSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0] ?? null;
+    if (!file) {
+      return;
+    }
+
+    if (!BUSINESS_ICON_CONTENT_TYPES.includes((file.type || 'image/jpeg') as (typeof BUSINESS_ICON_CONTENT_TYPES)[number])) {
+      this.notificationService.info('Use PNG, JPG, or WEBP for the business icon.', 'Unsupported file');
+      if (input) {
+        input.value = '';
+      }
+      return;
+    }
+
+    if (file.size > BUSINESS_ICON_MAX_BYTES) {
+      this.notificationService.info('Keep the business icon under 4 MB.', 'File too large');
+      if (input) {
+        input.value = '';
+      }
+      return;
+    }
+
+    try {
+      const asset = await this.readImageFile(file);
+      this.selectedBusinessIconAsset.set(asset);
+    } catch {
+      this.notificationService.error('Business icon could not be read.');
+    } finally {
+      if (input) {
+        input.value = '';
+      }
+    }
+  }
+
+  protected clearSelectedBusinessIcon(): void {
+    this.selectedBusinessIconAsset.set(null);
+  }
+
   protected formatBusinessId(id: number): string {
     return id.toString().padStart(5, '0');
   }
@@ -358,9 +427,30 @@ export class BusinessDetailsPage {
     return `${value.toFixed(1)}%`;
   }
 
+  protected hasBusinessRating(business: BusinessModel): boolean {
+    return business.ratingAverage !== null && business.ratingCount > 0;
+  }
+
+  protected businessRatingValue(business: BusinessModel): string {
+    if (!this.hasBusinessRating(business)) {
+      return 'New business';
+    }
+
+    return `${(business.ratingAverage ?? 0).toFixed(1)} / 5`;
+  }
+
+  protected businessRatingCountLabel(business: BusinessModel): string {
+    if (!business.ratingCount) {
+      return 'No customer votes yet';
+    }
+
+    return `${business.ratingCount} ${business.ratingCount === 1 ? 'customer vote' : 'customer votes'}`;
+  }
+
   private enterCreateMode(): void {
     this.mode.set('create');
     this.currentBusiness.set(null);
+    this.selectedBusinessIconAsset.set(null);
     this.detailLoading.set(false);
     this.dashboardLoading.set(false);
     this.dashboardAnalytics.set(null);
@@ -389,6 +479,7 @@ export class BusinessDetailsPage {
       next: (business) => {
         this.detailLoading.set(false);
         this.currentBusiness.set(business);
+        this.selectedBusinessIconAsset.set(null);
         this.mode.set(this.isSettingsPage() ? 'edit' : 'view');
         this.patchForm(business);
         this.businessWorkspaceState.rememberBusinessId(business.id);
@@ -413,37 +504,41 @@ export class BusinessDetailsPage {
     });
   }
 
-  private createBusiness(payload: BusinessPayload): void {
+  private async createBusiness(payload: BusinessPayload): Promise<void> {
     const existingIds = new Set(this.businessWorkspaceState.knownBusinesses().map((item) => item.id));
     this.detailLoading.set(true);
 
-    this.businessApi
-      .createBusiness(payload)
-      .pipe(switchMap(() => this.businessWorkspaceState.refreshBusinesses()))
-      .subscribe({
-        next: (items) => {
-          this.detailLoading.set(false);
-          const nextBusiness =
-            items.find((item) => !existingIds.has(item.id)) ??
-            [...items].sort((first, second) => second.id - first.id)[0] ??
-            null;
+    try {
+      await firstValueFrom(this.businessApi.createBusiness(payload));
+      const items = await firstValueFrom(this.businessWorkspaceState.refreshBusinesses());
+      const nextBusiness =
+        items.find((item) => !existingIds.has(item.id)) ??
+        [...items].sort((first, second) => second.id - first.id)[0] ??
+        null;
 
-          this.notificationService.success('Business was created successfully.', 'Business saved');
+      this.notificationService.success('Business was created successfully.', 'Business saved');
 
-          if (!nextBusiness) {
-            void this.router.navigateByUrl('/workspace/my-businesses');
-            return;
-          }
+      if (!nextBusiness) {
+        void this.router.navigateByUrl('/workspace/my-businesses');
+        return;
+      }
 
-          this.businessWorkspaceState.rememberBusinessId(nextBusiness.id);
-          void this.router.navigate(['/workspace', 'my-businesses', nextBusiness.id]);
-        },
-        error: () => {
-          this.detailLoading.set(false);
-          this.errorMessage.set('We could not create the business right now. Please try again.');
-          this.notificationService.error('Business could not be created.');
-        },
-      });
+      const uploadedBusiness = await this.uploadSelectedBusinessIcon(nextBusiness.id, 'created');
+      const destinationBusinessId = uploadedBusiness?.id ?? nextBusiness.id;
+
+      if (uploadedBusiness) {
+        this.businessWorkspaceState.rememberBusinessSummary(uploadedBusiness);
+      }
+
+      this.businessWorkspaceState.rememberBusinessId(destinationBusinessId);
+      this.selectedBusinessIconAsset.set(null);
+      void this.router.navigate(['/workspace', 'my-businesses', destinationBusinessId]);
+    } catch {
+      this.errorMessage.set('We could not create the business right now. Please try again.');
+      this.notificationService.error('Business could not be created.');
+    } finally {
+      this.detailLoading.set(false);
+    }
   }
 
   private buildPayload(): BusinessPayload {
@@ -496,5 +591,53 @@ export class BusinessDetailsPage {
     }
 
     return 'details';
+  }
+
+  private async uploadSelectedBusinessIcon(businessId: number, action: 'created' | 'updated'): Promise<BusinessModel | null> {
+    const asset = this.selectedBusinessIconAsset();
+    if (!asset) {
+      return null;
+    }
+
+    const payload: BusinessIconUploadPayload = {
+      businessId,
+      fileName: asset.fileName,
+      contentType: asset.contentType,
+      imageBase64: asset.imageBase64,
+    };
+
+    try {
+      const updatedBusiness = await firstValueFrom(this.businessIconApi.uploadBusinessIcon(payload));
+      this.selectedBusinessIconAsset.set(null);
+      return updatedBusiness;
+    } catch {
+      this.notificationService.info(
+        `Business profile was ${action}, but the icon upload still needs another try.`,
+        'Icon not updated',
+      );
+      return null;
+    }
+  }
+
+  private readImageFile(file: File): Promise<BusinessIconAsset> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const dataUrl = typeof reader.result === 'string' ? reader.result : '';
+        const base64Index = dataUrl.indexOf('base64,');
+        const imageBase64 = base64Index >= 0 ? dataUrl.slice(base64Index + 'base64,'.length) : '';
+
+        resolve({
+          fileName: file.name,
+          contentType: file.type || 'image/jpeg',
+          imageBase64,
+          previewUrl: dataUrl,
+        });
+      };
+
+      reader.onerror = () => reject(reader.error ?? new Error('Unable to read image file.'));
+      reader.readAsDataURL(file);
+    });
   }
 }

@@ -3,69 +3,117 @@
     <section class="home-hero">
       <div class="home-hero__grid">
         <div class="home-hero__copy">
-          <span class="home-hero__badge">
-            <fa-icon class="home-hero__badge-icon" [icon]="icons.leaf" aria-hidden="true" />
-            Together against food waste
-          </span>
-
           <h1 class="home-hero__title">
-            <span class="home-hero__title-lead">Good food</span>
-            deserves a
+            Good food
             <br />
-            second chance.
+            deserves a second
+            <br />
+            chance. Find it
+            <span class="home-hero__title-accent">near you.</span>
           </h1>
 
           <p class="home-hero__lead">
-            We connect businesses with people to rescue surplus food and reduce waste in our communities.
+            Savr connects you with local restaurants, cafes, and grocery stores to save good food at a great price
+            instead of letting it go to waste.
           </p>
 
           <div class="button-row home-hero__actions">
-            <app-action-button label="Browse offers" [icon]="icons.arrowRight" route="/browse-offers" />
+            <app-action-button label="Browse offers" [icon]="icons.leaf" iconPosition="start" route="/browse-offers" />
 
             @if (user()) {
-              <app-action-button label="Open workspace" variant="ghost" [icon]="icons.store" route="/workspace" />
+              <app-action-button
+                label="Open workspace"
+                variant="ghost"
+                [icon]="icons.store"
+                iconPosition="start"
+                route="/workspace"
+              />
             } @else {
-              <app-action-button label="For business" variant="ghost" [icon]="icons.store" route="/for-business" />
+              <app-action-button
+                label="For business"
+                variant="ghost"
+                [icon]="icons.store"
+                iconPosition="start"
+                route="/for-business"
+              />
             }
           </div>
 
-          <div class="home-hero__benefits">
-            @for (benefit of heroBenefits; track benefit.lead) {
-              <article class="home-hero__benefit">
-                <app-circle-icon class="home-hero__benefit-icon" [icon]="benefit.icon" />
+          <div class="home-hero__trust">
+            <div class="home-hero__avatars" aria-hidden="true">
+              @for (avatar of heroTrustAvatars; track avatar) {
+                <span class="home-hero__avatar">{{ avatar }}</span>
+              }
+            </div>
 
-                <div>
-                  <div class="home-hero__benefit-title">
-                    <strong>{{ benefit.lead }}</strong>
-                    @if (benefit.tail) {
-                      <span>{{ benefit.tail }}</span>
-                    }
-                  </div>
-                  <p>{{ benefit.description }}</p>
-                </div>
-              </article>
-            }
+            <div class="home-hero__trust-copy">
+              <div class="home-hero__trust-stars" aria-hidden="true">
+                @for (star of heroStars; track star) {
+                  <fa-icon [icon]="icons.star" />
+                }
+              </div>
+
+              <span>Trusted by 50,000+ food savers</span>
+            </div>
           </div>
         </div>
 
         <div class="home-hero__visual">
-          <div class="home-hero__media">
-            <img src="/images/home_hero1.png" alt="Rescued food ready for pickup" />
-          </div>
-
-          <aside class="surface home-hero__note">
-            <app-circle-icon class="home-hero__note-icon" [icon]="icons.heart" />
-            <div>
-              <strong>Every meal saved makes a difference</strong>
+          <div class="home-hero__visual-stage">
+            <div class="home-hero__map-layer">
+              <img src="/images/home_hero2.png" alt="Map view of nearby rescue offers" />
             </div>
-          </aside>
+
+            <div class="home-hero__food-layer">
+              <img src="/images/home_hero1.png" alt="Fresh rescued meal ready for pickup" />
+            </div>
+
+            <aside class="surface home-hero__offer-panel">
+              <div class="home-hero__offer-panel-head">
+                <strong>Nearby offers</strong>
+                <a routerLink="/browse-offers">See all</a>
+              </div>
+
+              <div class="home-hero__offer-panel-list">
+                @for (offer of heroFeaturedOffers; track offer.title) {
+                  <article class="home-hero__offer-panel-item">
+                    <div class="home-hero__offer-panel-image">
+                      <img [src]="offer.image" [alt]="offer.title" />
+                      <span class="home-hero__offer-panel-badge">{{ offer.availabilityLabel }}</span>
+                    </div>
+
+                    <div class="home-hero__offer-panel-copy">
+                      <strong>{{ offer.businessName }}</strong>
+                      <span>{{ offer.businessArea }} <span aria-hidden="true">&middot;</span> {{ offer.distance }}</span>
+                      <small>
+                        {{ offer.rating }}
+                        <fa-icon class="home-hero__offer-panel-star" [icon]="icons.star" aria-hidden="true" />
+                      </small>
+                    </div>
+
+                    <div class="home-hero__offer-panel-price">
+                      <strong>{{ offer.price }}</strong>
+                      @if (offer.originalPrice) {
+                        <small>{{ offer.originalPrice }}</small>
+                      }
+                    </div>
+                  </article>
+                }
+              </div>
+
+              <a class="home-hero__offer-panel-link" routerLink="/browse-offers">
+                View map
+                <fa-icon class="home-hero__offer-panel-link-icon" [icon]="icons.arrowRight" aria-hidden="true" />
+              </a>
+            </aside>
+          </div>
         </div>
       </div>
     </section>
 
     <section class="home-offers">
       <div class="home-section-head">
-        <h2>Nearby rescue offers</h2>
+        <h2>Nearby offers</h2>
         <a class="home-section-link" routerLink="/browse-offers">
           View all offers
           <fa-icon class="home-section-link-icon" [icon]="icons.arrowRight" aria-hidden="true" />
@@ -74,60 +122,95 @@
 
       <div class="home-offers__grid">
         @for (offer of offerPreview; track offer.title) {
-          <app-offer-preview-card [offer]="offer" />
+          <app-offer-card [card]="offer" variant="home" />
         }
       </div>
     </section>
 
     <section class="home-steps">
-      <div class="home-section-head">
-        <h2>How it works</h2>
-        <a class="home-section-link" routerLink="/how-it-works">
-          Explore the flow
-          <fa-icon class="home-section-link-icon" [icon]="icons.arrowRight" aria-hidden="true" />
-        </a>
-      </div>
+      <div class="surface home-steps__panel">
+        <div class="home-steps__heading">
+          <h2>How Savr works</h2>
+        </div>
 
-      <div class="home-steps__grid">
-        @for (step of steps; track step.title) {
-          <article class="home-step">
-            <app-circle-icon class="home-step__icon" [icon]="step.icon" size="lg" />
-            <div class="home-step__copy">
-              <strong>{{ step.title }}</strong>
-              <p>{{ step.description }}</p>
-            </div>
-          </article>
-        }
+        <div class="home-steps__grid">
+          @for (step of steps; track step.title; let index = $index) {
+            <article class="home-step">
+              <span class="home-step__number">{{ index + 1 }}</span>
+              <app-circle-icon class="home-step__icon" [icon]="step.icon" size="lg" />
+              <div class="home-step__copy">
+                <strong>{{ step.title }}</strong>
+                <p>{{ step.description }}</p>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="home-stats">
+      <div class="surface home-stats__panel">
+        <div class="home-stats__grid">
+          @for (stat of stats; track stat.label) {
+            <article class="stat-card">
+              <app-circle-icon class="stat-card__icon" [icon]="stat.icon" size="lg" />
+              <div>
+                <strong>{{ stat.value }}</strong>
+                <h3>{{ stat.label }}</h3>
+                <p>{{ stat.note }}</p>
+              </div>
+            </article>
+          }
+        </div>
       </div>
     </section>
 
     <section class="home-business surface">
-      <div class="home-business__copy">
-        <app-circle-icon class="home-business__icon" [icon]="icons.store" size="lg" />
-        <div>
-          <h2>Have surplus food?</h2>
-          <p>Explore the business side, then open the workspace when you are ready to manage locations.</p>
-        </div>
+      <div class="home-business__intro">
+        <span class="eyebrow">For businesses</span>
+
+        <h2>
+          Join Savr. Good for
+          your business, better
+          for our city.
+        </h2>
+
+        <p>
+          Turn surplus into impact. Savr helps you reduce
+          waste, reach new customers, and build loyalty in
+          your community.
+        </p>
+
+        @if (user()) {
+          <app-action-button
+            label="Open workspace"
+            [icon]="icons.store"
+            route="/workspace"
+          />
+        } @else {
+          <app-action-button
+            label="Learn more"
+            [icon]="icons.store"
+            route="/for-business"
+          />
+        }
       </div>
 
-      @if (user()) {
-        <app-action-button label="Open workspace" [icon]="icons.store" route="/workspace" />
-      } @else {
-        <app-action-button label="For business" [icon]="icons.store" route="/for-business" />
-      }
-    </section>
+      <div class="home-business__benefits">
+        @for (benefit of businessBenefits; track benefit.title) {
+          <article class="home-business__card">
+            <app-circle-icon [icon]="benefit.icon" />
 
-    <section class="home-stats">
-      <div class="home-stats__grid">
-        @for (stat of stats; track stat.label) {
-          <article class="surface stat-card">
-            <app-circle-icon class="stat-card__icon" [icon]="stat.icon" size="lg" />
             <div>
-              <strong>{{ stat.value }}</strong>
-              <p>{{ stat.label }}</p>
+              <strong>{{ benefit.title }}</strong>
+              <p>{{ benefit.description }}</p>
             </div>
           </article>
         }
+      </div>
+
+      <div class="home-business__media">
+        <img src="/images/for_business1.png" alt="Local business owner using Savr" />
       </div>
     </section>
   </div>

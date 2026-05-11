@@ -1,14 +1,9 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { BUSINESS_STATUS_META, BusinessWorkspaceListItem } from '../../models/business.model';
+import { BUSINESS_STATUS_META, buildBusinessMark, BusinessWorkspaceListItem, resolveBusinessIconUrl } from '../../models/business.model';
 import { appIcons } from '../../../../shared/icons/app-icons';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
-
-const BUSINESS_CARD_IMAGES = [
-  '/images/shop.png',
-  '/images/shop1.png',
-] as const;
 
 @Component({
   selector: 'app-business-card',
@@ -22,9 +17,8 @@ export class BusinessCardComponent {
 
   protected readonly icons = appIcons;
   protected readonly statusMeta = computed(() => BUSINESS_STATUS_META[this.business().status]);
-  protected readonly previewImage = computed(
-    () => BUSINESS_CARD_IMAGES[(this.business().id - 1) % BUSINESS_CARD_IMAGES.length],
-  );
+  protected readonly iconUrl = computed(() => resolveBusinessIconUrl(this.business().iconUrl));
+  protected readonly businessMark = computed(() => buildBusinessMark(this.business().name));
   protected readonly addressLine = computed(() => {
     const business = this.business();
     return `${business.address.street}, ${business.address.city}, ${business.address.country}`;

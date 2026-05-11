@@ -1,13 +1,45 @@
 .business-reservations-page {
+  --orders-green: var(--color-primary);
+  --orders-green-dark: var(--color-primary-strong);
+  --orders-green-soft: #eef6e8;
+  --orders-surface-soft: #f7f8f1;
+  --orders-border: rgba(218, 228, 213, 0.92);
+  --orders-muted: #647163;
+  --orders-shadow:
+    0 20px 42px rgba(19, 37, 22, 0.08),
+    0 3px 10px rgba(19, 37, 22, 0.05);
+  --orders-display-font: Georgia, 'Times New Roman', serif;
+
   display: grid;
-  gap: 2.4rem;
 }
 
+.business-reservations-page,
+.business-reservations-page__hero,
 .business-reservations-page__header,
-.business-reservations-page__summary,
-.business-reservations-page__grid,
-.business-reservations-page__state {
+.business-reservations-page__header-copy,
+.business-reservations-page__tabs,
+.business-reservations-page__list,
+.business-reservations-page__state,
+.business-reservations-page__state-copy,
+.business-reservations-page__empty-tab,
+.business-reservations-page__empty-tab-copy,
+.order-card__body,
+.order-card__headline-copy,
+.order-card__price,
+.order-card__detail-grid,
+.order-card__detail-copy,
+.order-card__pickup-verification,
+.order-card__pickup-copy,
+.order-card__pickup-field,
+.order-card__skeleton-body,
+.order-card__skeleton-row,
+.order-card__skeleton-actions {
   display: grid;
+}
+
+.business-reservations-page__hero {
+  gap: 2rem;
+  border-radius: 3rem;
 }
 
 .business-reservations-page__header {
@@ -16,87 +48,243 @@
   align-items: end;
 }
 
-.business-reservations-page__header p,
-.business-reservations-page__state p,
-.reservation-card__topline p,
-.reservation-card__fallback {
-  margin: 0;
-  color: var(--color-text-muted);
-}
-
-.business-reservations-page__summary {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1.6rem;
-  padding: 2rem 2.4rem;
-}
-
-.business-reservations-page__summary article {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.business-reservations-page__summary strong {
-  font-size: 2.6rem;
-}
-
-.business-reservations-page__summary span {
-  color: var(--color-text-muted);
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-
-.business-reservations-page__state {
+.business-reservations-page__header-copy {
   gap: 1rem;
-  padding: 2.4rem;
 }
 
-.business-reservations-page__state--empty {
-  justify-items: start;
+.business-reservations-page__header-copy h1,
+.business-reservations-page__state h2,
+.business-reservations-page__empty-tab h2,
+.order-card__headline-copy h2 {
+  margin: 0;
+  color: var(--orders-green-dark);
+  font-family: var(--orders-display-font);
+  font-weight: 700;
+  letter-spacing: -0.04em;
 }
 
-.business-reservations-page__grid {
+.business-reservations-page__header-copy h1 {
+  font-family: inherit;
+  font-size: clamp(3.2rem, 3.6vw, 5rem);
+  font-weight: 700;
+}
+
+.business-reservations-page__header-copy p,
+.business-reservations-page__state p,
+.business-reservations-page__empty-tab p,
+.order-card__headline-copy p,
+.order-card__detail-copy p,
+.order-card__pickup-copy p {
+  margin: 0;
+  color: var(--orders-muted);
+}
+
+.business-reservations-page__header-copy p {
+  max-width: 62rem;
+  font-size: 1.7rem;
+  line-height: 1.65;
+}
+
+.business-reservations-page__toolbar,
+.business-reservations-page__state-actions,
+.order-card__top-row,
+.order-card__headline-row,
+.order-card__meta-item,
+.order-card__actions,
+.order-card__action {
+  display: flex;
+  align-items: center;
+}
+
+.business-reservations-page__toolbar,
+.business-reservations-page__state-actions {
+  flex-wrap: wrap;
+  gap: 1.2rem;
+}
+
+.business-reservations-page__toolbar {
+  justify-content: flex-end;
+}
+
+.business-reservations-page__state-actions {
+  justify-content: center;
+}
+
+.business-reservations-page__toolbar-button {
+  gap: 0.8rem;
+  border-color: var(--orders-border);
+  box-shadow: 0 2px 6px rgba(20, 38, 22, 0.03);
+  text-decoration: none;
+}
+
+.business-reservations-page__toolbar-button fa-icon,
+.business-reservations-page__state-icon,
+.order-card__meta-item fa-icon,
+.order-card__action fa-icon {
+  flex: none;
+}
+
+.business-reservations-page__toolbar-button.button--secondary {
+  border-color: rgba(40, 124, 60, 0.94);
+  background: linear-gradient(135deg, var(--orders-green), #236e34);
+  box-shadow: 0 16px 26px rgba(24, 77, 37, 0.18);
+}
+
+.business-reservations-page__tabs {
+  grid-template-columns: repeat(4, minmax(0, max-content));
+  gap: 1.2rem;
+}
+
+.business-reservations-page__tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 5.6rem;
+  padding: 0 2rem;
+  border: 1px solid var(--orders-border);
+  border-radius: 1.5rem;
+  background: #ffffff;
+  color: #223226;
+  font-size: 1.6rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(20, 38, 22, 0.03);
+  transition:
+    transform var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    background var(--transition-base),
+    color var(--transition-base);
+}
+
+.business-reservations-page__tab.is-active {
+  border-color: rgba(40, 124, 60, 0.94);
+  background: linear-gradient(135deg, var(--orders-green), #236e34);
+  color: #ffffff;
+  box-shadow: 0 16px 26px rgba(24, 77, 37, 0.18);
+}
+
+.business-reservations-page__tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.9rem;
+  height: 2.9rem;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  background: rgba(39, 114, 55, 0.1);
+  color: var(--orders-green-dark);
+  font-size: 1.28rem;
+  line-height: 1;
+}
+
+.business-reservations-page__tab.is-active .business-reservations-page__tab-count {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.business-reservations-page__list {
   gap: 1.8rem;
 }
 
-.reservation-card {
+.business-reservations-page__state,
+.business-reservations-page__empty-tab {
+  place-items: center;
+  gap: 1.8rem;
+  padding: 3rem;
+  border: 1px solid var(--orders-border);
+  border-radius: 2.4rem;
+  background: #ffffff;
+  box-shadow: var(--orders-shadow);
+  text-align: center;
+}
+
+.business-reservations-page__state-copy,
+.business-reservations-page__empty-tab-copy {
+  gap: 1rem;
+  max-width: 56rem;
+}
+
+.business-reservations-page__state h2,
+.business-reservations-page__empty-tab h2 {
+  font-size: clamp(3rem, 4vw, 4rem);
+}
+
+.business-reservations-page__state p,
+.business-reservations-page__empty-tab p {
+  font-size: 1.55rem;
+  line-height: 1.7;
+}
+
+.business-reservations-page__state-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--orders-green), #236e34);
+  color: #ffffff;
+  font-size: 2.2rem;
+  box-shadow: 0 16px 28px rgba(26, 74, 37, 0.18);
+}
+
+.order-card {
   display: grid;
-  grid-template-columns: minmax(22rem, 28rem) minmax(0, 1fr);
-  gap: 2rem;
+  grid-template-columns: minmax(25rem, 28rem) minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--orders-border);
+  border-radius: 2rem;
+  background: #ffffff;
+  box-shadow: var(--orders-shadow);
+}
+
+.order-card[data-tone='success'] {
+  background:
+    linear-gradient(90deg, rgba(245, 249, 241, 0.74), rgba(255, 255, 255, 0) 16rem),
+    #ffffff;
+}
+
+.order-card[data-tone='warning'] {
+  background:
+    linear-gradient(90deg, rgba(250, 244, 236, 0.82), rgba(255, 255, 255, 0) 16rem),
+    #ffffff;
+}
+
+.order-card__media {
+  min-width: 0;
   overflow: hidden;
 }
 
-.reservation-card__media img {
+.order-card__media img,
+.order-card__skeleton-media {
   display: block;
   width: 100%;
   height: 100%;
   min-height: 24rem;
   object-fit: cover;
-  border-radius: 2rem;
 }
 
-.reservation-card__body {
-  display: grid;
-  gap: 1.8rem;
+.order-card__body {
+  gap: 1.5rem;
   align-content: start;
+  min-width: 0;
+  padding: 1.9rem 2rem 2rem;
 }
 
-.reservation-card__topline {
-  display: flex;
+.order-card__top-row,
+.order-card__headline-row {
   justify-content: space-between;
   gap: 1.6rem;
 }
 
-.reservation-card__topline h2 {
-  margin-bottom: 0.8rem;
-  font-size: clamp(2rem, 1.8vw, 2.8rem);
-}
-
-.reservation-card__status {
+.order-card__status-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 3.6rem;
-  padding: 0 1.4rem;
+  min-height: 3.2rem;
+  padding: 0 1.1rem;
   border-radius: 999px;
   font-size: 1.2rem;
   font-weight: 800;
@@ -105,75 +293,162 @@
   white-space: nowrap;
 }
 
-.reservation-card__status[data-tone='success'] {
-  background: rgba(47, 143, 78, 0.12);
-  color: #246e3d;
+.order-card__status-pill[data-tone='success'] {
+  background: #edf7df;
+  color: #376126;
 }
 
-.reservation-card__status[data-tone='warning'] {
-  background: rgba(212, 134, 36, 0.14);
-  color: #9a5f14;
+.order-card__status-pill[data-tone='default'] {
+  background: #eff3eb;
+  color: #5d6b5c;
 }
 
-.reservation-card__status[data-tone='danger'] {
-  background: rgba(216, 79, 79, 0.12);
-  color: #b03b3b;
+.order-card__status-pill[data-tone='warning'] {
+  background: #f7efe9;
+  color: #966234;
 }
 
-.reservation-card__status[data-tone='default'] {
-  background: rgba(64, 93, 70, 0.1);
-  color: #405d46;
+.order-card__status-pill[data-tone='danger'] {
+  background: #f9ecea;
+  color: #a94f4f;
 }
 
-.reservation-card__meta {
-  display: grid;
-  gap: 0.9rem;
+.order-card__headline-row {
+  align-items: start;
 }
 
-.reservation-card__meta div {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.9rem;
-  color: var(--color-text-muted);
+.order-card__headline-copy {
+  gap: 0.65rem;
+  min-width: 0;
 }
 
-.reservation-card__meta fa-icon {
-  color: var(--color-primary-strong);
+.order-card__headline-copy h2 {
+  font-size: clamp(2.2rem, 2.8vw, 3rem);
+  line-height: 1.03;
 }
 
-.reservation-card__pickup-verification {
-  display: grid;
-  gap: 1rem;
-  padding: 1.4rem;
-  border-radius: 1.7rem;
-  background: rgba(242, 246, 238, 0.78);
-  border: 1px solid rgba(216, 226, 210, 0.92);
+.order-card__headline-copy p {
+  font-size: 1.52rem;
+  line-height: 1.6;
 }
 
-.reservation-card__pickup-copy {
-  display: grid;
+.order-card__price {
+  justify-items: end;
   gap: 0.45rem;
+  flex: none;
 }
 
-.reservation-card__pickup-copy strong,
-.reservation-card__pickup-copy p {
-  margin: 0;
-}
-
-.reservation-card__pickup-field {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.reservation-card__pickup-field span {
-  color: #244931;
-  font-size: 1.15rem;
+.order-card__price strong {
+  color: var(--orders-green-dark);
+  font-size: 2.7rem;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.order-card__price span {
+  color: var(--orders-muted);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.order-card__detail-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.order-card__detail-tile {
+  display: flex;
+  align-items: start;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1.2rem 1.3rem;
+  border: 1px solid rgba(219, 228, 214, 0.96);
+  border-radius: 1.45rem;
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.order-card__detail-tile--wide {
+  grid-column: 1 / -1;
+}
+
+.order-card__detail-tile fa-icon {
+  margin-top: 0.2rem;
+  color: var(--orders-green-dark);
+}
+
+.order-card__detail-tile[data-tone='success'] {
+  background: linear-gradient(135deg, rgba(244, 248, 239, 0.96), rgba(252, 249, 242, 0.98));
+}
+
+.order-card__detail-tile[data-tone='danger'] {
+  background: rgba(249, 236, 234, 0.7);
+}
+
+.order-card__detail-tile[data-tone='warning'] {
+  background: rgba(250, 244, 236, 0.92);
+}
+
+.order-card__detail-copy {
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.order-card__detail-copy span {
+  color: var(--orders-green-dark);
+  font-size: 1.16rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
-.reservation-card__pickup-field input {
+.order-card__detail-copy strong {
+  color: #203124;
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.order-card__detail-copy p {
+  font-size: 1.38rem;
+  line-height: 1.5;
+}
+
+.order-card__pickup-verification {
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--orders-border);
+  border-radius: 1.8rem;
+  background: linear-gradient(135deg, rgba(244, 248, 239, 0.96), rgba(252, 249, 242, 0.98));
+}
+
+.order-card__pickup-copy {
+  gap: 0.45rem;
+}
+
+.order-card__pickup-copy strong {
+  color: var(--orders-green-dark);
+  font-size: 1.55rem;
+}
+
+.order-card__pickup-copy p {
+  font-size: 1.42rem;
+  line-height: 1.6;
+}
+
+.order-card__pickup-field {
+  gap: 0.5rem;
+}
+
+.order-card__pickup-field span {
+  color: var(--orders-green-dark);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.order-card__pickup-field input {
   width: 100%;
   min-height: 4.8rem;
   padding: 0 1.25rem;
@@ -184,44 +459,230 @@
   font: inherit;
 }
 
-.reservation-card__pickup-field input:focus {
+.order-card__pickup-field input:focus {
   outline: none;
   border-color: rgba(47, 143, 78, 0.56);
   box-shadow: 0 0 0 0.35rem rgba(47, 143, 78, 0.12);
 }
 
-.reservation-card__actions {
-  align-items: center;
+.order-card__actions {
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.order-card__action {
+  justify-content: center;
+  gap: 0.8rem;
+  min-height: 5.2rem;
+  flex: 1 1 18rem;
+  padding: 0 1.6rem;
+  border: 1px solid var(--orders-border);
+  border-radius: 1.45rem;
+  background: #ffffff;
+  color: var(--orders-green-dark);
+  font-size: 1.55rem;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    background var(--transition-base),
+    color var(--transition-base);
+}
+
+.order-card__action--primary {
+  border-color: rgba(38, 126, 60, 0.96);
+  background: linear-gradient(135deg, var(--orders-green), #2f9b41);
+  color: #ffffff;
+  box-shadow: 0 18px 28px rgba(24, 74, 37, 0.16);
+}
+
+.order-card__action:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.order-card--skeleton {
+  grid-template-columns: minmax(25rem, 28rem) minmax(0, 1fr);
+}
+
+.order-card__skeleton-body {
+  gap: 1.2rem;
+  padding: 2rem;
+}
+
+.order-card__skeleton-row,
+.order-card__skeleton-actions {
+  gap: 1rem;
+}
+
+.order-card__skeleton-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.order-card__skeleton-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-top: 0.8rem;
+}
+
+.order-card__skeleton-line,
+.order-card__skeleton-button {
+  display: block;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(238, 243, 236, 0.96), rgba(247, 249, 244, 0.96), rgba(238, 243, 236, 0.96));
+  background-size: 200% 100%;
+  animation: ordersSkeleton 1.5s ease-in-out infinite;
+}
+
+.order-card__skeleton-line {
+  height: 1.3rem;
+}
+
+.order-card__skeleton-line--sm {
+  width: 30%;
+}
+
+.order-card__skeleton-line--md {
+  width: 55%;
+}
+
+.order-card__skeleton-line--lg {
+  width: 78%;
+  height: 3rem;
+}
+
+.order-card__skeleton-button {
+  height: 5.1rem;
+  border-radius: 1.45rem;
+}
+
+.business-reservations-page__toolbar-button:hover:not(:disabled),
+.business-reservations-page__toolbar-button:focus-visible,
+.business-reservations-page__tab:hover,
+.business-reservations-page__tab:focus-visible,
+.order-card__action:hover:not(:disabled),
+.order-card__action:focus-visible {
+  transform: translateY(-1px);
+}
+
+.business-reservations-page__tab:hover,
+.business-reservations-page__tab:focus-visible,
+.order-card__action:not(.order-card__action--primary):hover:not(:disabled),
+.order-card__action:not(.order-card__action--primary):focus-visible {
+  border-color: rgba(38, 126, 60, 0.36);
+  box-shadow: 0 12px 24px rgba(19, 37, 22, 0.06);
+}
+
+.business-reservations-page__tab:focus-visible,
+.business-reservations-page__toolbar-button:focus-visible,
+.order-card__action:focus-visible,
+.order-card__pickup-field input:focus-visible {
+  outline-offset: 0.25rem;
+}
+
+.business-reservations-page__tab:focus-visible,
+.business-reservations-page__toolbar-button:focus-visible,
+.order-card__action:focus-visible {
+  outline: 0.3rem solid rgba(39, 124, 60, 0.24);
+}
+
+@keyframes ordersSkeleton {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: -100% 50%;
+  }
 }
 
 @media (max-width: 1199px) {
-  .business-reservations-page__summary {
+  .business-reservations-page__tabs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 959px) {
-  .business-reservations-page__header,
-  .reservation-card {
-    grid-template-columns: 1fr;
-  }
-
-  .business-reservations-page__state,
-  .business-reservations-page__summary {
+  .business-reservations-page__hero {
+    gap: 1.8rem;
     padding: 2rem;
   }
 
-  .reservation-card__media img {
-    min-height: 20rem;
+  .business-reservations-page__header,
+  .order-card,
+  .order-card--skeleton {
+    grid-template-columns: 1fr;
   }
 
-  .reservation-card__topline {
+  .order-card__detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .order-card__media img,
+  .order-card__skeleton-media {
+    min-height: 22rem;
+  }
+
+  .order-card__headline-row,
+  .order-card__top-row {
     display: grid;
+  }
+
+  .order-card__price {
+    justify-items: start;
+  }
+
+  .order-card__detail-tile--wide {
+    grid-column: auto;
   }
 }
 
 @media (max-width: 639px) {
-  .business-reservations-page__summary {
+  .business-reservations-page__hero {
+    padding: 1.8rem;
+    border-radius: 2.4rem;
+  }
+
+  .business-reservations-page__header-copy h1 {
+    font-size: clamp(4rem, 13vw, 4.8rem);
+  }
+
+  .business-reservations-page__header-copy p {
+    font-size: 1.6rem;
+  }
+
+  .business-reservations-page__toolbar,
+  .business-reservations-page__state-actions,
+  .business-reservations-page__tabs {
+    display: grid;
+  }
+
+  .business-reservations-page__tab,
+  .business-reservations-page__toolbar-button,
+  .order-card__action {
+    width: 100%;
+  }
+
+  .business-reservations-page__tabs {
     grid-template-columns: 1fr;
+  }
+
+  .business-reservations-page__state,
+  .business-reservations-page__empty-tab,
+  .order-card__body {
+    padding: 1.8rem;
+  }
+
+  .order-card__headline-copy h2 {
+    font-size: 2.6rem;
+  }
+
+  .order-card__actions,
+  .order-card__skeleton-row,
+  .order-card__skeleton-actions {
+    grid-template-columns: 1fr;
+    display: grid;
   }
 }

@@ -1,5 +1,5 @@
 import { AddressModel } from '../../business/models/business.model';
-import { OfferStatus, PickupLocationModel, PickupTimeWindowModel } from './offer.model';
+import { AllergenCode, OfferCategory, OfferStatus, PickupLocationModel, PickupTimeWindowModel } from './offer.model';
 
 export type MarketplaceOfferSort = 'DISTANCE' | 'PICKUP_SOONEST' | 'PRICE_ASC' | 'NEWEST';
 export type MarketplaceViewMode = 'LIST' | 'MAP';
@@ -8,6 +8,7 @@ export interface MarketplaceBusinessSummaryModel {
   id: number;
   name: string;
   description: string | null;
+  iconUrl: string | null;
   address: AddressModel;
   ratingAverage: number | null;
   ratingCount: number;
@@ -20,6 +21,11 @@ export interface MarketplaceOfferModel {
   title: string;
   description: string | null;
   imageUrl: string | null;
+  category: OfferCategory;
+  illustrativeImage: boolean;
+  containsAllergens: AllergenCode[];
+  mayContainAllergens: AllergenCode[];
+  otherAllergenNote: string | null;
   price: number;
   originalPrice: number | null;
   quantityAvailable: number;

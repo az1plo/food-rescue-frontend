@@ -4,25 +4,40 @@
       <a class="footer__brand-link" routerLink="/" aria-label="Savr">
         <img class="footer__brand-image" src="/images/logo_footer.png" alt="Savr" />
       </a>
-      <p>We connect businesses with people to rescue surplus food and reduce waste in local communities.</p>
+      <p>Saving good food today for a better tomorrow.</p>
+
+      <div class="footer__socials" aria-label="Savr social channels">
+        <span class="footer__social" aria-hidden="true">
+          <fa-icon [icon]="icons.instagram" />
+        </span>
+        <span class="footer__social" aria-hidden="true">
+          <fa-icon [icon]="icons.facebook" />
+        </span>
+        <span class="footer__social" aria-hidden="true">
+          <fa-icon [icon]="icons.tiktok" />
+        </span>
+        <span class="footer__social" aria-hidden="true">
+          <fa-icon [icon]="icons.email" />
+        </span>
+      </div>
     </div>
 
     <div class="footer__columns">
       <nav class="footer__column" aria-label="Explore">
         <strong>Explore</strong>
-        <a routerLink="/">Home</a>
         <a routerLink="/browse-offers">Browse offers</a>
         <a routerLink="/how-it-works">How it works</a>
+        <a routerLink="/">Home</a>
       </nav>
 
-      <nav class="footer__column" aria-label="Business">
-        <strong>Business</strong>
-        <a routerLink="/for-business">For business</a>
+      <nav class="footer__column" aria-label="For business">
+        <strong>For business</strong>
+        <a routerLink="/for-business">Why partner with Savr</a>
         @if (user()) {
           <a routerLink="/workspace">Open workspace</a>
           <a routerLink="/workspace/my-businesses/new">Create business profile</a>
         } @else {
-          <button type="button" (click)="openWorkspace()">Sign in to open workspace</button>
+          <button type="button" (click)="openWorkspace()">Open workspace</button>
           <button type="button" (click)="createBusinessProfile()">Create business profile</button>
         }
       </nav>
@@ -34,13 +49,37 @@
         @if (user()) {
           <a routerLink="/workspace/my-businesses">My businesses</a>
         } @else {
+          <button type="button" (click)="openWorkspace()">Sign in</button>
+        }
+      </nav>
+
+      <nav class="footer__column" aria-label="Account">
+        <strong>Get started</strong>
+        @if (user()) {
+          <a routerLink="/workspace">Workspace dashboard</a>
+          <a routerLink="/browse-offers">Reserve nearby offers</a>
+          <a routerLink="/for-business">Partner with Savr</a>
+        } @else {
           <button type="button" (click)="openWorkspace()">Open workspace</button>
+          <a routerLink="/browse-offers">Browse offers</a>
+          <a routerLink="/for-business">For business</a>
         }
       </nav>
     </div>
   </div>
 
   <div class="container footer__bottom">
-    <p>(c) {{ year }} Savr. All rights reserved.</p>
+    <p>&copy; {{ year }} Savr. All rights reserved.</p>
+
+    <div class="footer__bottom-meta">
+      <span aria-live="polite" [attr.aria-label]="'Current location: ' + currentLocationLabel()">
+        <fa-icon [icon]="icons.location" />
+        {{ currentLocationLabel() }}
+      </span>
+      <span>
+        <fa-icon [icon]="icons.globe" />
+        English
+      </span>
+    </div>
   </div>
 </footer>

@@ -1,218 +1,447 @@
 <section class="page-section page-section--top-tight offer-details-page">
   <div class="container">
-    <div class="offer-details-page__topbar">
-      <app-action-button
-        label="Back to browse"
-        variant="ghost"
-        iconPosition="start"
-        [icon]="icons.arrowLeft"
-        (pressed)="goBackToBrowse()"
-      />
-    </div>
+    <button type="button" class="offer-details-page__back-link" (click)="goBackToBrowse()">
+      <fa-icon [icon]="icons.arrowLeft" aria-hidden="true" />
+      <span>Back to browse offers</span>
+    </button>
 
     @if (errorMessage()) {
       <div class="alert-banner alert-banner--danger">{{ errorMessage() }}</div>
     }
 
     @if (loading()) {
-      <section class="surface offer-details-page__state" aria-busy="true">
-        <span class="eyebrow">Offer</span>
-        <h1>Loading offer details</h1>
-        <p>We are preparing the full pickup story and related offers from this business.</p>
-      </section>
-    } @else if (currentOffer(); as offer) {
-      <div class="offer-details-page__layout">
-        <section class="surface offer-details-hero">
-          <div class="offer-details-hero__media">
-            <img [src]="currentImage()" [alt]="offer.title" />
+      <div class="offer-details-page__stack offer-details-page__stack--skeleton" aria-busy="true">
+        <section class="offer-details-hero offer-details-hero--skeleton" aria-hidden="true">
+          <div class="offer-details-hero__media offer-details-skeleton-block"></div>
 
-            <div class="offer-details-hero__overlay-top">
-              <span class="offer-details-hero__distance-pill">
-                <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
-                <span>{{ formatDistance(offer.distanceMeters) }}</span>
-              </span>
+          <div class="offer-details-hero__details">
+            <span class="offer-details-skeleton-line offer-details-skeleton-line--eyebrow"></span>
+            <span class="offer-details-skeleton-line offer-details-skeleton-line--hero-title"></span>
+            <span class="offer-details-skeleton-line offer-details-skeleton-line--hero-subtitle"></span>
 
-              <button
-                type="button"
-                class="offer-details-hero__cart-toggle"
-                [class.offer-details-hero__cart-toggle--active]="isCurrentOfferInCart()"
-                [attr.aria-label]="isCurrentOfferInCart() ? 'Remove from cart' : 'Add to cart'"
-                (click)="toggleCurrentOfferInCart()"
-              >
-                <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
-              </button>
-            </div>
+            <div class="offer-details-hero__business-row">
+              <div class="offer-details-hero__business">
+                <span class="offer-details-skeleton-circle offer-details-skeleton-circle--logo"></span>
 
-            <div class="offer-details-hero__overlay-bottom">
-              <div class="offer-details-hero__badge-stack">
-                @if (hasDiscount(offer.price, offer.originalPrice) && discountPercent(offer.price, offer.originalPrice); as savings) {
-                  <span class="offer-details-hero__discount-badge">Save {{ savings }}%</span>
-                }
-
-                <span class="offer-details-hero__status-badge">{{ offerStatusLabel(offer.status) }}</span>
+                <div class="offer-details-skeleton-stack">
+                  <span class="offer-details-skeleton-line offer-details-skeleton-line--business"></span>
+                  <span class="offer-details-skeleton-line offer-details-skeleton-line--location"></span>
+                </div>
               </div>
 
-              <span class="offer-details-hero__rating-badge">
-                <span>{{ formatRating(offer.business.ratingAverage, offer.business.ratingCount) }}</span>
-                <fa-icon [icon]="icons.star" aria-hidden="true" />
-              </span>
+              <div class="offer-details-hero__rating-block offer-details-hero__rating-block--skeleton">
+                <span class="offer-details-skeleton-line offer-details-skeleton-line--rating"></span>
+                <span class="offer-details-skeleton-line offer-details-skeleton-line--rating-meta"></span>
+              </div>
+            </div>
+
+            <div class="offer-details-hero__price-row">
+              <div class="offer-details-hero__price-group">
+                <span class="offer-details-skeleton-line offer-details-skeleton-line--price"></span>
+                <span class="offer-details-skeleton-line offer-details-skeleton-line--old-price"></span>
+                <span class="offer-details-skeleton-pill"></span>
+              </div>
+            </div>
+
+            <div class="offer-details-hero__facts">
+              @for (skeletonId of loadingSkeletonIds; track skeletonId) {
+                <div class="offer-details-hero__fact offer-details-hero__fact--skeleton">
+                  <span class="offer-details-skeleton-circle"></span>
+                  <div>
+                    <span class="offer-details-skeleton-line offer-details-skeleton-line--fact-label"></span>
+                    <span class="offer-details-skeleton-line offer-details-skeleton-line--fact-value"></span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="offer-details-hero__info-box">
+              <span class="offer-details-skeleton-circle"></span>
+
+              <div class="offer-details-skeleton-stack">
+                <span class="offer-details-skeleton-line offer-details-skeleton-line--info-title"></span>
+                <span class="offer-details-skeleton-line offer-details-skeleton-line--body"></span>
+                <span class="offer-details-skeleton-line offer-details-skeleton-line--body offer-details-skeleton-line--body-short"></span>
+              </div>
+            </div>
+
+            <div class="offer-details-hero__actions">
+              <span class="offer-details-skeleton-button offer-details-skeleton-button--primary"></span>
+              <span class="offer-details-skeleton-button"></span>
             </div>
           </div>
+        </section>
 
-          <div class="offer-details-hero__body">
-            <div class="offer-details-hero__headline">
-              <div>
-                <span class="eyebrow">Rescue offer</span>
-                <h1>{{ offer.title }}</h1>
-                <p class="offer-details-hero__business">{{ offer.business.name }}</p>
+        <section class="offer-details-page__cards" aria-hidden="true">
+          <article class="surface offer-details-card offer-details-card--skeleton">
+            <span class="offer-details-skeleton-line offer-details-skeleton-line--card-title"></span>
+
+            <div class="offer-details-skeleton-stack offer-details-skeleton-stack--spacious">
+              <div class="offer-details-skeleton-row">
+                <span class="offer-details-skeleton-circle"></span>
+                <span class="offer-details-skeleton-line offer-details-skeleton-line--row"></span>
+              </div>
+              <div class="offer-details-skeleton-row">
+                <span class="offer-details-skeleton-circle"></span>
+                <span class="offer-details-skeleton-line offer-details-skeleton-line--row"></span>
+              </div>
+              <div class="offer-details-skeleton-row">
+                <span class="offer-details-skeleton-circle"></span>
+                <span class="offer-details-skeleton-line offer-details-skeleton-line--row-wide"></span>
+              </div>
+            </div>
+
+            <div class="offer-details-skeleton-panel"></div>
+          </article>
+
+          <article class="surface offer-details-card offer-details-card--skeleton">
+            <span class="offer-details-skeleton-line offer-details-skeleton-line--card-title"></span>
+
+            <div class="offer-details-skeleton-stack offer-details-skeleton-stack--spacious">
+              <div class="offer-details-skeleton-row">
+                <span class="offer-details-skeleton-circle"></span>
+                <div class="offer-details-skeleton-stack">
+                  <span class="offer-details-skeleton-line offer-details-skeleton-line--fact-label"></span>
+                  <span class="offer-details-skeleton-line offer-details-skeleton-line--row"></span>
+                </div>
               </div>
 
-              <div class="offer-details-hero__pricing">
+              <div class="offer-details-skeleton-row">
+                <span class="offer-details-skeleton-circle"></span>
+                <div class="offer-details-skeleton-stack">
+                  <span class="offer-details-skeleton-line offer-details-skeleton-line--business"></span>
+                  <span class="offer-details-skeleton-line offer-details-skeleton-line--row-wide"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="offer-details-skeleton-map"></div>
+
+            <div class="offer-details-skeleton-stack">
+              <span class="offer-details-skeleton-line offer-details-skeleton-line--info-title"></span>
+              <span class="offer-details-skeleton-line offer-details-skeleton-line--body"></span>
+              <span class="offer-details-skeleton-line offer-details-skeleton-line--body offer-details-skeleton-line--body-short"></span>
+            </div>
+          </article>
+
+          <article class="surface offer-details-card offer-details-card--skeleton">
+            <span class="offer-details-skeleton-line offer-details-skeleton-line--card-title"></span>
+
+            <div class="offer-details-skeleton-row offer-details-skeleton-row--top">
+              <span class="offer-details-skeleton-circle offer-details-skeleton-circle--logo"></span>
+
+              <div class="offer-details-skeleton-stack">
+                <span class="offer-details-skeleton-line offer-details-skeleton-line--business"></span>
+                <span class="offer-details-skeleton-line offer-details-skeleton-line--location"></span>
+              </div>
+            </div>
+
+            <span class="offer-details-skeleton-line offer-details-skeleton-line--rating"></span>
+            <span class="offer-details-skeleton-line offer-details-skeleton-line--body"></span>
+            <span class="offer-details-skeleton-line offer-details-skeleton-line--body"></span>
+
+            <div class="offer-details-skeleton-stack offer-details-skeleton-stack--spacious">
+              <span class="offer-details-skeleton-line offer-details-skeleton-line--feature"></span>
+              <span class="offer-details-skeleton-line offer-details-skeleton-line--feature"></span>
+            </div>
+          </article>
+        </section>
+
+        <section class="offer-related-panel offer-related-panel--skeleton" aria-hidden="true">
+          <div class="offer-related-panel__header">
+            <span class="offer-details-skeleton-line offer-details-skeleton-line--related-title"></span>
+            <span class="offer-details-skeleton-line offer-details-skeleton-line--related-link"></span>
+          </div>
+
+          <div class="offer-related-panel__grid">
+            @for (skeletonId of relatedLoadingSkeletonIds; track skeletonId) {
+              <article class="surface offer-related-card-skeleton">
+                <div class="offer-related-card-skeleton__media"></div>
+
+                <div class="offer-related-card-skeleton__body">
+                  <span class="offer-details-skeleton-line offer-details-skeleton-line--eyebrow"></span>
+                  <span class="offer-details-skeleton-line offer-details-skeleton-line--related-card-title"></span>
+                  <span class="offer-details-skeleton-line offer-details-skeleton-line--body"></span>
+
+                  <div class="offer-related-card-skeleton__footer">
+                    <span class="offer-details-skeleton-line offer-details-skeleton-line--price-sm"></span>
+                    <span class="offer-details-skeleton-pill offer-details-skeleton-pill--small"></span>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      </div>
+    } @else if (currentOffer(); as offer) {
+      <div class="offer-details-page__stack">
+        <section class="offer-details-hero">
+          <div class="offer-details-hero__media">
+            <img [src]="currentImage()" [alt]="offer.title" />
+          </div>
+
+          <div class="offer-details-hero__details">
+            <h1>{{ offer.title }}</h1>
+
+            <div class="offer-details-hero__business-row">
+              <div class="offer-details-hero__business">
+                @if (currentBusinessIconUrl(); as businessIconUrl) {
+                  <img class="offer-details-hero__business-logo" [src]="businessIconUrl" [alt]="offer.business.name + ' icon'" />
+                } @else {
+                  <span class="offer-details-hero__business-mark">{{ currentBusinessMark() }}</span>
+                }
+
+                <div class="offer-details-hero__business-copy">
+                  <strong>{{ offer.business.name }}</strong>
+                  <span>{{ currentBusinessLocation() }}</span>
+                </div>
+              </div>
+
+              <div class="offer-details-hero__rating-block">
+                @if (currentRatingCount(); as ratingCount) {
+                  <strong>
+                    {{ currentRatingValue() }}
+                    <fa-icon [icon]="icons.star" aria-hidden="true" />
+                  </strong>
+                  <small>{{ ratingCount }}</small>
+                } @else {
+                  <strong>New</strong>
+                  <small>business</small>
+                }
+              </div>
+            </div>
+
+            <div class="offer-details-hero__price-row">
+              <div class="offer-details-hero__price-group">
                 <strong>{{ formatPrice(offer.price) }}</strong>
+
                 @if (hasDiscount(offer.price, offer.originalPrice)) {
                   <span>{{ formatPrice(offer.originalPrice ?? offer.price) }}</span>
                 }
+
+                @if (discountPercent(offer.price, offer.originalPrice); as savings) {
+                  <span class="offer-details-hero__discount-pill">{{ savings }}% off</span>
+                }
               </div>
             </div>
-
-            <p class="offer-details-hero__description">{{ currentDescription() }}</p>
 
             <div class="offer-details-hero__facts">
-              <span>
-                <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
-                {{ formatOfferPickupWindow(offer) }}
-              </span>
-              <span>
+              <div class="offer-details-hero__fact">
+                <fa-icon [icon]="icons.clock" aria-hidden="true" />
+                <div>
+                  <span>Pick up</span>
+                  <strong>{{ formatOfferPickupWindow(offer) }}</strong>
+                </div>
+              </div>
+
+              <div class="offer-details-hero__fact">
                 <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
-                {{ formatAddress(offer) }}
-              </span>
-              <span>
+                <div>
+                  <span>Location</span>
+                  <strong>{{ currentLocationFactLabel() }}</strong>
+                  <small>{{ currentBusinessLocation() }}</small>
+                </div>
+              </div>
+
+              <div class="offer-details-hero__fact">
                 <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
-                {{ offer.quantityAvailable }} available
-              </span>
+                <div>
+                  <span>Quantity available</span>
+                  <strong>{{ currentQuantityLabel() }}</strong>
+                </div>
+              </div>
             </div>
 
-            @if (offer.pickupLocation.note) {
-              <div class="offer-details-hero__pickup-note">
-                <fa-icon [icon]="icons.circleInfo" aria-hidden="true" />
-                <span>{{ offer.pickupLocation.note }}</span>
+            <div class="offer-details-hero__info-box">
+              <span class="offer-details-hero__info-icon">
+                <fa-icon [icon]="icons.leaf" aria-hidden="true" />
+              </span>
+
+              <div>
+                <strong>Freshly prepared surplus food</strong>
+                <p>{{ currentDescription() }}</p>
               </div>
-            }
+            </div>
 
             <div class="offer-details-hero__actions">
               <app-action-button
                 [label]="detailPrimaryActionLabel()"
                 iconPosition="start"
-                [icon]="offer.canReserve ? icons.creditCard : icons.eye"
-                [disabled]="!offer.canReserve"
+                [icon]="detailPrimaryActionIcon()"
+                [disabled]="detailPrimaryActionDisabled()"
                 (pressed)="startCheckoutForCurrentOffer()"
               />
 
-              <app-action-button
-                [label]="detailCartActionLabel()"
-                variant="secondary"
-                iconPosition="start"
-                [icon]="detailCartActionIcon()"
-                (pressed)="toggleCurrentOfferInCart()"
-              />
-
-              <app-action-button
-                label="Back to browse"
-                variant="ghost"
-                iconPosition="start"
-                [icon]="icons.arrowLeft"
-                (pressed)="goBackToBrowse()"
-              />
+              @if (!isOwnBusinessOffer(offer)) {
+                <app-action-button
+                  [label]="detailCartActionLabel()"
+                  variant="secondary"
+                  iconPosition="start"
+                  [icon]="detailCartActionIcon()"
+                  (pressed)="toggleCurrentOfferInCart()"
+                />
+              }
             </div>
+
           </div>
         </section>
 
-        <div class="offer-details-page__content">
-          <section class="surface offer-details-panel">
-            <span class="eyebrow">Inside the offer</span>
-            <h2>What customers should expect</h2>
+        <section class="offer-details-page__cards">
+          <article class="surface offer-details-card">
+            <h2>What’s inside</h2>
 
             @if (currentItems().length) {
-              <div class="offer-details-panel__chip-list">
+              <div class="offer-details-feature-list">
                 @for (item of currentItems(); track item.name + '-' + item.quantity) {
-                  <span>{{ itemSummary(item) }}</span>
+                  <div class="offer-details-feature-list__item">
+                    <span class="offer-details-feature-list__icon">
+                      <fa-icon [icon]="icons.leaf" aria-hidden="true" />
+                    </span>
+                    <span>{{ itemSummary(item) }}</span>
+                  </div>
                 }
               </div>
             } @else {
-              <p class="offer-details-panel__muted">The business has not listed specific contents yet, but the pickup description above still applies.</p>
+              <div class="offer-details-feature-list">
+                <div class="offer-details-feature-list__item">
+                  <span class="offer-details-feature-list__icon">
+                    <fa-icon [icon]="icons.leaf" aria-hidden="true" />
+                  </span>
+                  <span>Each rescue offer may include a different mix of fresh items.</span>
+                </div>
+                <div class="offer-details-feature-list__item">
+                  <span class="offer-details-feature-list__icon">
+                    <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
+                  </span>
+                  <span>Contents can vary depending on what was left at the end of service.</span>
+                </div>
+                <div class="offer-details-feature-list__item">
+                  <span class="offer-details-feature-list__icon">
+                    <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
+                  </span>
+                  <span>A balanced surprise offer designed for a same-day pickup.</span>
+                </div>
+              </div>
             }
-          </section>
 
-          <section class="surface offer-details-panel">
-            <span class="eyebrow">Business</span>
-            <h2>About {{ offer.business.name }}</h2>
-            <p>{{ offer.business.description || 'This business regularly publishes rescue offers to keep quality food moving instead of going to waste.' }}</p>
+            <div class="offer-details-card__callout">
+              <span>A tasty surprise every time!</span>
+            </div>
+          </article>
 
-            <div class="offer-details-panel__business-meta">
-              <span>
-                <fa-icon [icon]="icons.star" aria-hidden="true" />
-                {{ formatRating(offer.business.ratingAverage, offer.business.ratingCount) }}
-              </span>
-              <span>
+          <article class="surface offer-details-card">
+            <h2>Pickup details</h2>
+
+            <div class="offer-details-detail-list">
+              <div class="offer-details-detail-list__item">
+                <fa-icon [icon]="icons.clock" aria-hidden="true" />
+                <div>
+                  <span>Pickup window</span>
+                  <strong>{{ formatOfferPickupWindow(offer) }}</strong>
+                </div>
+              </div>
+
+              <div class="offer-details-detail-list__item">
                 <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
-                {{ offer.business.address.street }}, {{ offer.business.address.city }}, {{ offer.business.address.country }}
-              </span>
-              <span>
-                <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
-                {{ offer.business.availableOfferCount }} live offers, {{ offer.business.unavailableOfferCount }} unavailable
-              </span>
+                <div>
+                  <strong>{{ offer.business.name }}</strong>
+                  <span>{{ formatAddress(offer) }}</span>
+                </div>
+              </div>
             </div>
-          </section>
-        </div>
 
-        <section class="surface offer-related-panel">
-          <div class="offer-related-panel__header">
-            <div>
-              <span class="eyebrow">More from this business</span>
-              <h2>Other rescue offers from {{ offer.business.name }}</h2>
-              <p>Explore similar pickups from the same business without losing your marketplace context.</p>
+            <button type="button" class="offer-details-card__map-preview" (click)="goBackToBrowse()">
+              <span class="offer-details-card__map-pin">
+                <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
+              </span>
+              <span class="offer-details-card__map-button">View on map</span>
+            </button>
+
+            <div class="offer-details-card__text-block">
+              <strong>Pickup instructions</strong>
+              <p>{{ currentPickupInstructions() }}</p>
             </div>
+
+            <div class="offer-details-card__note">
+              <strong>Note:</strong>
+              <span>Orders must be picked up during the pickup window.</span>
+            </div>
+          </article>
+
+          <article class="surface offer-details-card">
+            <h2>About this business</h2>
+
+            <div class="offer-details-business">
+            <div class="offer-details-business__header">
+                @if (currentBusinessIconUrl(); as businessIconUrl) {
+                  <img class="offer-details-business__logo" [src]="businessIconUrl" [alt]="offer.business.name + ' icon'" />
+                } @else {
+                  <span class="offer-details-business__mark">{{ currentBusinessMark() }}</span>
+                }
+
+                <div class="offer-details-business__copy">
+                  <strong>{{ offer.business.name }}</strong>
+                  <span>
+                    @if (currentCategoryLabel(); as categoryLabel) {
+                      {{ categoryLabel }} •
+                    }
+                    {{ currentBusinessLocation() }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="offer-details-business__rating">
+                @if (currentRatingCount(); as ratingCount) {
+                  <strong>{{ currentRatingValue() }}</strong>
+                  <span>
+                    <fa-icon [icon]="icons.star" aria-hidden="true" />
+                    {{ ratingCount }}
+                  </span>
+                } @else {
+                  <span>New business</span>
+                }
+              </div>
+
+              <p>{{ currentBusinessDescription() }}</p>
+
+              <div class="offer-details-business__features">
+                <span>
+                  <fa-icon [icon]="icons.heart" aria-hidden="true" />
+                  Local favorite
+                </span>
+                <span>
+                  <fa-icon [icon]="icons.leaf" aria-hidden="true" />
+                  Sustainable packaging
+                </span>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="offer-related-panel">
+          <div class="offer-related-panel__header">
+            <h2>More from this business</h2>
+
+            <button type="button" class="offer-related-panel__link" (click)="goBackToBrowse()">
+              <span>See all offers</span>
+              <fa-icon [icon]="icons.chevronRight" aria-hidden="true" />
+            </button>
           </div>
 
           @if (relatedOffers().length) {
             <div class="offer-related-panel__grid">
-              @for (relatedOffer of relatedOffers(); track relatedOffer.id) {
-                <article class="offer-related-card">
-                  <div class="offer-related-card__media">
-                    <img [src]="resolveRelatedOfferImage(relatedOffer)" [alt]="relatedOffer.title" />
-                    <span class="offer-related-card__distance">{{ formatDistance(relatedOffer.distanceMeters) }}</span>
-                  </div>
-
-                  <div class="offer-related-card__body">
-                    <div class="offer-related-card__title-row">
-                      <h3>{{ relatedOffer.title }}</h3>
-                      <strong>{{ formatPrice(relatedOffer.price) }}</strong>
-                    </div>
-
-                    @if (hasDiscount(relatedOffer.price, relatedOffer.originalPrice)) {
-                      <span class="offer-related-card__original-price">{{ formatPrice(relatedOffer.originalPrice ?? relatedOffer.price) }}</span>
-                    }
-
-                    <p>{{ relatedOffer.description || 'Another rescue pickup from this business.' }}</p>
-
-                    <div class="offer-related-card__meta">
-                      <span>{{ formatOfferPickupWindow(relatedOffer) }}</span>
-                      <span>{{ relatedOffer.quantityAvailable }} available</span>
-                    </div>
-
-                    <app-action-button
-                      label="View details"
-                      variant="secondary"
-                      iconPosition="start"
-                      [icon]="icons.arrowRight"
-                      (pressed)="openRelatedOffer(relatedOffer)"
-                    />
-                  </div>
-                </article>
+              @for (relatedOfferCard of relatedOfferCards(); track relatedOfferCard.offer.id) {
+                <app-offer-card
+                  [card]="relatedOfferCard.card"
+                  variant="detail"
+                  [clickable]="true"
+                  [showRatingIcon]="relatedOfferCard.showRatingIcon"
+                  (cardPressed)="openRelatedOffer(relatedOfferCard.offer)"
+                />
               }
             </div>
           } @else {
-            <div class="offer-related-panel__empty">
+            <div class="surface offer-related-panel__empty">
               <h3>No other offers from this business right now</h3>
               <p>This pickup is currently the only public marketplace offer available from this business.</p>
             </div>

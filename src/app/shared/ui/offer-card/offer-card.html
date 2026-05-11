@@ -1,0 +1,117 @@
+<article
+  class="surface offer-card"
+  [class.offer-card--selected]="isSelected()"
+  [class.offer-card--interactive]="clickable()"
+  [attr.data-status]="status()"
+  [attr.data-variant]="variant()"
+  [attr.role]="clickable() ? 'button' : null"
+  [attr.tabindex]="clickable() ? '0' : null"
+  (click)="handleCardClick()"
+  (keydown)="handleCardKeydown($event)"
+>
+  <div class="offer-card__media">
+    <img [src]="card().image" [alt]="card().title" />
+
+    @if (hasMediaTop()) {
+      <div
+        class="offer-card__media-top"
+        [class.offer-card__media-top--end]="!showCartButton() && hasBadge()"
+        [class.offer-card__media-top--start]="showCartButton() && !hasBadge()"
+      >
+        @if (showCartButton()) {
+          <button
+            type="button"
+            class="offer-card__cart-toggle"
+            [class.offer-card__cart-toggle--active]="isInCart()"
+            [attr.aria-label]="cartAriaLabel()"
+            (click)="handleCartClick($event)"
+            (keydown)="stopCardKeyboardEvent($event)"
+          >
+            <fa-icon [icon]="icons.bagShopping" aria-hidden="true" />
+          </button>
+        }
+
+        @if (hasBadge()) {
+          @if (interactiveBadge()) {
+            <button
+              type="button"
+              class="offer-card__availability-badge"
+              [attr.aria-label]="badgeAriaLabel()"
+              (click)="handleBadgeClick($event)"
+              (keydown)="stopCardKeyboardEvent($event)"
+            >
+              {{ card().availabilityLabel }}
+            </button>
+          } @else {
+            <span class="offer-card__availability-badge">{{ card().availabilityLabel }}</span>
+          }
+        }
+      </div>
+    }
+  </div>
+
+  <div class="offer-card__body">
+    @if (showBusinessInfo()) {
+      <div class="offer-card__brand-row">
+        <div class="offer-card__brand">
+          @if (brandImageUrl(); as brandImageUrlValue) {
+            <img class="offer-card__brand-logo" [src]="brandImageUrlValue" [alt]="card().businessName + ' icon'" />
+          } @else {
+            <span class="offer-card__brand-mark" aria-hidden="true">{{ brandMark() }}</span>
+          }
+
+          <div class="offer-card__brand-copy">
+            <strong>{{ card().businessName }}</strong>
+
+            @if (card().businessArea) {
+              <span>{{ card().businessArea }}</span>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <h3 class="offer-card__title">{{ card().title }}</h3>
+
+    @if (showDescription() && card().description) {
+      <p class="offer-card__description">{{ card().description }}</p>
+    }
+
+    @if (showPickup() && card().pickup) {
+      <div class="offer-card__meta-row">
+        <fa-icon class="offer-card__meta-icon" [icon]="icons.clock" aria-hidden="true" />
+        <span>{{ card().pickup }}</span>
+      </div>
+    }
+
+    @if (showDistance() && card().distance) {
+      <div class="offer-card__meta-row">
+        <fa-icon class="offer-card__meta-icon" [icon]="icons.locationDot" aria-hidden="true" />
+        <span>{{ card().distance }}</span>
+      </div>
+    }
+
+    @if (hasFooter()) {
+      <div class="offer-card__footer">
+        @if (showPrice()) {
+          <div class="offer-card__price-stack">
+            <strong>{{ card().price }}</strong>
+
+            @if (showOriginalPrice() && card().originalPrice) {
+              <span class="offer-card__original-price">{{ card().originalPrice }}</span>
+            }
+          </div>
+        }
+
+        @if (showRating() && card().rating) {
+          <span class="offer-card__rating">
+            {{ card().rating }}
+            @if (showRatingIcon()) {
+              <fa-icon [icon]="icons.star" aria-hidden="true" />
+            }
+          </span>
+        }
+      </div>
+    }
+  </div>
+</article>

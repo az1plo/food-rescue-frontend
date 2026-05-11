@@ -40,11 +40,22 @@ export interface OrderPickupPassModel {
   providerReference: string;
 }
 
+export interface OrderReviewModel {
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+}
+
 export interface CreateOrderPayload {
   offerId: number;
   quantity: number;
   cardHolderName: string;
   cardLast4: string;
+}
+
+export interface CreateOrderReviewPayload {
+  rating: number;
+  comment?: string | null;
 }
 
 export interface OrderModel {
@@ -60,6 +71,7 @@ export interface OrderModel {
   cancelledAt: string | null;
   pickupConfirmation: PickupConfirmationModel | null;
   payment: OrderPaymentModel | null;
+  review: OrderReviewModel | null;
 }
 
 export interface OrderStatusMeta {

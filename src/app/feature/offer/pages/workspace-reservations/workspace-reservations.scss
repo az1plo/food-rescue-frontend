@@ -1,188 +1,1046 @@
-.workspace-reservations-page__summary {
+.my-pickups-page {
+  --pickup-green: var(--color-primary);
+  --pickup-green-dark: var(--color-primary-strong);
+  --pickup-green-soft: #eef6e8;
+  --pickup-surface-soft: #f7f8f1;
+  --pickup-border: rgba(218, 228, 213, 0.92);
+  --pickup-muted: #647163;
+  --pickup-shadow:
+    0 20px 42px rgba(19, 37, 22, 0.08),
+    0 3px 10px rgba(19, 37, 22, 0.05);
+  --pickup-display-font: Georgia, 'Times New Roman', serif;
+}
+
+.my-pickups-page .container,
+.my-pickups-page__header,
+.my-pickups-page__list,
+.my-pickups-page__tabs,
+.my-pickups-page__state,
+.my-pickups-page__state-copy,
+.my-pickups-page__empty-tab,
+.pickup-card__body,
+.pickup-card__detail-copy,
+.pickup-card__panel-copy,
+.pickup-card__detail-grid,
+.pickup-card__detail-tile,
+.pickup-card__review-copy,
+.pickup-tips,
+.pickup-tips__lead,
+.pickup-tips__item,
+.past-pickups-shortcut {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1.6rem;
-  margin-bottom: 2.4rem;
 }
 
-.workspace-reservations-page__summary article {
-  display: grid;
-  gap: 0.4rem;
+.my-pickups-page .container {
+  gap: 2.8rem;
 }
 
-.workspace-reservations-page__summary strong {
-  font-size: 2.4rem;
+.my-pickups-page__header {
+  gap: 1rem;
 }
 
-.workspace-reservations-page__summary span {
-  color: var(--color-text-muted);
-  font-size: 1.3rem;
-  font-weight: 600;
+.my-pickups-page__header h1,
+.my-pickups-page__state h2,
+.my-pickups-page__empty-tab h2,
+.pickup-card__headline-row h2,
+.pickup-tips__lead h2,
+.past-pickups-shortcut__copy strong {
+  margin: 0;
+  color: var(--pickup-green-dark);
+  font-family: var(--pickup-display-font);
+  font-weight: 700;
+  letter-spacing: -0.04em;
 }
 
-.workspace-reservations-page__grid {
-  display: grid;
-  gap: 1.8rem;
+.my-pickups-page__header h1 {
+  font-size: clamp(4.8rem, 6vw, 5.8rem);
+  line-height: 0.96;
 }
 
-.workspace-reservations-page__state {
-  display: grid;
+.my-pickups-page__header p,
+.my-pickups-page__state p,
+.my-pickups-page__empty-tab p,
+.pickup-card__business-copy span,
+.pickup-card__detail-copy span,
+.pickup-card__meta-note,
+.pickup-card__panel-copy p,
+.pickup-card__detail-tile p,
+.pickup-card__review-copy span,
+.pickup-tips__item p,
+.past-pickups-shortcut__copy span {
+  margin: 0;
+  color: var(--pickup-muted);
+}
+
+.my-pickups-page__header p {
+  max-width: 60rem;
+  font-size: 1.7rem;
+  line-height: 1.65;
+}
+
+.my-pickups-page__tabs {
+  grid-template-columns: repeat(3, minmax(0, max-content));
   gap: 1.2rem;
 }
 
-.workspace-reservations-page__state--empty {
-  justify-items: start;
+.my-pickups-page__tab,
+.my-pickups-page__state-button,
+.my-pickups-page__empty-tab-button,
+.pickup-card__action,
+.past-pickups-shortcut {
+  border: 1px solid var(--pickup-border);
+  background: #ffffff;
 }
 
-.reservation-card {
+.my-pickups-page__tab,
+.my-pickups-page__state-button,
+.my-pickups-page__empty-tab-button,
+.pickup-card__action,
+.pickup-card__review-score,
+.past-pickups-shortcut {
+  transition:
+    transform var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    background var(--transition-base),
+    color var(--transition-base);
+}
+
+.my-pickups-page__tab,
+.pickup-card__action,
+.past-pickups-shortcut {
+  display: inline-flex;
+  align-items: center;
+}
+
+.my-pickups-page__tab {
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 5.6rem;
+  padding: 0 2rem;
+  border-radius: 1.5rem;
+  color: #223226;
+  font-size: 1.6rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(20, 38, 22, 0.03);
+}
+
+.my-pickups-page__tab.is-active {
+  border-color: rgba(40, 124, 60, 0.94);
+  background: linear-gradient(135deg, var(--pickup-green), #236e34);
+  color: #ffffff;
+  box-shadow: 0 16px 26px rgba(24, 77, 37, 0.18);
+}
+
+.my-pickups-page__tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.9rem;
+  height: 2.9rem;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  background: rgba(39, 114, 55, 0.1);
+  color: var(--pickup-green-dark);
+  font-size: 1.28rem;
+  line-height: 1;
+}
+
+.my-pickups-page__tab.is-active .my-pickups-page__tab-count {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.my-pickups-page__state,
+.my-pickups-page__empty-tab {
+  gap: 1.8rem;
+  padding: 3rem;
+  border: 1px solid var(--pickup-border);
+  border-radius: 2.4rem;
+  background: #ffffff;
+  box-shadow: var(--pickup-shadow);
+}
+
+.my-pickups-page__state {
+  place-items: center;
+  text-align: center;
+}
+
+.my-pickups-page__state-copy {
+  gap: 1rem;
+  max-width: 55rem;
+}
+
+.my-pickups-page__state h2,
+.my-pickups-page__empty-tab h2 {
+  font-size: clamp(3rem, 4vw, 4rem);
+}
+
+.my-pickups-page__state p,
+.my-pickups-page__empty-tab p {
+  font-size: 1.55rem;
+  line-height: 1.7;
+}
+
+.my-pickups-page__state-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pickup-green), #236e34);
+  color: #ffffff;
+  font-size: 2.2rem;
+  box-shadow: 0 16px 28px rgba(26, 74, 37, 0.18);
+}
+
+.my-pickups-page__state-button,
+.my-pickups-page__empty-tab-button {
+  min-height: 5.4rem;
+  padding: 0 2.4rem;
+  border-radius: 1.6rem;
+  background: linear-gradient(135deg, var(--pickup-green), #2b9c3e);
+  color: #ffffff;
+  font-size: 1.65rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 18px 34px rgba(28, 83, 40, 0.18);
+}
+
+.my-pickups-page__list {
+  gap: 1.8rem;
+}
+
+.pickup-card {
   display: grid;
-  grid-template-columns: minmax(22rem, 28rem) minmax(0, 1fr);
-  gap: 2rem;
+  grid-template-columns: minmax(25rem, 28rem) minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--pickup-border);
+  border-radius: 2rem;
+  background: #ffffff;
+  box-shadow: var(--pickup-shadow);
+}
+
+.pickup-card__media {
+  min-width: 0;
   overflow: hidden;
 }
 
-.reservation-card__media {
-  min-height: 100%;
-}
-
-.reservation-card__media img {
+.pickup-card__media img,
+.pickup-card__skeleton-media {
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 24rem;
+  min-height: 21rem;
   object-fit: cover;
-  border-radius: 2rem;
 }
 
-.reservation-card__body {
-  display: grid;
-  gap: 1.8rem;
+.pickup-card__body {
+  gap: 1.5rem;
   align-content: start;
+  min-width: 0;
+  padding: 1.9rem 2rem 2rem;
 }
 
-.reservation-card__topline {
+.pickup-card__top-row,
+.pickup-card__headline-row,
+.pickup-card__business,
+.pickup-card__detail,
+.pickup-card__actions,
+.pickup-card__review,
+.pickup-tips__lead,
+.pickup-tips__item,
+.past-pickups-shortcut {
+  display: flex;
+  align-items: center;
+}
+
+.pickup-card__top-row,
+.pickup-card__headline-row {
+  justify-content: space-between;
+  gap: 1.6rem;
+}
+
+.pickup-card__business {
+  gap: 1.2rem;
+  min-width: 0;
+}
+
+.pickup-card__avatar,
+.pickup-card__avatar-image,
+.pickup-tips__leaf,
+.pickup-tips__icon,
+.past-pickups-shortcut__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex: none;
+}
+
+.pickup-card__avatar {
+  width: 4.8rem;
+  height: 4.8rem;
+  background: linear-gradient(135deg, #18251b, #324436);
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  box-shadow: 0 12px 22px rgba(18, 31, 20, 0.14);
+}
+
+.pickup-card__avatar-image {
+  width: 4.8rem;
+  height: 4.8rem;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 12px 22px rgba(18, 31, 20, 0.14);
+}
+
+.pickup-card__business-copy,
+.pickup-card__detail-copy {
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.pickup-card__business-copy strong,
+.pickup-card__detail-copy strong {
+  color: #203124;
+  font-size: 1.52rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.pickup-card__business-copy strong,
+.pickup-card__business-copy span,
+.pickup-card__detail-copy strong,
+.pickup-card__detail-copy span,
+.pickup-card__headline-row h2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pickup-card__business-copy span,
+.pickup-card__detail-copy span,
+.pickup-card__meta-note,
+.pickup-card__panel-copy p,
+.pickup-card__detail-tile p,
+.pickup-card__review-copy span,
+.pickup-tips__item p,
+.past-pickups-shortcut__copy span {
+  font-size: 1.38rem;
+  line-height: 1.5;
+}
+
+.pickup-card__status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.2rem;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  background: #edf7df;
+  color: #376126;
+  font-size: 1.2rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.pickup-card__status-pill[data-tone='default'] {
+  background: #eff3eb;
+  color: #5d6b5c;
+}
+
+.pickup-card__status-pill[data-tone='danger'],
+.pickup-card__status-pill[data-tone='warning'] {
+  background: #f7efe9;
+  color: #966234;
+}
+
+.pickup-card__headline-row h2 {
+  flex: 1 1 auto;
+  font-size: clamp(2.2rem, 2.8vw, 3rem);
+  line-height: 1.03;
+}
+
+.pickup-card__price {
+  display: grid;
+  justify-items: end;
+  gap: 0.45rem;
+  flex: none;
+}
+
+.pickup-card__price-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+
+.pickup-card__price strong {
+  color: var(--pickup-green-dark);
+  font-size: 2.7rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.pickup-card__old-price {
+  color: var(--pickup-muted);
+  font-size: 1.34rem;
+  font-weight: 600;
+  text-decoration: line-through;
+  text-decoration-thickness: 0.14rem;
+}
+
+.pickup-card__discount-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0 1rem;
+  border-radius: 999px;
+  background: #ddf0bf;
+  color: #365a22;
+  font-size: 1.16rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.pickup-card__price-meta {
+  color: var(--pickup-muted);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.pickup-card__details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem 1.4rem;
+}
+
+.pickup-card__detail {
+  align-items: start;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.pickup-card__detail fa-icon,
+.pickup-card__review fa-icon,
+.past-pickups-shortcut > fa-icon {
+  color: var(--pickup-green-dark);
+}
+
+.pickup-card__detail fa-icon {
+  margin-top: 0.2rem;
+}
+
+.pickup-card__meta-note {
+  padding: 0.2rem 0;
+}
+
+.pickup-card__meta-note[data-tone='warning'] {
+  color: #8a6337;
+}
+
+.pickup-card__meta-note[data-tone='danger'] {
+  color: #935834;
+}
+
+.pickup-card__actions {
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pickup-card__action {
+  justify-content: center;
+  gap: 0.8rem;
+  min-height: 5.2rem;
+  flex: 1 1 18rem;
+  padding: 0 1.6rem;
+  border-radius: 1.45rem;
+  color: var(--pickup-green-dark);
+  font-size: 1.55rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pickup-card__action--primary {
+  border-color: rgba(38, 126, 60, 0.96);
+  background: linear-gradient(135deg, var(--pickup-green), #2f9b41);
+  color: #ffffff;
+  box-shadow: 0 18px 28px rgba(24, 74, 37, 0.16);
+}
+
+.pickup-card__panel {
+  gap: 1.4rem;
+  padding: 1.6rem;
+  border: 1px solid var(--pickup-border);
+  border-radius: 1.8rem;
+  background: linear-gradient(135deg, rgba(244, 248, 239, 0.96), rgba(252, 249, 242, 0.98));
+}
+
+.pickup-card__panel-copy {
+  gap: 0.45rem;
+}
+
+.pickup-card__panel-copy strong,
+.pickup-card__detail-tile span,
+.pickup-card__review-copy strong,
+.pickup-tips__item strong {
+  color: var(--pickup-green-dark);
+}
+
+.pickup-card__panel-copy strong,
+.pickup-card__review-copy strong,
+.pickup-tips__item strong,
+.past-pickups-shortcut__copy strong {
+  font-size: 1.55rem;
+}
+
+.pickup-card__panel-fallback {
+  margin: 0;
+  color: var(--pickup-muted);
+  font-size: 1.4rem;
+  line-height: 1.6;
+}
+
+.pickup-pass-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 2.4rem;
+  background: rgba(16, 24, 18, 0.38);
+  backdrop-filter: blur(10px);
+}
+
+.pickup-pass-modal__dialog,
+.pickup-pass-modal__loading,
+.pickup-pass-modal__brand-copy {
+  display: grid;
+}
+
+.pickup-pass-modal__dialog {
+  width: min(52rem, 100%);
+  gap: 1.8rem;
+  padding: 2.6rem;
+  border: 1px solid var(--pickup-border);
+  border-radius: 2.4rem;
+  background: #ffffff;
+  box-shadow:
+    0 28px 64px rgba(15, 26, 17, 0.22),
+    0 8px 18px rgba(15, 26, 17, 0.12);
+}
+
+.pickup-pass-modal__header {
   display: flex;
   align-items: start;
   justify-content: space-between;
   gap: 1.6rem;
 }
 
-.reservation-card__topline h2 {
-  margin-bottom: 0.8rem;
-  font-size: clamp(2rem, 1.6vw, 2.6rem);
-}
-
-.reservation-card__topline p {
+.pickup-pass-modal__header h2,
+.pickup-pass-modal__meta strong {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--pickup-green-dark);
 }
 
-.reservation-card__status {
+.pickup-pass-modal__header h2 {
+  font-family: var(--pickup-display-font);
+  font-size: 3.2rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.pickup-pass-modal__header p,
+.pickup-pass-modal__fallback,
+.pickup-pass-modal__meta span,
+.pickup-pass-modal__loading p {
+  margin: 0;
+  color: var(--pickup-muted);
+}
+
+.pickup-pass-modal__header p,
+.pickup-pass-modal__fallback,
+.pickup-pass-modal__loading p {
+  font-size: 1.45rem;
+  line-height: 1.65;
+}
+
+.pickup-pass-modal__close {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 3.6rem;
-  padding: 0 1.4rem;
-  border-radius: 999px;
-  font-size: 1.2rem;
+  width: 4.4rem;
+  height: 4.4rem;
+  flex: none;
+  border: 0;
+  border-radius: 1.4rem;
+  background: rgba(245, 248, 241, 0.96);
+  box-shadow: inset 0 0 0 1px rgba(220, 229, 215, 0.96);
+  color: #243728;
+  cursor: pointer;
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.pickup-pass-modal__meta {
+  display: grid;
+  gap: 0.3rem;
+  padding: 1.5rem 1.6rem;
+  border: 1px solid rgba(220, 229, 215, 0.96);
+  border-radius: 1.7rem;
+  background: linear-gradient(135deg, rgba(243, 247, 239, 0.96), rgba(252, 248, 241, 0.96));
+}
+
+.pickup-pass-modal__brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.pickup-pass-modal__brand-image,
+.pickup-pass-modal__brand-mark {
+  display: inline-flex;
+  width: 4.4rem;
+  height: 4.4rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 10px 18px rgba(18, 31, 20, 0.12);
+}
+
+.pickup-pass-modal__brand-image {
+  object-fit: cover;
+}
+
+.pickup-pass-modal__brand-mark {
+  background: linear-gradient(135deg, #18251b, #324436);
+  color: #ffffff;
+  font-size: 1.3rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
+}
+
+.pickup-pass-modal__brand-copy {
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.pickup-pass-modal__brand-copy strong {
+  font-size: 1.5rem;
+  color: #203124;
+}
+
+.pickup-pass-modal__meta strong {
+  font-size: 1.72rem;
+  font-weight: 800;
+}
+
+.pickup-pass-modal__brand-copy strong,
+.pickup-pass-modal__brand-copy span {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.reservation-card__status[data-tone='success'] {
-  background: rgba(47, 143, 78, 0.12);
-  color: #246e3d;
+.pickup-pass-modal__meta span,
+.pickup-pass-modal__brand-copy span {
+  font-size: 1.35rem;
+  line-height: 1.5;
 }
 
-.reservation-card__status[data-tone='warning'] {
-  background: rgba(212, 134, 36, 0.14);
-  color: #9a5f14;
+.pickup-pass-modal__loading {
+  gap: 1rem;
 }
 
-.reservation-card__status[data-tone='danger'] {
-  background: rgba(216, 79, 79, 0.12);
-  color: #b03b3b;
+.pickup-pass-modal__loading-line {
+  display: block;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(238, 243, 236, 0.96), rgba(247, 249, 244, 0.96), rgba(238, 243, 236, 0.96));
+  background-size: 200% 100%;
+  animation: pickupSkeleton 1.5s ease-in-out infinite;
 }
 
-.reservation-card__status[data-tone='default'] {
-  background: rgba(64, 93, 70, 0.1);
-  color: #405d46;
+.pickup-pass-modal__loading-line--title {
+  width: 38%;
+  height: 1.4rem;
 }
 
-.reservation-card__meta {
-  display: grid;
-  gap: 0.9rem;
+.pickup-pass-modal__loading-line--card {
+  width: 100%;
+  height: 34rem;
+  border-radius: 2rem;
 }
 
-.reservation-card__meta div {
-  display: inline-flex;
+.pickup-card__detail-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.pickup-card__detail-tile {
+  gap: 0.4rem;
+  padding: 1.2rem 1.3rem;
+  border: 1px solid rgba(219, 228, 214, 0.96);
+  border-radius: 1.45rem;
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.pickup-card__detail-tile--wide {
+  grid-column: 1 / -1;
+}
+
+.pickup-card__detail-tile span {
+  font-size: 1.16rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.pickup-card__review {
+  gap: 1rem 1.4rem;
+  padding: 1.4rem 1.5rem;
+  border: 1px solid rgba(219, 228, 214, 0.96);
+  border-radius: 1.6rem;
+  background: rgba(246, 248, 241, 0.92);
+}
+
+.pickup-card__review--submitted {
+  background: linear-gradient(135deg, rgba(244, 248, 239, 0.96), rgba(252, 249, 242, 0.98));
+}
+
+.pickup-card__review-copy {
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.pickup-card__review-scale {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.7rem;
+}
+
+.pickup-card__review-score {
+  min-width: 4rem;
+  min-height: 4rem;
+  border: 1px solid rgba(192, 203, 187, 0.96);
+  border-radius: 1.2rem;
+  background: #ffffff;
+  color: var(--pickup-green-dark);
+  font-size: 1.4rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pickup-tips,
+.past-pickups-shortcut {
+  border: 1px solid var(--pickup-border);
+  border-radius: 2rem;
+  background: #ffffff;
+  box-shadow: var(--pickup-shadow);
+}
+
+.pickup-tips {
+  grid-template-columns: minmax(18rem, 23rem) repeat(3, minmax(0, 1fr));
+  gap: 0;
+  overflow: hidden;
+}
+
+.pickup-tips__lead,
+.pickup-tips__item {
+  gap: 1rem;
+  padding: 2rem 2.2rem;
+  min-width: 0;
+}
+
+.pickup-tips__lead {
+  grid-template-columns: auto minmax(0, 1fr);
+  background: linear-gradient(135deg, rgba(248, 251, 244, 0.98), rgba(255, 252, 245, 0.98));
+}
+
+.pickup-tips__leaf {
+  width: 5.6rem;
+  height: 5.6rem;
+  background: linear-gradient(135deg, var(--pickup-green), #236e34);
+  color: #ffffff;
+  font-size: 2rem;
+  box-shadow: 0 14px 26px rgba(24, 74, 37, 0.16);
+}
+
+.pickup-tips__lead h2 {
+  font-size: 3rem;
+  line-height: 1.02;
+}
+
+.pickup-tips__item {
+  border-left: 1px solid rgba(221, 230, 216, 0.96);
+}
+
+.pickup-tips__icon,
+.past-pickups-shortcut__icon {
+  width: 4.8rem;
+  height: 4.8rem;
+  background: #edf7df;
+  color: var(--pickup-green-dark);
+  font-size: 1.7rem;
+}
+
+.pickup-tips__item strong {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.past-pickups-shortcut {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 1.4rem;
+  width: 100%;
   align-items: center;
-  gap: 0.9rem;
-  color: var(--color-text-muted);
+  padding: 1.8rem 2rem;
+  cursor: pointer;
 }
 
-.reservation-card__meta fa-icon {
-  color: var(--color-primary-strong);
+.past-pickups-shortcut__copy {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  text-align: left;
 }
 
-.reservation-card__fallback {
-  margin: 0;
-  padding: 1.2rem 1.4rem;
-  border-radius: 1.4rem;
-  background: #f7f2e8;
-  color: #7a6641;
-  font-size: 1.3rem;
+.past-pickups-shortcut__copy strong {
+  line-height: 1.1;
 }
 
-.reservation-card__pickup-pass-panel {
+.past-pickups-shortcut__copy span {
+  font-size: 1.45rem;
+}
+
+.pickup-card--skeleton {
+  grid-template-columns: minmax(25rem, 28rem) minmax(0, 1fr);
+}
+
+.pickup-card__skeleton-body {
   display: grid;
   gap: 1.2rem;
-  padding: 1.5rem;
-  border-radius: 1.8rem;
-  background: rgba(242, 246, 238, 0.78);
-  border: 1px solid rgba(216, 226, 210, 0.92);
+  padding: 2rem;
 }
 
-.reservation-card__pickup-pass-copy {
+.pickup-card__skeleton-row,
+.pickup-card__skeleton-actions {
   display: grid;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
-.reservation-card__pickup-pass-copy strong,
-.reservation-card__pickup-pass-copy p {
-  margin: 0;
+.pickup-card__skeleton-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.reservation-card__pickup-pass-copy p {
-  color: var(--color-text-muted);
+.pickup-card__skeleton-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding-top: 0.8rem;
 }
 
-.reservation-card__actions {
-  align-items: center;
+.pickup-card__skeleton-line,
+.pickup-card__skeleton-button {
+  display: block;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(238, 243, 236, 0.96), rgba(247, 249, 244, 0.96), rgba(238, 243, 236, 0.96));
+  background-size: 200% 100%;
+  animation: pickupSkeleton 1.5s ease-in-out infinite;
 }
 
-@media (max-width: 959px) {
-  .workspace-reservations-page__summary {
+.pickup-card__skeleton-line {
+  height: 1.3rem;
+}
+
+.pickup-card__skeleton-line--sm {
+  width: 30%;
+}
+
+.pickup-card__skeleton-line--md {
+  width: 55%;
+}
+
+.pickup-card__skeleton-line--lg {
+  width: 78%;
+  height: 3rem;
+}
+
+.pickup-card__skeleton-button {
+  height: 5.1rem;
+  border-radius: 1.45rem;
+}
+
+.my-pickups-page__tab:hover,
+.my-pickups-page__tab:focus-visible,
+.my-pickups-page__state-button:hover,
+.my-pickups-page__state-button:focus-visible,
+.my-pickups-page__empty-tab-button:hover,
+.my-pickups-page__empty-tab-button:focus-visible,
+.pickup-card__action:hover,
+.pickup-card__action:focus-visible,
+.pickup-card__review-score:hover:not(:disabled),
+.pickup-card__review-score:focus-visible,
+.past-pickups-shortcut:hover,
+.past-pickups-shortcut:focus-visible,
+.pickup-pass-modal__close:hover,
+.pickup-pass-modal__close:focus-visible {
+  transform: translateY(-1px);
+}
+
+.my-pickups-page__tab:focus-visible,
+.my-pickups-page__state-button:focus-visible,
+.my-pickups-page__empty-tab-button:focus-visible,
+.pickup-card__action:focus-visible,
+.pickup-card__review-score:focus-visible,
+.past-pickups-shortcut:focus-visible,
+.pickup-pass-modal__close:focus-visible {
+  outline: 0.3rem solid rgba(39, 124, 60, 0.24);
+  outline-offset: 0.25rem;
+}
+
+.pickup-card__action:not(.pickup-card__action--primary):hover,
+.pickup-card__action:not(.pickup-card__action--primary):focus-visible,
+.pickup-card__review-score:hover:not(:disabled),
+.pickup-card__review-score:focus-visible,
+.past-pickups-shortcut:hover,
+.past-pickups-shortcut:focus-visible {
+  border-color: rgba(38, 126, 60, 0.36);
+  box-shadow: 0 12px 24px rgba(19, 37, 22, 0.06);
+}
+
+.pickup-card__review-score:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+@keyframes pickupSkeleton {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: -100% 50%;
+  }
+}
+
+@media (max-width: 1199px) {
+  .pickup-tips {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .reservation-card {
-    grid-template-columns: minmax(0, 1fr);
+  .pickup-tips__lead {
+    grid-column: 1 / -1;
   }
 
-  .reservation-card__media img {
-    min-height: 20rem;
+  .pickup-tips__item:nth-child(3) {
+    border-left: 0;
+  }
+}
+
+@media (max-width: 959px) {
+  .my-pickups-page .container {
+    gap: 2.4rem;
   }
 
-  .reservation-card__topline {
+  .my-pickups-page__tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .pickup-card,
+  .pickup-card--skeleton {
+    grid-template-columns: 1fr;
+  }
+
+  .pickup-card__media img,
+  .pickup-card__skeleton-media {
+    min-height: 24rem;
+  }
+
+  .pickup-card__headline-row,
+  .pickup-card__top-row {
     display: grid;
+  }
+
+  .pickup-card__price {
+    justify-items: start;
+  }
+
+  .pickup-card__price-line {
+    justify-content: flex-start;
+  }
+
+  .pickup-card__details,
+  .pickup-card__detail-grid,
+  .pickup-card__skeleton-row,
+  .pickup-card__skeleton-actions,
+  .pickup-tips {
+    grid-template-columns: 1fr;
+  }
+
+  .pickup-tips__item {
+    border-left: 0;
+    border-top: 1px solid rgba(221, 230, 216, 0.96);
   }
 }
 
 @media (max-width: 639px) {
-  .workspace-reservations-page__summary {
-    grid-template-columns: minmax(0, 1fr);
+  .my-pickups-page .container {
+    gap: 2rem;
+  }
+
+  .my-pickups-page__state,
+  .my-pickups-page__empty-tab,
+  .pickup-tips,
+  .past-pickups-shortcut,
+  .pickup-pass-modal__dialog {
+    padding: 2rem;
+  }
+
+  .my-pickups-page__header h1 {
+    font-size: clamp(4rem, 13vw, 4.8rem);
+  }
+
+  .my-pickups-page__header p {
+    font-size: 1.6rem;
+  }
+
+  .pickup-card__body {
+    padding: 1.8rem;
+  }
+
+  .pickup-card__headline-row h2 {
+    white-space: normal;
+  }
+
+  .pickup-card__action,
+  .my-pickups-page__state-button,
+  .my-pickups-page__empty-tab-button {
+    width: 100%;
+  }
+
+  .pickup-card__actions,
+  .pickup-card__review {
+    display: grid;
+  }
+
+  .pickup-card__review-scale {
+    justify-content: start;
+  }
+
+  .past-pickups-shortcut {
+    padding: 1.8rem;
+  }
+
+  .pickup-pass-modal {
+    padding: 1.4rem;
   }
 }

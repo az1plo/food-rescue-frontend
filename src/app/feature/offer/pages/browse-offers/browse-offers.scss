@@ -1,581 +1,299 @@
-.browse-offers-page {
-  min-height: 100%;
-}
-
-.browse-offers-page__header p,
-.browse-business-chip span,
-.browse-business-focus__header p,
-.browse-map-panel__header p,
-.browse-map-panel__details p,
-.browse-offer-card__address,
-.browse-offer-card__note,
-.browse-offers-page__state p {
-  margin: 0;
-  color: var(--color-text-muted);
-}
-
-.browse-offers-page__toolbar,
-.browse-business-focus,
-.browse-offers-page__state,
-.browse-map-panel {
-  padding: 2.4rem;
-}
-
-.browse-offers-page__toolbar {
-  display: grid;
-  grid-template-columns: minmax(0, 2.4fr) repeat(3, auto);
-  gap: 1.4rem;
-  margin-bottom: 2.4rem;
-}
-
-.browse-offers-page__search,
-.browse-offers-page__select {
-  display: grid;
-  gap: 0.7rem;
-}
-
-.browse-offers-page__search {
-  position: relative;
-}
-
-.browse-offers-page__search fa-icon {
-  position: absolute;
-  top: 50%;
-  left: 1.4rem;
-  color: var(--color-text-muted);
-  transform: translateY(-50%);
-}
-
-.browse-offers-page__search input {
-  min-height: 5rem;
-  padding: 1.2rem 1.4rem 1.2rem 4.2rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: #fff;
-  color: var(--color-text);
-}
-
-.browse-offers-page__search input:focus {
-  outline: none;
-  border-color: rgba(47, 143, 78, 0.56);
-  box-shadow: 0 0 0 0.4rem rgba(47, 143, 78, 0.12);
-}
-
-.browse-offers-page__select span {
-  font-size: 1.3rem;
-  font-weight: 700;
-}
-
-.browse-offers-page__select .form-control {
-  min-width: 19rem;
-}
-
-.browse-toggle,
-.browse-segmented__button,
-.browse-offer-card__distance-pill,
-.browse-offer-card__business-link,
-.browse-map-panel__offer-item,
-.browse-offer-card__cart-toggle {
-  border: 1px solid transparent;
-  background: none;
-  color: inherit;
-}
-
-.browse-toggle {
-  min-height: 5rem;
-  padding: 0 1.8rem;
-  border-color: var(--color-border);
-  border-radius: 999px;
-  background: #fff;
-  font-weight: 700;
-  transition:
-    border-color var(--transition-base),
-    background var(--transition-base),
-    color var(--transition-base);
-}
-
-.browse-toggle--active {
-  border-color: rgba(47, 143, 78, 0.35);
-  background: var(--color-primary-soft);
-  color: var(--color-primary-strong);
-}
-
-.browse-segmented {
-  display: inline-grid;
-  grid-auto-flow: column;
-  gap: 0.4rem;
-  padding: 0.4rem;
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  background: rgba(242, 246, 238, 0.9);
-}
-
-.browse-segmented__button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.8rem;
-  min-height: 4.2rem;
-  padding: 0 1.4rem;
-  border-radius: 999px;
-  font-weight: 700;
-  transition:
-    background var(--transition-base),
-    color var(--transition-base);
-}
-
-.browse-segmented__button--active {
-  background: #fff;
-  color: var(--color-primary-strong);
-  box-shadow: 0 10px 22px rgba(24, 44, 24, 0.08);
-}
-
-.browse-offers-page__toolbar-actions {
-  justify-content: end;
-}
-
-.browse-offers-page__scope {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  gap: 1.2rem;
-  grid-column: 1 / -1;
-}
-
-.browse-offers-page__scope .browse-offers-page__select {
-  min-width: 24rem;
-}
-
-.browse-offers-page__radius {
-  min-width: 14rem !important;
-}
-
-.browse-offers-page__radius .form-control {
-  min-width: 0;
-}
-
-.browse-offers-page__scope-hint {
-  color: var(--color-text-muted);
-  font-size: 1.4rem;
-}
-
-.browse-offers-page__toolbar-meta {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 1rem 2rem;
-  grid-column: 1 / -1;
-  color: var(--color-text-muted);
-  font-size: 1.4rem;
-}
-
-.browse-offers-page__toolbar-meta strong {
-  color: var(--color-text);
-}
-
-.browse-offer-card__distance-pill:hover,
-.browse-offer-card__business-link:hover,
-.browse-map-panel__offer-item:hover {
-  transform: translateY(-1px);
-}
-
-.browse-offers-page__content {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 2rem;
-}
-
 .browse-offers-page__content--map {
-  grid-template-columns: minmax(0, 1.1fr) minmax(34rem, 0.9fr);
-  align-items: start;
+  --browse-map-sticky-top: 1.8rem;
+  --browse-map-viewport-gap: 1.2rem;
 }
 
-.browse-offers-page__catalog {
-  display: grid;
-  gap: 1.8rem;
-}
-
-.browse-business-focus {
-  display: grid;
-  gap: 1.4rem;
-}
-
-.browse-business-focus__header {
-  display: flex;
-  justify-content: space-between;
-  gap: 1.6rem;
-}
-
-.browse-business-focus__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem 1.8rem;
-  color: var(--color-text-muted);
-}
-
-.browse-business-focus__meta span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.7rem;
+.browse-map-panel__scope-button:hover,
+.browse-offers-page__clear-link:hover {
+  transform: translateY(-1px);
 }
 
 .browse-offers-page__grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1.4rem;
+  gap: 1.8rem;
 }
 
-.browse-offers-page__content--map .browse-offers-page__grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.browse-filter-chip--radius-select {
+  width: auto;
+  min-width: 13.5rem;
+  flex: 0 0 auto;
 }
 
-.browse-offer-card {
-  padding: 0;
-  overflow: hidden;
-  border: 1px solid rgba(217, 228, 213, 0.96);
-  border-radius: 2.6rem;
-  box-shadow: 0 18px 34px rgba(20, 45, 24, 0.08);
-  transition:
-    transform var(--transition-base),
-    border-color var(--transition-base),
-    box-shadow var(--transition-base);
+.browse-filter-chip--radius-select select {
+  cursor: pointer;
 }
 
-.browse-offer-card:hover {
-  transform: translateY(-2px);
-}
-
-.browse-offer-card--selected {
-  border-color: rgba(47, 143, 78, 0.42);
-  box-shadow: 0 22px 38px rgba(29, 78, 39, 0.16);
-}
-
-.browse-offer-card[data-status='SOLD_OUT'],
-.browse-offer-card[data-status='EXPIRED'] {
-  opacity: 0.88;
-}
-
-.browse-offer-card__media {
-  position: relative;
-  aspect-ratio: 1.15 / 0.82;
-  overflow: hidden;
-  background: linear-gradient(135deg, rgba(47, 143, 78, 0.14), rgba(34, 105, 58, 0.05));
-}
-
-.browse-offer-card__media::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgba(20, 35, 21, 0.14) 0%, rgba(20, 35, 21, 0) 32%),
-    linear-gradient(180deg, rgba(20, 35, 21, 0) 58%, rgba(20, 35, 21, 0.22) 100%);
-  pointer-events: none;
-}
-
-.browse-offer-card__media img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.browse-offer-card__media-top,
-.browse-offer-card__media-bottom {
-  position: absolute;
-  z-index: 1;
-  left: 1.4rem;
-  right: 1.4rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.9rem;
-}
-
-.browse-offer-card__media-top {
-  top: 1.4rem;
-}
-
-.browse-offer-card__media-bottom {
-  bottom: 1.4rem;
-}
-
-.browse-offer-card__distance-pill,
-.browse-offer-card__cart-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 4.8rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 14px 24px rgba(15, 32, 20, 0.14);
-  backdrop-filter: blur(10px);
-}
-
-.browse-offer-card__distance-pill {
-  gap: 0.8rem;
-  padding: 0 1.5rem;
-  color: #163922;
-  font-size: 1.25rem;
-  font-weight: 800;
-}
-
-.browse-offer-card__distance-pill fa-icon,
-.browse-offer-card__cart-toggle fa-icon,
-.browse-offer-card__rating-badge fa-icon,
-.browse-offer-card__pickup fa-icon,
-.browse-offer-card__primary-action fa-icon {
-  line-height: 1;
-}
-
-.browse-offer-card__distance-pill fa-icon {
-  color: var(--color-primary-strong);
-}
-
-.browse-offer-card__cart-toggle {
-  width: 4.8rem;
-  aspect-ratio: 1;
-  color: #163922;
-  flex: none;
-  transition:
-    transform var(--transition-base),
-    background var(--transition-base),
-    color var(--transition-base);
-}
-
-.browse-offer-card__cart-toggle:hover {
-  transform: translateY(-1px);
-}
-
-.browse-offer-card__cart-toggle--active {
-  background: linear-gradient(135deg, rgba(15, 94, 46, 0.95), rgba(18, 61, 30, 0.95));
-  color: #ffffff;
-}
-
-.browse-offer-card__cart-toggle fa-icon {
-  font-size: 1.7rem;
-}
-
-.browse-offer-card__cart-toggle fa-icon svg {
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 28px;
-}
-
-.browse-offer-card__badge,
-.browse-offer-card__rating-badge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 3.8rem;
-}
-
-.browse-offer-card__badge-stack {
-  display: inline-flex;
-  flex-wrap: wrap;
+.browse-offers-page__catalog-heading {
+  display: grid;
   gap: 0.6rem;
-  align-items: center;
 }
 
-.browse-offer-card__badge {
-  padding: 0 1.2rem;
-  border-radius: 1.4rem;
-  background: linear-gradient(135deg, rgba(10, 69, 33, 0.95), rgba(24, 96, 46, 0.95));
-  color: #f6fff7;
-  font-size: 1.15rem;
-  font-weight: 800;
-  box-shadow: 0 12px 20px rgba(17, 58, 28, 0.24);
-}
-
-.browse-offer-card__discount-badge {
+.browse-offers-page__catalog-status {
   display: inline-flex;
   align-items: center;
-  min-height: 3.8rem;
-  padding: 0 1.2rem;
-  border-radius: 1.4rem;
-  background: rgba(255, 241, 187, 0.96);
-  color: #6c4b00;
-  font-size: 1.15rem;
-  font-weight: 800;
-  box-shadow: 0 12px 20px rgba(94, 72, 10, 0.16);
-}
-
-.browse-offer-card__rating-badge {
-  gap: 0.5rem;
-  color: #ffffff;
-  font-size: 1.25rem;
-  font-weight: 800;
-  text-shadow: 0 8px 20px rgba(15, 24, 17, 0.42);
-}
-
-.browse-offer-card__rating-badge fa-icon {
-  color: #ffd85a;
-}
-
-.browse-offer-card__body {
-  display: grid;
-  gap: 1.3rem;
-  padding: 1.8rem 1.8rem 2rem;
-}
-
-.browse-offer-card__identity {
-  display: grid;
-  gap: 0.45rem;
-}
-
-.browse-offer-card__identity h2 {
-  margin: 0;
-  color: #163922;
-  font-size: clamp(2rem, 1.45vw, 2.8rem);
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-}
-
-.browse-offer-card__business-link {
-  justify-self: start;
-  padding: 0;
-  color: #596a5f;
-  font-size: 1.45rem;
-  font-weight: 500;
-  text-align: left;
-  transition:
-    color var(--transition-base),
-    transform var(--transition-base);
-}
-
-.browse-offer-card__business-link:hover {
-  color: var(--color-primary-strong);
-}
-
-.browse-offer-card__price-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.8rem 1.2rem;
-}
-
-.browse-offer-card__price-stack {
-  display: grid;
-  gap: 0.35rem;
-  align-items: start;
-}
-
-.browse-offer-card__price-row strong {
-  color: var(--color-primary-strong);
-  font-size: 2.25rem;
-  line-height: 1;
-  letter-spacing: -0.03em;
-}
-
-.browse-offer-card__original-price {
+  gap: 0.8rem;
   color: var(--color-text-muted);
-  font-size: 1.2rem;
-  font-weight: 600;
-  text-decoration: line-through;
-  text-decoration-thickness: 0.14rem;
-}
-
-.browse-offer-card__price-row span {
-  padding: 0.55rem 0.95rem;
-  border-radius: 999px;
-  background: rgba(234, 242, 232, 0.94);
-  color: #48614f;
-  font-size: 1.1rem;
+  font-size: 1.18rem;
   font-weight: 700;
 }
 
-.browse-offer-card__address {
-  font-size: 1.3rem;
-  line-height: 1.45;
+.browse-offers-page__catalog-status-dot {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8abd3b, #2b7a43);
+  box-shadow: 0 0 0 0.45rem rgba(141, 193, 74, 0.14);
 }
 
-.browse-offer-card__note {
-  padding: 0.85rem 1rem;
-  border-radius: 1.3rem;
-  background: rgba(242, 246, 238, 0.78);
-  font-size: 1.25rem;
-  line-height: 1.45;
-}
-
-.browse-offer-card__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.2rem;
-  padding-top: 1.3rem;
-  border-top: 1px solid rgba(221, 229, 217, 0.92);
-}
-
-.browse-offer-card__pickup {
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-  min-width: 0;
-}
-
-.browse-offer-card__pickup fa-icon {
-  color: var(--color-primary-strong);
-  font-size: 1.9rem;
-  flex: none;
-}
-
-.browse-offer-card__pickup div {
+.browse-business-focus {
   display: grid;
-  gap: 0.25rem;
+  gap: 1.4rem;
+  padding: 2rem;
+  border-radius: 2.2rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 252, 246, 0.96));
+  box-shadow:
+    0 14px 28px rgba(20, 38, 22, 0.08),
+    inset 0 0 0 1px rgba(224, 232, 218, 0.82);
+}
+
+.browse-business-focus__header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1.6rem;
+}
+
+.browse-business-focus__copy {
+  display: grid;
+  gap: 0.55rem;
   min-width: 0;
 }
 
-.browse-offer-card__pickup strong {
-  font-size: 1.45rem;
-  line-height: 1.2;
+.browse-business-focus__copy h2 {
+  margin: 0;
+  color: var(--color-primary-strong);
+  font-size: 3.2rem;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
 }
 
-.browse-offer-card__pickup span {
+.browse-business-focus__tagline,
+.browse-map-panel__business-tagline {
+  margin: 0;
   color: var(--color-text-muted);
-  font-size: 1.15rem;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
-.browse-offer-card__primary-action {
+.browse-business-summary__facts {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.browse-business-summary__fact {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 0;
+  min-height: 3.7rem;
+  padding: 0.75rem 0.95rem;
+  border-radius: 999px;
+  background: rgba(245, 248, 240, 0.96);
+  box-shadow: inset 0 0 0 1px rgba(224, 232, 218, 0.84);
+}
+
+.browse-business-summary__fact-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.8rem;
-  min-height: 5rem;
-  padding: 0 1.7rem;
-  border: 0;
-  border-radius: 1.6rem;
-  background: linear-gradient(135deg, #0f5e2e, #123d1e);
-  color: #ffffff;
-  font-size: 1.4rem;
-  font-weight: 800;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  border-radius: 999px;
+  background: rgba(27, 94, 48, 0.1);
+  color: var(--color-primary-strong);
+}
+
+.browse-business-summary__fact-text {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-primary-strong);
+  font-size: 1.12rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
   white-space: nowrap;
-  box-shadow: 0 14px 26px rgba(15, 62, 30, 0.18);
-  transition:
-    transform var(--transition-base),
-    box-shadow var(--transition-base),
-    filter var(--transition-base);
 }
 
-.browse-offer-card__primary-action:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 22px 36px rgba(15, 62, 30, 0.24);
+.browse-business-summary__fact--rating .browse-business-summary__fact-icon {
+  background: rgba(141, 193, 74, 0.16);
+  color: #7da82f;
 }
 
-.browse-offer-card__primary-action:disabled {
-  cursor: wait;
-  filter: saturate(0.82);
+.browse-offers-page__empty-results {
+  display: grid;
+  gap: 1.6rem;
+  padding: 2rem;
+  border-radius: 2rem;
+  background:
+    linear-gradient(180deg, rgba(251, 252, 247, 0.98), rgba(255, 255, 255, 0.98)),
+    radial-gradient(circle at top right, rgba(231, 242, 225, 0.92), transparent 48%);
+  box-shadow:
+    inset 0 0 0 1px rgba(224, 232, 218, 0.82),
+    0 16px 30px rgba(20, 38, 22, 0.06);
 }
 
-.browse-offer-card__primary-action fa-icon svg {
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2.1;
+.browse-offers-page__empty-copy {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.browse-offers-page__empty-copy h3 {
+  margin: 0;
+  color: var(--color-primary-strong);
+  font-size: 2.6rem;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.browse-offers-page__empty-copy p {
+  margin: 0;
+  max-width: 62rem;
+  color: var(--color-text-muted);
+}
+
+.browse-offers-page__empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.browse-offers-page__content--map .browse-offers-page__grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.browse-offers-page__grid--skeleton {
+  align-items: stretch;
+}
+
+.browse-offer-skeleton {
+  display: grid;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 2.4rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 252, 246, 0.96)),
+    radial-gradient(circle at top right, rgba(237, 246, 232, 0.9), transparent 42%);
+  box-shadow:
+    0 18px 36px rgba(20, 38, 22, 0.08),
+    inset 0 0 0 1px rgba(224, 232, 218, 0.82);
+}
+
+.browse-offer-skeleton__media,
+.browse-offer-skeleton__line,
+.browse-offer-skeleton__pill,
+.browse-offer-skeleton__button {
+  background: linear-gradient(90deg, rgba(238, 243, 236, 0.96), rgba(247, 249, 244, 0.96), rgba(238, 243, 236, 0.96));
+  background-size: 200% 100%;
+  animation: browseOffersSkeleton 1.5s ease-in-out infinite;
+}
+
+.browse-offer-skeleton__media {
+  aspect-ratio: 1.28 / 1;
+}
+
+.browse-offer-skeleton__body {
+  display: grid;
+  gap: 1.15rem;
+  padding: 1.7rem;
+}
+
+.browse-offer-skeleton__line,
+.browse-offer-skeleton__pill,
+.browse-offer-skeleton__button {
+  display: block;
+  border-radius: 999px;
+}
+
+.browse-offer-skeleton__line {
+  height: 1.25rem;
+}
+
+.browse-offer-skeleton__line--eyebrow {
+  width: 26%;
+  height: 1.05rem;
+}
+
+.browse-offer-skeleton__line--title {
+  width: 78%;
+  height: 2.7rem;
+}
+
+.browse-offer-skeleton__line--body {
+  width: 62%;
+}
+
+.browse-offer-skeleton__line--price {
+  width: 34%;
+  height: 2rem;
+}
+
+.browse-offer-skeleton__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.browse-offer-skeleton__pill {
+  width: 8.8rem;
+  height: 3.1rem;
+  border-radius: 999px;
+}
+
+.browse-offer-skeleton__pill--wide {
+  width: 11.6rem;
+}
+
+.browse-offer-skeleton__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.2rem;
+}
+
+.browse-offer-skeleton__button {
+  width: 5.1rem;
+  height: 5.1rem;
+  border-radius: 1.6rem;
+}
+
+.browse-offers-page__content--full-map {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.8rem;
+  min-width: 0;
+}
+
+.browse-offers-page__content--full-map .browse-offers-page__catalog {
+  display: none;
+}
+
+.browse-offers-page__content--full-map .browse-offers-page__map-column {
+  position: static;
+  height: min(78rem, calc(100vh - 25rem));
 }
 
 .browse-offers-page__map-column {
+  min-width: 0;
   position: sticky;
-  top: 2rem;
+  top: var(--browse-map-sticky-top, 1.6rem);
+  align-self: start;
+  height: calc(100vh - var(--browse-map-sticky-top, 0rem) - var(--browse-map-viewport-gap, 0rem));
 }
 
 .browse-offers-page__map-column--hidden {
@@ -583,49 +301,107 @@
 }
 
 .browse-map-panel {
-  display: grid;
-  gap: 1.6rem;
-}
-
-.browse-map-panel__header {
   display: flex;
-  justify-content: space-between;
-  gap: 1.6rem;
-}
-
-.browse-map-panel__header h2 {
-  font-size: 2.6rem;
-}
-
-.browse-map-panel__header-meta {
-  color: var(--color-primary-strong);
-  font-weight: 800;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+  overflow: visible;
+  background: transparent;
+  box-shadow: none;
 }
 
 .browse-map-panel__canvas-wrap {
+  flex: 1 1 auto;
   position: relative;
-  min-height: 46rem;
-  border: 1px solid rgba(216, 226, 210, 0.92);
-  border-radius: var(--radius-md);
+  min-height: 0;
+  height: 100%;
+  border-radius: 2.4rem;
   overflow: hidden;
-  background:
-    linear-gradient(135deg, rgba(47, 143, 78, 0.08), rgba(34, 105, 58, 0.03)),
-    #eef4ef;
+  background: #edf1eb;
+  box-shadow:
+    inset 0 0 0 1px rgba(224, 232, 218, 0.8),
+    0 22px 48px rgba(20, 38, 22, 0.1),
+    0 2px 12px rgba(20, 38, 22, 0.05);
+}
+
+.browse-map-panel__canvas-wrap::before,
+.browse-map-panel__canvas-wrap::after {
+  display: none;
 }
 
 .browse-map-panel__canvas {
   width: 100%;
-  height: 46rem;
+  height: 100%;
+}
+
+.browse-map-panel__scope-button {
+  position: absolute;
+  top: 1.6rem;
+  left: 1.6rem;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-height: 4.8rem;
+  padding: 0 1.7rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 16px 32px rgba(20, 38, 22, 0.12),
+    inset 0 0 0 1px rgba(224, 232, 218, 0.84);
+  color: var(--color-primary-strong);
+  font-weight: 800;
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base),
+    background var(--transition-base);
+}
+
+.browse-map-panel__scope-button fa-icon {
+  font-size: 1.45rem;
+}
+
+.browse-map-panel__fullscreen-button {
+  position: absolute;
+  top: 1.6rem;
+  right: 1.6rem;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-height: 4.8rem;
+  padding: 0 1.5rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 16px 32px rgba(20, 38, 22, 0.12),
+    inset 0 0 0 1px rgba(224, 232, 218, 0.84);
+  color: var(--color-primary-strong);
+  font-weight: 800;
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base),
+    background var(--transition-base);
+}
+
+.browse-map-panel__fullscreen-button fa-icon {
+  font-size: 1.35rem;
 }
 
 .browse-map-panel__overlay {
   position: absolute;
   inset: 0;
+  z-index: 2;
   display: grid;
   place-content: center;
   gap: 0.8rem;
   padding: 2rem;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.58);
+  backdrop-filter: blur(8px);
   text-align: center;
 }
 
@@ -633,131 +409,561 @@
   font-size: 1.8rem;
 }
 
-.browse-map-panel__overlay span,
-.browse-map-panel__hint,
-.browse-map-panel__details-meta {
+.browse-map-panel__overlay span {
   color: var(--color-text-muted);
 }
 
-.browse-map-panel__details {
+.browse-map-panel__notice {
+  position: absolute;
+  top: 7.4rem;
+  left: 50%;
+  z-index: 4;
   display: grid;
-  gap: 1.2rem;
-  padding-top: 0.4rem;
+  gap: 0.8rem;
+  width: min(38rem, calc(100% - 12rem));
+  padding: 1.35rem 1.45rem;
+  border-radius: 1.8rem;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  box-shadow:
+    0 18px 38px rgba(20, 38, 22, 0.16),
+    inset 0 0 0 1px rgba(224, 232, 218, 0.84);
+  transform: translateX(-50%);
+  text-align: center;
 }
 
-.browse-map-panel__details-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 1.6rem;
-  align-items: start;
-}
-
-.browse-map-panel__details-header h3 {
-  margin: 0 0 0.6rem;
-}
-
-.browse-map-panel__rating {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.8rem 1rem;
-  border-radius: 999px;
-  background: var(--color-primary-soft);
+.browse-map-panel__notice strong {
   color: var(--color-primary-strong);
-  font-weight: 800;
+  font-size: 1.7rem;
+  line-height: 1.1;
 }
 
-.browse-map-panel__details-meta {
-  display: grid;
-  gap: 0.6rem;
-  font-size: 1.4rem;
-}
-
-.browse-map-panel__offer-list {
-  display: grid;
-  gap: 0.9rem;
-}
-
-.browse-map-panel__offer-item {
-  display: grid;
-  gap: 0.2rem;
-  padding: 1.2rem 1.3rem;
-  border-color: rgba(216, 226, 210, 0.92);
-  border-radius: 1.4rem;
-  background: rgba(242, 246, 238, 0.72);
-  text-align: left;
-}
-
-.browse-map-panel__offer-item span {
-  color: var(--color-primary-strong);
-  font-weight: 700;
-}
-
-.browse-map-panel__offer-item small {
+.browse-map-panel__notice span {
   color: var(--color-text-muted);
   font-size: 1.3rem;
 }
 
-.browse-map-panel__hint {
-  padding: 1.2rem 0 0.4rem;
+.browse-map-panel__notice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
 }
 
-.browse-offers-page__state {
+.browse-map-panel__carousel {
+  position: absolute;
+  right: 1.6rem;
+  bottom: 1.6rem;
+  left: 1.6rem;
+  z-index: 4;
   display: grid;
+  gap: 1rem;
+  padding: 1.2rem;
+  border-radius: 2rem;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(18px);
+  box-shadow:
+    0 24px 50px rgba(20, 38, 22, 0.18),
+    inset 0 0 0 1px rgba(224, 232, 218, 0.86);
+}
+
+.browse-map-panel__carousel::before {
+  content: '';
+  position: absolute;
+  inset: -1.6rem 0 auto;
+  height: 2rem;
+  border-radius: 2rem 2rem 0 0;
+  background: linear-gradient(180deg, rgba(17, 33, 22, 0.18), rgba(17, 33, 22, 0));
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.browse-map-panel__carousel-eyebrow {
+  display: inline-flex;
+  margin-bottom: 0.35rem;
+  color: var(--color-primary-strong);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.browse-map-panel__carousel-actions {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+}
+
+.browse-map-panel__carousel-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.8rem;
+  height: 3.8rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 8px 18px rgba(20, 38, 22, 0.12),
+    inset 0 0 0 1px rgba(224, 232, 218, 0.82);
+  color: var(--color-primary-strong);
+}
+
+.browse-map-panel__carousel-layout {
+  display: grid;
+  grid-template-columns: minmax(22rem, 25rem) minmax(0, 1fr);
   gap: 1.2rem;
+  min-width: 0;
+}
+
+.browse-map-panel__business-card,
+.browse-map-panel__offers-shell {
+  min-width: 0;
+}
+
+.browse-map-panel__business-card {
+  display: grid;
+  align-self: start;
+  align-content: start;
+  gap: 1rem;
+  padding: 1.4rem;
+  border-radius: 1.8rem;
+  background: linear-gradient(180deg, rgba(248, 251, 244, 0.96), rgba(255, 255, 255, 0.98));
+  box-shadow: inset 0 0 0 1px rgba(224, 232, 218, 0.82);
+  overflow: hidden;
+}
+
+.browse-map-panel__business-card strong {
+  color: var(--color-primary-strong);
+  font-size: 2.2rem;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.browse-map-panel__business-copy {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.browse-map-panel__selection-card {
+  position: absolute;
+  left: 1.6rem;
+  bottom: 1.6rem;
+  width: min(36rem, calc(100% - 8rem));
+  max-width: calc(100% - 8rem);
+  pointer-events: auto;
+  z-index: 4;
+}
+
+.browse-map-panel__selection-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.browse-map-panel__selection-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  flex: none;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 8px 16px rgba(20, 38, 22, 0.12),
+    inset 0 0 0 1px rgba(224, 232, 218, 0.78);
+  color: var(--color-primary-strong);
+}
+
+.browse-map-panel__business-card--split {
+  gap: 0.95rem;
+  padding: 1.25rem 1.25rem 1.15rem;
+  border-radius: 2rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 252, 246, 0.96)),
+    radial-gradient(circle at top right, rgba(237, 246, 232, 0.9), transparent 45%);
+  box-shadow:
+    0 18px 36px rgba(20, 38, 22, 0.14),
+    0 2px 10px rgba(20, 38, 22, 0.05),
+    inset 0 0 0 1px rgba(224, 232, 218, 0.82);
+}
+
+.browse-map-panel__business-card--split strong {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 2rem;
+}
+
+.browse-map-panel__offers-shell {
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+}
+
+.browse-map-panel__offers-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-right: 4.6rem;
+}
+
+.browse-map-panel__offers-head strong {
+  color: var(--color-primary-strong);
+  font-size: 1.4rem;
+  line-height: 1.2;
+}
+
+.browse-map-panel__carousel-shell {
+  position: relative;
+  padding-inline: 4.4rem;
+}
+
+.browse-map-panel__carousel-track {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-auto-flow: column;
+  gap: 1rem;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.browse-map-panel__carousel-card {
+  display: block;
+  min-width: 0;
+}
+
+.browse-map-panel__carousel-side-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 10px 22px rgba(20, 38, 22, 0.16),
+    inset 0 0 0 1px rgba(224, 232, 218, 0.88);
+  color: var(--color-primary-strong);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.browse-map-panel__carousel-side-nav--back {
+  left: 0.2rem;
+}
+
+.browse-map-panel__carousel-side-nav--forward {
+  right: 0.2rem;
+}
+
+.browse-map-panel__carousel-side-nav[disabled] {
+  opacity: 0.65;
+  cursor: default;
+  box-shadow: inset 0 0 0 1px rgba(224, 232, 218, 0.82);
+}
+
+.browse-map-panel__carousel-empty {
+  position: absolute;
+  right: 1.6rem;
+  bottom: 1.6rem;
+  left: 1.6rem;
+  z-index: 4;
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.6rem 1.8rem;
+  border-radius: 2rem;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 18px 38px rgba(20, 38, 22, 0.14),
+    inset 0 0 0 1px rgba(224, 232, 218, 0.84);
+}
+
+.browse-map-panel__carousel-empty strong {
+  color: var(--color-primary-strong);
+  font-size: 1.7rem;
+}
+
+.browse-map-panel__carousel-empty span {
+  color: var(--color-text-muted);
+}
+
+.browse-map-panel__canvas-wrap:fullscreen {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  background: #edf1eb;
+}
+
+.browse-map-panel__canvas-wrap:fullscreen .browse-map-panel__scope-button,
+.browse-map-panel__canvas-wrap:fullscreen .browse-map-panel__fullscreen-button {
+  top: 2rem;
+}
+
+.browse-map-panel__canvas-wrap:fullscreen .browse-map-panel__scope-button {
+  left: 2rem;
+}
+
+.browse-map-panel__canvas-wrap:fullscreen .browse-map-panel__fullscreen-button {
+  right: 2rem;
+}
+
+.browse-map-panel__canvas-wrap:fullscreen .browse-map-panel__carousel,
+.browse-map-panel__canvas-wrap:fullscreen .browse-map-panel__carousel-empty {
+  right: 2rem;
+  bottom: 2rem;
+  left: 2rem;
 }
 
 .browse-offers-page__state--empty {
   text-align: center;
 }
 
+@keyframes browseOffersSkeleton {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: -100% 50%;
+  }
+}
+
 :host ::ng-deep .gm-style {
   font: inherit;
 }
 
+:host ::ng-deep .gm-style .gm-fullscreen-control {
+  display: none !important;
+}
+
 :host ::ng-deep .gm-style .gm-style-iw-c {
-  padding: 1.2rem 1.4rem !important;
-  border-radius: 1.4rem !important;
-  box-shadow: 0 18px 38px rgba(24, 44, 24, 0.14) !important;
+  padding: 0 !important;
+  border-radius: 2rem !important;
+  overflow: hidden !important;
+  box-shadow: 0 22px 46px rgba(24, 44, 24, 0.18) !important;
 }
 
 :host ::ng-deep .gm-style .gm-style-iw-d {
-  overflow: auto !important;
+  overflow: hidden !important;
+  padding: 0 !important;
 }
 
 :host ::ng-deep .gm-style .gm-ui-hover-effect {
-  top: 0 !important;
-  right: 0 !important;
+  top: 0.8rem !important;
+  right: 0.8rem !important;
+  width: 3.2rem !important;
+  height: 3.2rem !important;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 8px 18px rgba(20, 38, 22, 0.12),
+    inset 0 0 0 1px rgba(224, 232, 218, 0.82);
 }
 
 :host ::ng-deep .browse-map-popup {
+  width: min(28rem, calc(100vw - 10rem));
   display: grid;
-  gap: 0.35rem;
+  background: #ffffff;
+}
+
+:host ::ng-deep .browse-map-popup__body {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1.6rem 1.8rem 1.8rem;
+}
+
+:host ::ng-deep .browse-map-popup__eyebrow {
+  color: var(--color-primary-strong);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
 :host ::ng-deep .browse-map-popup strong {
-  font-size: 1.45rem;
+  font-size: 1.7rem;
+  line-height: 1.15;
 }
 
-:host ::ng-deep .browse-map-popup span {
-  color: var(--color-text-muted);
-  font-size: 1.25rem;
+:host ::ng-deep .browse-map-popup--simple .browse-map-popup__body {
+  min-width: 18rem;
+}
+
+:host ::ng-deep .browse-map-marker {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 5rem;
+  height: 5rem;
+  padding: 0.38rem;
+  border: 0;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow:
+    0 12px 24px rgba(20, 38, 22, 0.16),
+    inset 0 0 0 1px rgba(224, 232, 218, 0.78);
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translate(-50%, calc(-100% - 0.72rem));
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base),
+    background var(--transition-base);
+}
+
+:host ::ng-deep .browse-map-marker::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -0.58rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 0 0 0.38rem 0;
+  background: #ffffff;
+  box-shadow: 0 7px 14px rgba(20, 38, 22, 0.1);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+:host ::ng-deep .browse-map-marker:hover {
+  transform: translate(-50%, calc(-100% - 0.82rem));
+}
+
+:host ::ng-deep .browse-map-marker.is-selected {
+  width: 5.6rem;
+  height: 5.6rem;
+  padding: 0.42rem;
+  background: #ffffff;
+  box-shadow:
+    0 16px 30px rgba(20, 38, 22, 0.2),
+    0 0 0 0.3rem rgba(47, 143, 78, 0.12),
+    inset 0 0 0 1px rgba(96, 164, 113, 0.24);
+}
+
+:host ::ng-deep .browse-map-marker__body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #f6fbf3, #ecf5e8);
+  box-shadow: inset 0 0 0 1px rgba(214, 229, 206, 0.92);
+}
+
+:host ::ng-deep .browse-map-marker__body.has-logo {
+  background: linear-gradient(180deg, #ffffff, #f2f7ef);
+}
+
+:host ::ng-deep .browse-map-marker__body img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+:host ::ng-deep .browse-map-marker__body.is-fallback {
+  color: var(--color-primary-strong);
+}
+
+:host ::ng-deep .browse-map-marker__store {
+  position: relative;
+  display: inline-block;
+  width: 1.72rem;
+  height: 1.2rem;
+  border-radius: 0.28rem;
+  background: linear-gradient(180deg, #2f8f4e, #1f6f38);
+  box-shadow: 0 0.2rem 0 rgba(21, 33, 23, 0.08);
+}
+
+:host ::ng-deep .browse-map-marker__store::before {
+  content: '';
+  position: absolute;
+  top: -0.34rem;
+  left: 50%;
+  width: 1.95rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: repeating-linear-gradient(
+    90deg,
+    #f7fff8 0,
+    #f7fff8 0.36rem,
+    #2f8f4e 0.36rem,
+    #2f8f4e 0.72rem
+  );
+  box-shadow: 0 0 0 1px rgba(31, 111, 56, 0.12);
+  transform: translateX(-50%);
+}
+
+:host ::ng-deep .browse-map-marker__store::after {
+  content: '';
+  position: absolute;
+  inset: 0.34rem 0.42rem 0.18rem;
+  border-radius: 0.16rem;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+:host ::ng-deep .browse-map-marker__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.55rem;
+  min-height: 1.55rem;
+  color: var(--color-primary-strong);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+:host ::ng-deep .browse-map-marker__badge {
+  position: absolute;
+  top: -0.16rem;
+  right: -0.16rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.1rem;
+  height: 2.1rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--color-primary), #1b6f34);
+  box-shadow:
+    0 8px 14px rgba(27, 111, 52, 0.2),
+    0 0 0 0.2rem #ffffff;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 800;
 }
 
 @media (max-width: 1399px) {
-  .browse-offers-page__toolbar {
-    grid-template-columns: minmax(0, 1fr) repeat(2, auto);
-  }
-
   .browse-offers-page__grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .browse-segmented,
-  .browse-offers-page__scope,
-  .browse-offers-page__toolbar-actions,
-  .browse-offers-page__toolbar-meta {
-    grid-column: 1 / -1;
+  .browse-offers-page__content--map .browse-offers-page__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .browse-map-panel__carousel-track {
+    grid-auto-columns: minmax(0, calc((100% - 3rem) / 4));
   }
 }
 
@@ -773,31 +979,125 @@
 
   .browse-offers-page__map-column {
     position: static;
+    height: auto;
+  }
+
+  .browse-map-panel__canvas-wrap {
+    min-height: 46rem;
+    height: 46rem;
+    flex: none;
+  }
+
+  .browse-map-panel__canvas {
+    height: 46rem;
+  }
+
+  .browse-offers-page__content--full-map .browse-offers-page__map-column {
+    height: min(70rem, calc(100vh - 24rem));
+  }
+
+  .browse-map-panel__carousel-layout {
+    grid-template-columns: minmax(20rem, 22rem) minmax(0, 1fr);
+  }
+
+  .browse-map-panel__carousel-track {
+    grid-auto-columns: minmax(0, calc((100% - 2rem) / 3));
+  }
+
+  .browse-map-panel__notice {
+    width: min(42rem, calc(100% - 9rem));
   }
 }
 
 @media (max-width: 959px) {
-  .browse-offers-page__toolbar,
-  .browse-business-focus__header,
-  .browse-offer-card__footer,
-  .browse-map-panel__header,
-  .browse-map-panel__details-header {
-    grid-template-columns: 1fr;
+  .browse-offers-page__toolbar-top,
+  .browse-offers-page__toolbar-main,
+  .browse-offers-page__toolbar-utility,
+  .browse-offers-page__filters,
+  .browse-offers-page__catalog-head,
+  .browse-business-focus__header {
     display: grid;
-  }
-
-  .browse-offers-page__toolbar-actions {
-    justify-content: start;
-  }
-
-  .browse-offers-page__scope {
+    grid-template-columns: 1fr;
     align-items: stretch;
   }
 
+  .browse-offers-page__toolbar-utility {
+    justify-content: stretch;
+  }
+
+  .browse-offers-page__empty-actions,
+  .browse-map-panel__notice-actions {
+    justify-content: stretch;
+  }
+
+  .browse-map-panel__fullscreen-button {
+    top: 7.2rem;
+    right: 1.2rem;
+    min-height: 4.4rem;
+    padding: 0 1.35rem;
+  }
+
+  .browse-offers-page__content--full-map .browse-offers-page__map-column {
+    height: calc(100vh - 29rem);
+    min-height: 52rem;
+  }
+
+  .browse-map-panel__carousel {
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    gap: 1rem;
+    padding: 1.25rem;
+  }
+
+  .browse-map-panel__carousel-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .browse-map-panel__business-card {
+    padding-right: 4.8rem;
+  }
+
+  .browse-map-panel__business-card--split {
+    width: 100%;
+    max-width: none;
+  }
+
+  .browse-map-panel__business-card strong {
+    font-size: 1.95rem;
+  }
+
+  .browse-map-panel__offers-head {
+    padding-right: 0;
+  }
+
+  .browse-map-panel__carousel-track {
+    grid-auto-columns: minmax(0, calc((100% - 1rem) / 2));
+  }
+
+  .browse-map-panel__carousel-side-nav--back {
+    left: 0;
+  }
+
+  .browse-map-panel__carousel-side-nav--forward {
+    right: 0;
+  }
+
+  .browse-map-panel__notice {
+    top: 6.8rem;
+    width: calc(100% - 6rem);
+  }
+
   .browse-offers-page__search,
-  .browse-offers-page__select .form-control,
-  .browse-toggle,
-  .browse-segmented {
+  .browse-location-picker,
+  .browse-filter-chip,
+  .browse-filter-utility,
+  .browse-segmented,
+  .browse-offers-page__cart-link {
+    width: 100%;
+  }
+
+  .browse-location-picker__menu {
     width: 100%;
   }
 
@@ -809,41 +1109,85 @@
     justify-content: center;
   }
 
-  .browse-offer-card__media-top,
-  .browse-offer-card__media-bottom {
-    left: 1.4rem;
-    right: 1.4rem;
-  }
-
-  .browse-offer-card__distance-pill,
-  .browse-offer-card__cart-toggle {
-    min-height: 5.2rem;
-  }
-
-  .browse-offer-card__distance-pill {
-    padding: 0 1.6rem;
-    font-size: 1.35rem;
-  }
-
-  .browse-offer-card__cart-toggle {
-    width: 5.2rem;
-  }
-
-  .browse-offer-card__body {
-    padding: 1.7rem;
-  }
-
-  .browse-offer-card__price-row {
-    align-items: start;
-    flex-direction: column;
+  .browse-map-panel__notice-actions .browse-filter-utility {
+    width: 100%;
+    justify-content: center;
   }
 
   .browse-offers-page__grid,
   .browse-offers-page__content--map .browse-offers-page__grid {
     grid-template-columns: 1fr;
   }
+}
 
-  .browse-offer-card__primary-action {
-    width: 100%;
+@media (max-width: 639px) {
+  .browse-map-panel__scope-button,
+  .browse-map-panel__fullscreen-button {
+    min-height: 4.2rem;
+    padding: 0 1.25rem;
+  }
+
+  .browse-offers-page__empty-results {
+    padding: 1.6rem;
+  }
+
+  .browse-offers-page__empty-copy h3 {
+    font-size: 2.2rem;
+  }
+
+  .browse-map-panel__fullscreen-button span {
+    display: none;
+  }
+
+  .browse-map-panel__carousel {
+    border-radius: 1.9rem;
+    padding: 1.1rem;
+  }
+
+  .browse-map-panel__business-card {
+    padding: 1.2rem 4.6rem 1.2rem 1.2rem;
+  }
+
+  .browse-map-panel__business-card strong {
+    font-size: 1.75rem;
+  }
+
+  .browse-map-panel__selection-card {
+    right: 1rem;
+    left: 1rem;
+    width: auto;
+    max-width: none;
+  }
+
+  .browse-map-panel__notice {
+    right: 1rem;
+    left: 50%;
+    width: auto;
+  }
+
+  .browse-map-panel__carousel-shell {
+    padding-inline: 3.2rem;
+  }
+
+  .browse-map-panel__carousel-close {
+    width: 3.4rem;
+    height: 3.4rem;
+  }
+
+  .browse-map-panel__carousel-side-nav {
+    width: 3.2rem;
+    height: 3.2rem;
+  }
+
+  .browse-map-panel__carousel-side-nav--back {
+    left: -0.2rem;
+  }
+
+  .browse-map-panel__carousel-side-nav--forward {
+    right: -0.2rem;
+  }
+
+  .browse-map-panel__carousel-track {
+    grid-auto-columns: minmax(0, 100%);
   }
 }

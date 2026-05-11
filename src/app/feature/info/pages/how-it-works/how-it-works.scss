@@ -16,13 +16,6 @@
   max-width: 50rem;
 }
 
-.how-page__hero-copy h1 {
-  margin: 0;
-  color: var(--color-primary-strong);
-  font-size: clamp(4.2rem, 5vw, 6.8rem);
-  line-height: 1.04;
-}
-
 .how-page__hero-copy p,
 .how-flow-card p,
 .how-benefit p {
@@ -68,21 +61,10 @@
   min-height: 0;
 }
 
-.how-page__hero-media,
-.how-page__hero-media img {
-  width: 100%;
-}
-
 .how-page__hero-media {
   overflow: hidden;
   border-radius: 3.4rem;
   aspect-ratio: 1.55/1;
-}
-
-.how-page__hero-media img {
-  display: block;
-  height: 100%;
-  object-fit: cover;
 }
 
 .how-flow {

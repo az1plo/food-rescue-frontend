@@ -3,10 +3,23 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { resolveBusinessIconUrl } from '../../../business/models/business.model';
+import { BusinessWorkspaceStateService } from '../../../business/services/business-workspace-state.service';
 import { appIcons } from '../../../../shared/icons/app-icons';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
+import { OfferCardComponent } from '../../../../shared/ui/offer-card/offer-card';
+import { OfferCardModel } from '../../../../shared/ui/offer-card/offer-card.models';
+import {
+  buildOfferBusinessMark,
+  createMarketplaceOfferCardModel,
+  formatOfferAvailabilityLabel,
+  formatOfferDistance,
+  formatOfferPickupWindow,
+  formatOfferRatingValue,
+  marketplaceOfferLocationLabel,
+} from '../../../../shared/ui/offer-card/offer-card.utils';
 import { MarketplaceOfferModel } from '../../models/marketplace-offer.model';
-import { OfferItemModel, OfferModel, OfferStatus, resolveOfferImage } from '../../models/offer.model';
+import { OfferCategory, OfferItemModel, OfferModel, resolveOfferImage } from '../../models/offer.model';
 import { MarketplaceOfferApiService } from '../../services/marketplace-offer-api.service';
 import { OfferApiService } from '../../services/offer-api.service';
 import { OfferCartService } from '../../services/offer-cart.service';
@@ -16,12 +29,18 @@ interface ViewerLocation {
   longitude: number;
 }
 
+interface RelatedOfferCardItem {
+  offer: MarketplaceOfferModel;
+  card: OfferCardModel;
+  showRatingIcon: boolean;
+}
+
 const LOCATION_STORAGE_KEY = 'savr:browse-viewer-location';
 const LEGACY_LOCATION_STORAGE_KEY = 'food-rescue:browse-viewer-location';
 
 @Component({
   selector: 'app-offer-details-page',
-  imports: [FontAwesomeModule, ActionButtonComponent],
+  imports: [FontAwesomeModule, ActionButtonComponent, OfferCardComponent],
   templateUrl: './offer-details.html',
   styleUrl: './offer-details.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,14 +52,20 @@ export class OfferDetailsPage {
   private readonly marketplaceOfferApi = inject(MarketplaceOfferApiService);
   private readonly offerApi = inject(OfferApiService);
   private readonly notificationService = inject(NotificationService);
+  private readonly businessWorkspaceState = inject(BusinessWorkspaceStateService);
   private readonly offerCart = inject(OfferCartService);
 
   protected readonly icons = appIcons;
+  protected readonly ownedBusinessIds = computed(() => new Set(this.businessWorkspaceState.knownBusinesses().map((business) => business.id)));
+  protected readonly loadingSkeletonIds = [1, 2, 3] as const;
+  protected readonly relatedLoadingSkeletonIds = [1, 2, 3, 4] as const;
   protected readonly loading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly marketplaceOffer = signal<MarketplaceOfferModel | null>(null);
   protected readonly detailedOffer = signal<OfferModel | null>(null);
   protected readonly relatedOffers = signal<MarketplaceOfferModel[]>([]);
+  protected readonly viewerLocation = signal<ViewerLocation | null>(this.readStoredViewerLocation());
+  protected readonly hasViewerLocation = computed(() => this.viewerLocation() !== null);
 
   protected readonly currentOffer = computed(() => this.marketplaceOffer());
   protected readonly currentItems = computed<OfferItemModel[]>(() => this.detailedOffer()?.items ?? []);
@@ -63,6 +88,73 @@ export class OfferDetailsPage {
     const offer = this.currentOffer();
     return offer ? this.offerCart.hasOffer(offer.id) : false;
   });
+  protected readonly currentBusinessMark = computed(() => {
+    const offer = this.currentOffer();
+    return offer ? buildOfferBusinessMark(offer.business.name) : '?';
+  });
+  protected readonly currentBusinessIconUrl = computed(() => {
+    const offer = this.currentOffer();
+    return offer ? resolveBusinessIconUrl(offer.business.iconUrl) : null;
+  });
+  protected readonly currentBusinessLocation = computed(() => {
+    const offer = this.currentOffer();
+    return offer ? this.resolveOfferLocationLabel(offer) : 'Location unavailable';
+  });
+  protected readonly currentRatingValue = computed(() => {
+    const offer = this.currentOffer();
+    return offer ? this.ratingAverageLabel(offer.business.ratingAverage, offer.business.ratingCount) : 'New';
+  });
+  protected readonly currentRatingCount = computed(() => {
+    const offer = this.currentOffer();
+    return offer ? this.ratingCountLabel(offer.business.ratingCount) : null;
+  });
+  protected readonly currentQuantityLabel = computed(() => {
+    const offer = this.currentOffer();
+    return offer ? formatOfferAvailabilityLabel(offer.quantityAvailable, offer.status) : 'Unavailable';
+  });
+  protected readonly currentCategoryLabel = computed(() => {
+    const offer = this.currentOffer();
+    return offer ? this.formatCategoryLabel(offer.category) : null;
+  });
+  protected readonly currentPickupInstructions = computed(() => {
+    const offer = this.currentOffer();
+    const pickupNote = offer?.pickupLocation.note?.trim();
+    return pickupNote || 'Please follow the business pickup instructions and arrive during the selected pickup window.';
+  });
+  protected readonly currentBusinessDescription = computed(() => {
+    const offer = this.currentOffer();
+    return offer?.business.description?.trim()
+      || 'This local business regularly shares rescue offers to keep good food moving instead of going to waste.';
+  });
+  protected readonly currentLocationFactLabel = computed(() => {
+    const offer = this.currentOffer();
+    if (!offer) {
+      return 'Pickup point';
+    }
+
+    return this.hasViewerLocation() && offer.distanceMeters !== null
+      ? formatOfferDistance(offer.distanceMeters)
+      : 'Pickup point';
+  });
+  protected readonly relatedOfferCards = computed<RelatedOfferCardItem[]>(() =>
+    this.relatedOffers().map((offer) => ({
+      offer,
+      showRatingIcon: offer.business.ratingAverage !== null && offer.business.ratingCount > 0,
+      card: createMarketplaceOfferCardModel(offer, {
+        price: this.formatPrice(offer.price),
+        originalPrice: this.hasDiscount(offer.price, offer.originalPrice)
+          ? this.formatPrice(offer.originalPrice ?? offer.price)
+          : null,
+        rating: formatOfferRatingValue(offer.business.ratingAverage, offer.business.ratingCount, 'New'),
+        pickup: formatOfferPickupWindow(offer.pickupTimeWindow),
+        distance: this.hasViewerLocation() && offer.distanceMeters !== null
+          ? formatOfferDistance(offer.distanceMeters)
+          : null,
+        availabilityLabel: formatOfferAvailabilityLabel(offer.quantityAvailable, offer.status),
+        businessArea: this.resolveOfferLocationLabel(offer),
+      }),
+    })),
+  );
 
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((paramMap) => {
@@ -100,6 +192,11 @@ export class OfferDetailsPage {
       return;
     }
 
+    if (this.isOwnBusinessOffer(offer)) {
+      this.notificationService.info('You cannot reserve offers from your own business.', 'Offer unavailable');
+      return;
+    }
+
     const added = this.offerCart.toggleOffer(offer.id);
     if (added) {
       this.notificationService.success(`"${offer.title}" was added to your cart.`, 'Saved for later');
@@ -111,7 +208,16 @@ export class OfferDetailsPage {
 
   protected startCheckoutForCurrentOffer(): void {
     const offer = this.currentOffer();
-    if (!offer || !offer.canReserve) {
+    if (!offer) {
+      return;
+    }
+
+    if (this.isOwnBusinessOffer(offer)) {
+      void this.router.navigate(['/workspace', 'my-businesses', offer.business.id, 'offers']);
+      return;
+    }
+
+    if (!offer.canReserve) {
       return;
     }
 
@@ -122,12 +228,8 @@ export class OfferDetailsPage {
     void this.router.navigateByUrl('/cart');
   }
 
-  protected resolveRelatedOfferImage(offer: MarketplaceOfferModel): string {
-    return resolveOfferImage(offer.imageUrl, offer.id);
-  }
-
   protected formatPrice(price: number): string {
-    return `${price.toFixed(2)} EUR`;
+    return `€${price.toFixed(2)}`;
   }
 
   protected hasDiscount(price: number, originalPrice: number | null): boolean {
@@ -142,53 +244,55 @@ export class OfferDetailsPage {
     return Math.round(((originalPrice - price) / originalPrice) * 100);
   }
 
-  protected offerStatusLabel(status: OfferStatus): string {
-    return status
-      .toLowerCase()
-      .split('_')
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ');
-  }
-
   protected detailPrimaryActionLabel(): string {
     const offer = this.currentOffer();
     if (!offer) {
       return 'View details';
     }
 
+    if (this.isOwnBusinessOffer(offer)) {
+      return 'Manage this offer';
+    }
+
     if (!offer.canReserve) {
       return offer.status === 'EXPIRED' ? 'Expired' : 'Unavailable';
     }
 
-    return this.isCurrentOfferInCart() ? 'Go to checkout' : 'Buy now';
+    return this.isCurrentOfferInCart() ? 'Go to checkout' : 'Reserve now';
   }
 
   protected detailCartActionLabel(): string {
-    return this.isCurrentOfferInCart() ? 'Remove from cart' : 'Add to cart';
+    return this.isCurrentOfferInCart() ? 'Remove saved' : 'Save';
   }
 
   protected detailCartActionIcon() {
     return this.isCurrentOfferInCart() ? this.icons.xmark : this.icons.bagShopping;
   }
 
-  protected formatDistance(distanceMeters: number | null): string {
-    if (distanceMeters === null) {
-      return 'Distance unavailable';
+  protected detailPrimaryActionIcon() {
+    const offer = this.currentOffer();
+    if (this.isOwnBusinessOffer(offer)) {
+      return this.icons.store;
     }
 
-    if (distanceMeters < 1000) {
-      return `${Math.round(distanceMeters)} m away`;
-    }
-
-    return `${(distanceMeters / 1000).toFixed(1)} km away`;
+    return offer?.canReserve ? this.icons.creditCard : this.icons.eye;
   }
 
-  protected formatRating(ratingAverage: number | null, ratingCount: number): string {
-    if (ratingAverage === null || ratingCount <= 0) {
-      return 'New business';
+  protected detailPrimaryActionDisabled(): boolean {
+    const offer = this.currentOffer();
+    if (!offer) {
+      return true;
     }
 
-    return `${ratingAverage.toFixed(1)} (${ratingCount})`;
+    if (this.isOwnBusinessOffer(offer)) {
+      return false;
+    }
+
+    return !offer.canReserve;
+  }
+
+  protected formatDistance(distanceMeters: number | null): string {
+    return formatOfferDistance(distanceMeters);
   }
 
   protected formatAddress(offer: MarketplaceOfferModel): string {
@@ -202,47 +306,53 @@ export class OfferDetailsPage {
   }
 
   protected formatOfferPickupWindow(offer: MarketplaceOfferModel): string {
-    const from = new Date(offer.pickupTimeWindow.from);
-    const to = new Date(offer.pickupTimeWindow.to);
-
-    if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
-      return 'Pickup window unavailable';
-    }
-
-    const today = new Date();
-    const tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
-
-    const timeFormatter = new Intl.DateTimeFormat('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    const dateFormatter = new Intl.DateTimeFormat('en-GB', {
-      day: 'numeric',
-      month: 'short',
-    });
-
-    const timeRange = `${timeFormatter.format(from)} - ${timeFormatter.format(to)}`;
-    if (this.isSameCalendarDay(from, today)) {
-      return `Today ${timeRange}`;
-    }
-
-    if (this.isSameCalendarDay(from, tomorrow)) {
-      return `Tomorrow ${timeRange}`;
-    }
-
-    return `${dateFormatter.format(from)} ${timeRange}`;
+    return formatOfferPickupWindow(offer.pickupTimeWindow);
   }
 
   protected itemSummary(item: OfferItemModel): string {
     return `${item.quantity}x ${item.name}`;
   }
 
+  protected ratingAverageLabel(ratingAverage: number | null, ratingCount: number): string {
+    if (ratingAverage === null || ratingCount <= 0) {
+      return 'New';
+    }
+
+    return ratingAverage.toFixed(1);
+  }
+
+  protected ratingCountLabel(ratingCount: number): string | null {
+    return ratingCount > 0 ? `(${ratingCount})` : null;
+  }
+
+  protected formatCategoryLabel(category: OfferCategory): string {
+    return category
+      .toLowerCase()
+      .split('_')
+      .map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  }
+
+  protected isOwnBusinessOffer(offer: MarketplaceOfferModel | null): boolean {
+    return !!offer && this.ownedBusinessIds().has(offer.business.id);
+  }
+
+  private resolveOfferLocationLabel(offer: MarketplaceOfferModel): string {
+    const pickupStreet = offer.pickupLocation.address.street?.trim() || null;
+    const businessStreet = offer.business.address.street?.trim() || null;
+
+    if (this.viewerLocation()) {
+      return pickupStreet || businessStreet || marketplaceOfferLocationLabel(offer);
+    }
+
+    return marketplaceOfferLocationLabel(offer);
+  }
+
   private loadOffer(offerId: number): void {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    const viewerLocation = this.readStoredViewerLocation();
+    const viewerLocation = this.viewerLocation();
 
     this.marketplaceOfferApi
       .getMarketplaceOffers({
@@ -330,9 +440,4 @@ export class OfferDetailsPage {
     }
   }
 
-  private isSameCalendarDay(first: Date, second: Date): boolean {
-    return first.getFullYear() === second.getFullYear()
-      && first.getMonth() === second.getMonth()
-      && first.getDate() === second.getDate();
-  }
 }

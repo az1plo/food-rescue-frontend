@@ -6,17 +6,8 @@ import { UserService } from '../../../../core/services/user.service';
 import { appIcons } from '../../../../shared/icons/app-icons';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
 import { CircleIconComponent } from '../../../../shared/ui/circle-icon/circle-icon';
-import {
-  OfferPreviewCardComponent,
-  OfferPreviewCardModel,
-} from '../../../../shared/ui/offer-preview-card/offer-preview-card';
-
-interface HomeBenefit {
-  icon: IconDefinition;
-  lead: string;
-  tail?: string;
-  description: string;
-}
+import { OfferCardComponent } from '../../../../shared/ui/offer-card/offer-card';
+import { OfferCardModel } from '../../../../shared/ui/offer-card/offer-card.models';
 
 interface HomeStep {
   icon: IconDefinition;
@@ -28,11 +19,18 @@ interface HomeStat {
   icon: IconDefinition;
   value: string;
   label: string;
+  note: string;
+}
+
+interface HomeBusinessBenefit {
+  icon: IconDefinition;
+  title: string;
+  description: string;
 }
 
 @Component({
   selector: 'app-public-home-page',
-  imports: [RouterLink, FontAwesomeModule, ActionButtonComponent, CircleIconComponent, OfferPreviewCardComponent],
+  imports: [RouterLink, FontAwesomeModule, ActionButtonComponent, CircleIconComponent, OfferCardComponent],
   templateUrl: './home.html',
   styleUrl: './home.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,86 +41,129 @@ export class HomePage {
   protected readonly user = this.userService.getUser();
   protected readonly icons = appIcons;
 
-  protected readonly heroBenefits: HomeBenefit[] = [
+  protected readonly offerPreview: OfferCardModel[] = [
     {
-      icon: appIcons.leaf,
-      lead: 'Save food',
-      description: 'Rescue delicious food from local businesses.',
+      title: 'Pastry Bag',
+      businessName: 'Spinning J Bakery',
+      businessArea: 'Bucktown',
+      brandMark: 'SJ',
+      price: '\u20AC4.50',
+      originalPrice: '\u20AC15.00',
+      rating: '4.8',
+      availabilityLabel: '1 left',
+      distance: '0.5 km away',
+      pickup: 'Today 4:00 PM - 6:00 PM',
+      image: '/images/offer-bakery.png',
+      status: 'AVAILABLE',
     },
     {
-      icon: appIcons.store,
-      lead: 'Support local',
-      description: 'Help businesses and build stronger communities.',
+      title: 'Good Day Bag',
+      businessName: 'Lula Cafe',
+      businessArea: 'Wicker Park',
+      brandMark: 'LC',
+      price: '\u20AC5.00',
+      originalPrice: '\u20AC16.00',
+      rating: '4.7',
+      availabilityLabel: '2 left',
+      distance: '1.0 km away',
+      pickup: 'Today 3:30 PM - 5:30 PM',
+      image: '/images/offer-salad.png',
+      status: 'AVAILABLE',
     },
     {
-      icon: appIcons.globe,
-      lead: 'Protect the',
-      tail: 'planet',
-      description: 'Reduce waste and make a real impact.',
+      title: 'Produce Bundle',
+      businessName: 'The Green Grocer',
+      businessArea: 'Logan Square',
+      brandMark: 'GG',
+      price: '\u20AC6.00',
+      originalPrice: '\u20AC18.00',
+      rating: '4.9',
+      availabilityLabel: '3 left',
+      distance: '1.3 km away',
+      pickup: 'Today 5:00 PM - 7:00 PM',
+      image: '/images/offer-sushi.png',
+      status: 'AVAILABLE',
+    },
+    {
+      title: 'Pizza Surprise Bag',
+      businessName: 'Santa Maria Pizzeria',
+      businessArea: 'West Loop',
+      brandMark: 'SP',
+      price: '\u20AC5.50',
+      originalPrice: '\u20AC16.00',
+      rating: '4.6',
+      availabilityLabel: '1 left',
+      distance: '1.3 km away',
+      pickup: 'Today 8:00 PM - 9:30 PM',
+      image: '/images/offer-bagels.png',
+      status: 'AVAILABLE',
     },
   ];
 
-  protected readonly offerPreview: OfferPreviewCardModel[] = [
-    {
-      title: 'Bakery Surprise Box',
-      business: 'Little Oven Bakery',
-      price: '3.50 EUR',
-      rating: '4.8',
-      distance: '1.2 km',
-      pickup: 'Today 18:00 - 20:00',
-      image: '/images/offer-bakery.png',
-    },
-    {
-      title: 'Sushi Set',
-      business: 'Sakura Sushi',
-      price: '5.00 EUR',
-      rating: '4.6',
-      distance: '2.1 km',
-      pickup: 'Today 19:00 - 21:00',
-      image: '/images/offer-sushi.png',
-    },
-    {
-      title: 'Healthy Mix',
-      business: 'Green Kitchen',
-      price: '4.00 EUR',
-      rating: '4.7',
-      distance: '1.5 km',
-      pickup: 'Today 17:30 - 19:30',
-      image: '/images/offer-salad.png',
-    },
-    {
-      title: 'Bagels Box',
-      business: 'City Bagels',
-      price: '3.00 EUR',
-      rating: '4.5',
-      distance: '2.7 km',
-      pickup: 'Today 18:30 - 20:00',
-      image: '/images/offer-bagels.png',
-    },
-  ];
+  protected readonly heroFeaturedOffers = this.offerPreview.slice(0, 3);
+  protected readonly heroTrustAvatars = ['AL', 'MK', 'JP', 'SR'];
+  protected readonly heroStars = Array.from({ length: 5 }, (_, index) => index);
 
   protected readonly steps: HomeStep[] = [
     {
       icon: appIcons.magnifyingGlass,
-      title: 'Browse offers',
-      description: 'Find great surplus food near you.',
+      title: 'Browse nearby offers',
+      description: 'Discover great food from local businesses near you.',
     },
     {
       icon: appIcons.bagShopping,
-      title: 'Pay',
-      description: 'Check out online and secure your pickup in a few taps.',
+      title: 'Reserve & pay in app',
+      description: 'Secure your order in seconds at a big discount.',
     },
     {
       icon: appIcons.calendarDays,
-      title: 'Pick up',
-      description: 'Collect your order and enjoy your meal.',
+      title: 'Pick up & enjoy',
+      description: 'Pick it up during the time window and enjoy your meal.',
     },
   ];
 
   protected readonly stats: HomeStat[] = [
-    { icon: appIcons.bagShopping, value: '10K+', label: 'Meals saved' },
-    { icon: appIcons.store, value: '500+', label: 'Partner businesses' },
-    { icon: appIcons.userGroup, value: '15K+', label: 'Happy rescuers' },
-    { icon: appIcons.globe, value: '30+', label: 'Cities' },
+    {
+      icon: appIcons.leaf,
+      value: '2.4M+',
+      label: 'Meals rescued',
+      note: 'Delicious meals saved from waste and enjoyed by our community.',
+    },
+    {
+      icon: appIcons.store,
+      value: '5,800+',
+      label: 'Local businesses',
+      note: 'Restaurants, cafes, and grocers partnering with Savr.',
+    },
+    {
+      icon: appIcons.globe,
+      value: '1,250',
+      label: 'Tons of CO2 saved',
+      note: 'Keeping good food out of landfills and our planet happier.',
+    },
+    {
+      icon: appIcons.userGroup,
+      value: '50,000+',
+      label: 'Happy savers',
+      note: 'People across the city saving food and money every day.',
+    },
+  ];
+
+  protected readonly businessBenefits: HomeBusinessBenefit[] = [
+    {
+      icon: appIcons.store,
+      title: 'Reduce waste and costs',
+      description: 'Turn unsold food into value instead of disposal costs.',
+    },
+    {
+      icon: appIcons.userGroup,
+      title: 'Attract new customers',
+      description: 'Reach thousands of local savers who love neighborhood food spots.',
+    },
+    {
+      icon: appIcons.leaf,
+      title: 'Strengthen your impact',
+      description: 'Show your community that good food deserves a second chance.',
+    },
   ];
 }

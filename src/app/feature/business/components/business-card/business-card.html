@@ -1,6 +1,11 @@
 <article class="surface business-card">
-  <div class="business-card__media">
-    <img [src]="previewImage()" [alt]="business().name" />
+  <div class="business-card__media" [class.business-card__media--placeholder]="!iconUrl()">
+    @if (iconUrl(); as iconUrlValue) {
+      <img [src]="iconUrlValue" [alt]="business().name" />
+    } @else {
+      <span class="business-card__media-mark">{{ businessMark() }}</span>
+      <small>Icon not added yet</small>
+    }
   </div>
 
   <div class="business-card__content">

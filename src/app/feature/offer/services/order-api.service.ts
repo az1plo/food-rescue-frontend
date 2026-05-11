@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
-import { CreateOrderPayload, OrderModel, OrderPickupPassModel } from '../models/order.model';
+import { CreateOrderPayload, CreateOrderReviewPayload, OrderModel, OrderPickupPassModel } from '../models/order.model';
 
 @Injectable({
   providedIn: 'root',
@@ -29,5 +29,9 @@ export class OrderApiService {
 
   confirmPickup(id: number, pickupToken: string) {
     return this.http.post<OrderModel>(`${this.baseUrl}/${id}/pickup`, { pickupToken });
+  }
+
+  submitReview(id: number, payload: CreateOrderReviewPayload) {
+    return this.http.post<OrderModel>(`${this.baseUrl}/${id}/review`, payload);
   }
 }

@@ -7,9 +7,12 @@
 }
 
 .business-card__media {
+  display: grid;
+  place-items: center;
   overflow: hidden;
   border-radius: 1.8rem;
   aspect-ratio: 1.08;
+  background: linear-gradient(145deg, rgba(28, 70, 39, 0.96), rgba(86, 123, 93, 0.88));
 }
 
 .business-card__media img {
@@ -17,6 +20,34 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.business-card__media--placeholder {
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+  color: #ffffff;
+}
+
+.business-card__media-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 6.4rem;
+  height: 6.4rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.business-card__media small {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  opacity: 0.86;
 }
 
 .business-card__content {
