@@ -11,7 +11,8 @@ import {
   OfferFilterSortBy,
 } from './offer-filter-modal.models';
 
-type QuickFilterId = 'pickupToday' | 'availableNow' | 'nearMe' | 'vegetarian' | 'bestDiscount';
+type QuickFilterId = 'pickupToday' | 'availableNow' | 'nearMe' | 'bestDiscount';
+type FilterSectionId = 'discount' | 'availability' | 'allergens' | 'sort';
 
 interface QuickFilterOption {
   id: QuickFilterId;
@@ -35,19 +36,18 @@ export class OfferFilterModalComponent {
   readonly close = output<void>();
   readonly applyFilters = output<OfferFilters>();
   readonly clearFilters = output<void>();
+  readonly draftFiltersChange = output<OfferFilters>();
 
   protected readonly icons = appIcons;
   protected readonly quickFilterOptions: readonly QuickFilterOption[] = [
     { id: 'pickupToday', label: 'Pickup today', icon: 'calendarDays' },
     { id: 'availableNow', label: 'Available now', icon: 'clock' },
     { id: 'nearMe', label: 'Near me', icon: 'locationDot' },
-    { id: 'vegetarian', label: 'Vegetarian', icon: 'leaf' },
     { id: 'bestDiscount', label: 'Best discount', icon: 'wandMagicSparkles' },
   ] as const;
   protected readonly distanceOptions = [1, 3, 5, 10, 30] as const;
   protected readonly categoryOptions = OFFER_CATEGORY_OPTIONS;
   protected readonly allergenOptions = ALLERGEN_OPTIONS.filter((option) => option.value !== 'UNKNOWN');
-  protected readonly dietaryOptions = ['Vegetarian', 'Vegan', 'Gluten-free', 'Dairy-free'] as const;
   protected readonly quantityOptions = [
     { value: 'any', label: 'Any' },
     { value: 'one', label: '1 left' },
@@ -74,6 +74,7 @@ export class OfferFilterModalComponent {
     { value: 'newest', label: 'Newest' },
   ] as const;
   protected readonly draftFilters = signal<OfferFilters>(createDefaultOfferFilters());
+  protected readonly openAdvancedSections = signal<FilterSectionId[]>([]);
   protected readonly canShowLocationSelect = computed(() => this.locationOptions().length > 0);
   protected readonly resolvedLocationOptions = computed(() => {
     const options = new Set<string>();
@@ -102,7 +103,7 @@ export class OfferFilterModalComponent {
   protected readonly showOffersLabel = computed(() => {
     const count = this.resultCount();
     const noun = count === 1 ? 'offer' : 'offers';
-    return `Show ${count} ${noun}`;
+    return `Show ${count} matching ${noun}`;
   });
 
   constructor() {
@@ -110,7 +111,18 @@ export class OfferFilterModalComponent {
       if (!this.isOpen()) {
         return;
       }
-      this.draftFilters.set(cloneOfferFilters(this.filters()));
+
+      const nextDraftFilters = cloneOfferFilters(this.filters());
+      this.draftFilters.set(nextDraftFilters);
+      this.openAdvancedSections.set(this.resolveInitialOpenSections(nextDraftFilters));
+    });
+
+    effect(() => {
+      if (!this.isOpen()) {
+        return;
+      }
+
+      this.draftFiltersChange.emit(normalizeOfferFilters(this.draftFilters()));
     });
   }
 
@@ -180,10 +192,6 @@ export class OfferFilterModalComponent {
 
       if (filterId === 'nearMe') {
         nextFilters.location = isActive ? '' : this.currentLocationLabel();
-      }
-
-      if (filterId === 'vegetarian') {
-        nextFilters.dietary = this.toggleStringSelection(nextFilters.dietary, 'Vegetarian', !isActive);
       }
 
       if (filterId === 'bestDiscount') {
@@ -275,20 +283,6 @@ export class OfferFilterModalComponent {
     this.patchDraft({ quantityLeft: value });
   }
 
-  protected toggleDietary(value: string): void {
-    this.draftFilters.update((currentFilters) => {
-      const nextDietary = this.toggleStringSelection(currentFilters.dietary, value);
-      return {
-        ...currentFilters,
-        dietary: nextDietary,
-        quickFilters:
-          value === 'Vegetarian'
-            ? this.syncStringFlag(currentFilters.quickFilters, 'vegetarian', nextDietary.includes('Vegetarian'))
-            : currentFilters.quickFilters,
-      };
-    });
-  }
-
   protected toggleAllergen(value: string): void {
     this.draftFilters.update((currentFilters) => ({
       ...currentFilters,
@@ -304,16 +298,20 @@ export class OfferFilterModalComponent {
     this.patchDraft({ sortBy: value as OfferFilterSortBy });
   }
 
+  protected toggleAdvancedSection(sectionId: FilterSectionId): void {
+    this.openAdvancedSections.update((currentSections) =>
+      currentSections.includes(sectionId)
+        ? currentSections.filter((currentSection) => currentSection !== sectionId)
+        : [...currentSections, sectionId],
+    );
+  }
+
   protected isQuickFilterActive(value: QuickFilterId): boolean {
     return this.draftFilters().quickFilters.includes(value);
   }
 
   protected isCategorySelected(value: string): boolean {
     return this.draftFilters().categories.includes(value);
-  }
-
-  protected isDietarySelected(value: string): boolean {
-    return this.draftFilters().dietary.includes(value);
   }
 
   protected isAllergenSelected(value: string): boolean {
@@ -336,6 +334,10 @@ export class OfferFilterModalComponent {
     return this.draftFilters().quantityLeft === value;
   }
 
+  protected isAdvancedSectionOpen(sectionId: FilterSectionId): boolean {
+    return this.openAdvancedSections().includes(sectionId);
+  }
+
   protected formatDistanceLabel(): string {
     return `Showing offers within ${this.draftFilters().distanceKm} km`;
   }
@@ -347,6 +349,39 @@ export class OfferFilterModalComponent {
   protected formatPriceMaxLabel(): string {
     const priceMax = this.draftFilters().priceMax;
     return priceMax >= DEFAULT_PRICE_RANGE.max ? `${this.formatCurrency(priceMax)}+` : this.formatCurrency(priceMax);
+  }
+
+  protected advancedSectionSummary(sectionId: FilterSectionId): string {
+    const filters = this.draftFilters();
+
+    switch (sectionId) {
+      case 'discount':
+        return filters.discountPreset === 'any' ? 'Any discount' : `${filters.discountPreset}% and up`;
+      case 'availability':
+        if (filters.hideSoldOut) {
+          return filters.quantityLeft === 'any' ? 'Only available offers' : 'Availability narrowed';
+        }
+        switch (filters.quantityLeft) {
+          case 'one':
+            return '1 left';
+          case 'twoThree':
+            return '2-3 left';
+          case 'fourPlus':
+            return '4+ left';
+          default:
+            return 'Any quantity';
+        }
+      case 'allergens':
+        if (!filters.excludedAllergens.length) {
+          return 'No exclusions';
+        }
+
+        return filters.excludeMayContain
+          ? `${filters.excludedAllergens.length} exclusions incl. traces`
+          : `${filters.excludedAllergens.length} exclusions`;
+      case 'sort':
+        return this.sortOptions.find((option) => option.value === filters.sortBy)?.label ?? 'Nearest';
+    }
   }
 
   private patchDraft(patch: Partial<OfferFilters>): void {
@@ -386,6 +421,28 @@ export class OfferFilterModalComponent {
     return shouldEnable
       ? this.toggleStringSelection(values, value, true)
       : this.toggleStringSelection(values, value, false);
+  }
+
+  private resolveInitialOpenSections(filters: OfferFilters): FilterSectionId[] {
+    const sections: FilterSectionId[] = [];
+
+    if (filters.discountPreset !== 'any' || filters.quickFilters.includes('bestDiscount')) {
+      sections.push('discount');
+    }
+
+    if (filters.hideSoldOut || filters.quantityLeft !== 'any') {
+      sections.push('availability');
+    }
+
+    if (filters.excludedAllergens.length || filters.excludeMayContain) {
+      sections.push('allergens');
+    }
+
+    if (filters.sortBy !== 'nearest') {
+      sections.push('sort');
+    }
+
+    return sections;
   }
 
   private toggleStringSelection(values: string[], value: string, force?: boolean): string[] {

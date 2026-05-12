@@ -5,16 +5,17 @@ import { environment } from '../../environments/environment';
 
 const normalizedApiBaseUrl = environment.beUrl.replace(/\/+$/, '').toLowerCase();
 const authTokenUrl = `${normalizedApiBaseUrl}/auth/token`;
-const publicAuthUrls = new Set([
+const publicApiUrls = new Set([
   authTokenUrl,
   `${normalizedApiBaseUrl}/users/register`,
+  `${normalizedApiBaseUrl}/support/chat/messages`,
 ]);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const requestUrl = req.url.toLowerCase();
   const isApiRequest = requestUrl === normalizedApiBaseUrl || requestUrl.startsWith(`${normalizedApiBaseUrl}/`);
 
-  if (!isApiRequest || req.headers.has('Authorization') || publicAuthUrls.has(requestUrl)) {
+  if (!isApiRequest || req.headers.has('Authorization') || publicApiUrls.has(requestUrl)) {
     return next(req);
   }
 

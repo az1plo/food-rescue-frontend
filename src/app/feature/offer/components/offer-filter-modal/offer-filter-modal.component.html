@@ -324,157 +324,184 @@
             </div>
           </section>
 
-          <section class="offer-filter-modal__card offer-filter-modal__card--discount">
-            <div class="offer-filter-modal__card-head">
-              <h3>Discount</h3>
-            </div>
+          <section class="offer-filter-modal__card offer-filter-modal__card--discount" [class.offer-filter-modal__card--collapsed]="!isAdvancedSectionOpen('discount')">
+            <button type="button" class="offer-filter-modal__section-toggle" (click)="toggleAdvancedSection('discount')">
+              <span class="offer-filter-modal__section-copy">
+                <span class="offer-filter-modal__section-title">Discount</span>
+                <span class="offer-filter-modal__section-summary">{{ advancedSectionSummary('discount') }}</span>
+              </span>
+              <fa-icon
+                [icon]="icons.chevronRight"
+                aria-hidden="true"
+                class="offer-filter-modal__section-chevron"
+                [class.offer-filter-modal__section-chevron--open]="isAdvancedSectionOpen('discount')"
+              />
+            </button>
 
-            <div class="offer-filter-modal__stack">
-              <label class="offer-filter-modal__field">
-                <span>Discount threshold</span>
-                <div class="offer-filter-modal__select-wrap offer-filter-modal__select-wrap--simple">
-                  <select
-                    class="offer-filter-modal__select"
-                    aria-label="Choose discount preset"
-                    [value]="draftFilters().discountPreset"
-                    (change)="setDiscountPreset(($any($event.target).value ?? 'any').toString())"
-                  >
-                    <option value="any">Any discount</option>
-                    @for (discount of discountOptions; track discount.value) {
-                      <option [value]="discount.value">{{ discount.label }}</option>
-                    }
-                  </select>
-                </div>
-              </label>
+            @if (isAdvancedSectionOpen('discount')) {
+              <div class="offer-filter-modal__stack">
+                <label class="offer-filter-modal__field">
+                  <span>Discount threshold</span>
+                  <div class="offer-filter-modal__select-wrap offer-filter-modal__select-wrap--simple">
+                    <select
+                      class="offer-filter-modal__select"
+                      aria-label="Choose discount preset"
+                      [value]="draftFilters().discountPreset"
+                      (change)="setDiscountPreset(($any($event.target).value ?? 'any').toString())"
+                    >
+                      <option value="any">Any discount</option>
+                      @for (discount of discountOptions; track discount.value) {
+                        <option [value]="discount.value">{{ discount.label }}</option>
+                      }
+                    </select>
+                  </div>
+                </label>
 
-              <div class="offer-filter-modal__pills offer-filter-modal__pills--wrap">
-                @for (discount of discountOptions; track discount.value) {
-                  <button
-                    type="button"
-                    class="offer-filter-modal__pill"
-                    [class.offer-filter-modal__pill--active]="isDiscountPresetSelected(discount.value)"
-                    (click)="setDiscountPreset(discount.value)"
-                  >
-                    {{ discount.label }}
-                  </button>
-                }
-              </div>
-            </div>
-          </section>
-
-          <section class="offer-filter-modal__card offer-filter-modal__card--availability">
-            <div class="offer-filter-modal__card-head">
-              <h3>Availability</h3>
-            </div>
-
-            <div class="offer-filter-modal__stack">
-              <label class="offer-filter-modal__toggle">
-                <input type="checkbox" [checked]="draftFilters().hideSoldOut" (change)="toggleHideSoldOut()" />
-                <span class="offer-filter-modal__check-box">
-                  @if (draftFilters().hideSoldOut) {
-                    <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
-                  }
-                </span>
-                <span>Hide sold out</span>
-              </label>
-
-              <div class="offer-filter-modal__field">
-                <span>Quantity left</span>
                 <div class="offer-filter-modal__pills offer-filter-modal__pills--wrap">
-                  @for (quantity of quantityOptions; track quantity.value) {
+                  @for (discount of discountOptions; track discount.value) {
                     <button
                       type="button"
                       class="offer-filter-modal__pill"
-                      [class.offer-filter-modal__pill--active]="isQuantitySelected(quantity.value)"
-                      (click)="setQuantityLeft(quantity.value)"
+                      [class.offer-filter-modal__pill--active]="isDiscountPresetSelected(discount.value)"
+                      (click)="setDiscountPreset(discount.value)"
                     >
-                      {{ quantity.label }}
+                      {{ discount.label }}
                     </button>
                   }
                 </div>
               </div>
-            </div>
+            }
           </section>
 
-          <section class="offer-filter-modal__card offer-filter-modal__card--dietary">
-            <div class="offer-filter-modal__card-head">
-              <h3>Dietary preferences</h3>
-            </div>
-
-            <div class="offer-filter-modal__check-list">
-              @for (dietary of dietaryOptions; track dietary) {
-                <label class="offer-filter-modal__toggle">
-                  <input type="checkbox" [checked]="isDietarySelected(dietary)" (change)="toggleDietary(dietary)" />
-                  <span class="offer-filter-modal__check-box">
-                    @if (isDietarySelected(dietary)) {
-                      <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
-                    }
-                  </span>
-                  <span>{{ dietary }}</span>
-                </label>
-              }
-            </div>
-          </section>
-
-          <section class="offer-filter-modal__card offer-filter-modal__card--allergens">
-            <div class="offer-filter-modal__card-head">
-              <h3>Allergens</h3>
-              <p>Exclude offers that contain:</p>
-            </div>
-
-            <div class="offer-filter-modal__allergen-grid">
-              @for (allergen of allergenOptions; track allergen.value) {
-                <label class="offer-filter-modal__toggle">
-                  <input
-                    type="checkbox"
-                    [checked]="isAllergenSelected(allergen.value)"
-                    (change)="toggleAllergen(allergen.value)"
-                  />
-                  <span class="offer-filter-modal__check-box">
-                    @if (isAllergenSelected(allergen.value)) {
-                      <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
-                    }
-                  </span>
-                  <span>{{ allergen.label }}</span>
-                </label>
-              }
-            </div>
-
-            <label class="offer-filter-modal__toggle offer-filter-modal__toggle--muted">
-              <input
-                type="checkbox"
-                [checked]="draftFilters().excludeMayContain"
-                (change)="toggleExcludeMayContain()"
-              />
-              <span class="offer-filter-modal__check-box">
-                @if (draftFilters().excludeMayContain) {
-                  <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
-                }
+          <section class="offer-filter-modal__card offer-filter-modal__card--availability" [class.offer-filter-modal__card--collapsed]="!isAdvancedSectionOpen('availability')">
+            <button type="button" class="offer-filter-modal__section-toggle" (click)="toggleAdvancedSection('availability')">
+              <span class="offer-filter-modal__section-copy">
+                <span class="offer-filter-modal__section-title">Availability</span>
+                <span class="offer-filter-modal__section-summary">{{ advancedSectionSummary('availability') }}</span>
               </span>
-              <span>Also exclude offers that may contain selected allergens</span>
-            </label>
+              <fa-icon
+                [icon]="icons.chevronRight"
+                aria-hidden="true"
+                class="offer-filter-modal__section-chevron"
+                [class.offer-filter-modal__section-chevron--open]="isAdvancedSectionOpen('availability')"
+              />
+            </button>
+
+            @if (isAdvancedSectionOpen('availability')) {
+              <div class="offer-filter-modal__stack">
+                <label class="offer-filter-modal__toggle">
+                  <input type="checkbox" [checked]="draftFilters().hideSoldOut" (change)="toggleHideSoldOut()" />
+                  <span class="offer-filter-modal__check-box">
+                    @if (draftFilters().hideSoldOut) {
+                      <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
+                    }
+                  </span>
+                  <span>Hide sold out</span>
+                </label>
+
+                <div class="offer-filter-modal__field">
+                  <span>Quantity left</span>
+                  <div class="offer-filter-modal__pills offer-filter-modal__pills--wrap">
+                    @for (quantity of quantityOptions; track quantity.value) {
+                      <button
+                        type="button"
+                        class="offer-filter-modal__pill"
+                        [class.offer-filter-modal__pill--active]="isQuantitySelected(quantity.value)"
+                        (click)="setQuantityLeft(quantity.value)"
+                      >
+                        {{ quantity.label }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
           </section>
 
-          <section class="offer-filter-modal__card offer-filter-modal__card--sort">
-            <div class="offer-filter-modal__card-head">
-              <h3>Sort by</h3>
-            </div>
+          <section class="offer-filter-modal__card offer-filter-modal__card--allergens" [class.offer-filter-modal__card--collapsed]="!isAdvancedSectionOpen('allergens')">
+            <button type="button" class="offer-filter-modal__section-toggle" (click)="toggleAdvancedSection('allergens')">
+              <span class="offer-filter-modal__section-copy">
+                <span class="offer-filter-modal__section-title">Allergens</span>
+                <span class="offer-filter-modal__section-summary">{{ advancedSectionSummary('allergens') }}</span>
+              </span>
+              <fa-icon
+                [icon]="icons.chevronRight"
+                aria-hidden="true"
+                class="offer-filter-modal__section-chevron"
+                [class.offer-filter-modal__section-chevron--open]="isAdvancedSectionOpen('allergens')"
+              />
+            </button>
 
-            <label class="offer-filter-modal__field">
-              <span>Offer order</span>
-              <div class="offer-filter-modal__select-wrap offer-filter-modal__select-wrap--simple">
-                <select
-                  class="offer-filter-modal__select"
-                  aria-label="Choose sort order"
-                  [value]="draftFilters().sortBy"
-                  (change)="updateSort(($any($event.target).value ?? 'nearest').toString())"
-                >
-                  @for (sortOption of sortOptions; track sortOption.value) {
-                    <option [value]="sortOption.value">{{ sortOption.label }}</option>
-                  }
-                </select>
+            @if (isAdvancedSectionOpen('allergens')) {
+              <div class="offer-filter-modal__card-head">
+                <p>Exclude offers that contain:</p>
               </div>
-            </label>
+
+              <div class="offer-filter-modal__allergen-grid">
+                @for (allergen of allergenOptions; track allergen.value) {
+                  <label class="offer-filter-modal__toggle">
+                    <input
+                      type="checkbox"
+                      [checked]="isAllergenSelected(allergen.value)"
+                      (change)="toggleAllergen(allergen.value)"
+                    />
+                    <span class="offer-filter-modal__check-box">
+                      @if (isAllergenSelected(allergen.value)) {
+                        <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
+                      }
+                    </span>
+                    <span>{{ allergen.label }}</span>
+                  </label>
+                }
+              </div>
+
+              <label class="offer-filter-modal__toggle offer-filter-modal__toggle--muted">
+                <input
+                  type="checkbox"
+                  [checked]="draftFilters().excludeMayContain"
+                  (change)="toggleExcludeMayContain()"
+                />
+                <span class="offer-filter-modal__check-box">
+                  @if (draftFilters().excludeMayContain) {
+                    <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
+                  }
+                </span>
+                <span>Also exclude offers that may contain selected allergens</span>
+              </label>
+            }
+          </section>
+
+          <section class="offer-filter-modal__card offer-filter-modal__card--sort" [class.offer-filter-modal__card--collapsed]="!isAdvancedSectionOpen('sort')">
+            <button type="button" class="offer-filter-modal__section-toggle" (click)="toggleAdvancedSection('sort')">
+              <span class="offer-filter-modal__section-copy">
+                <span class="offer-filter-modal__section-title">Sort by</span>
+                <span class="offer-filter-modal__section-summary">{{ advancedSectionSummary('sort') }}</span>
+              </span>
+              <fa-icon
+                [icon]="icons.chevronRight"
+                aria-hidden="true"
+                class="offer-filter-modal__section-chevron"
+                [class.offer-filter-modal__section-chevron--open]="isAdvancedSectionOpen('sort')"
+              />
+            </button>
+
+            @if (isAdvancedSectionOpen('sort')) {
+              <label class="offer-filter-modal__field">
+                <span>Offer order</span>
+                <div class="offer-filter-modal__select-wrap offer-filter-modal__select-wrap--simple">
+                  <select
+                    class="offer-filter-modal__select"
+                    aria-label="Choose sort order"
+                    [value]="draftFilters().sortBy"
+                    (change)="updateSort(($any($event.target).value ?? 'nearest').toString())"
+                  >
+                    @for (sortOption of sortOptions; track sortOption.value) {
+                      <option [value]="sortOption.value">{{ sortOption.label }}</option>
+                    }
+                  </select>
+                </div>
+              </label>
+            }
           </section>
         </div>
       </div>

@@ -397,6 +397,7 @@ export class BrowseOffersPage implements OnDestroy {
   protected readonly locating = signal(false);
   protected readonly searchText = signal('');
   protected readonly filterModalOpen = signal(false);
+  protected readonly filterModalDraftFilters = signal<OfferFilters | null>(null);
   protected readonly pickupTodayOnly = signal(false);
   protected readonly categoryFilter = signal<BrowseCategoryFilter>('ALL');
   protected readonly priceFilter = signal<BrowsePriceFilter>('ALL');
@@ -477,6 +478,14 @@ export class BrowseOffersPage implements OnDestroy {
     return `${count} ${noun} available now`;
   });
   protected readonly hasVisibleOffers = computed(() => this.visibleOffers().length > 0);
+  protected readonly filterModalResultCount = computed(() => {
+    const draftFilters = this.filterModalDraftFilters();
+    if (draftFilters === null) {
+      return this.visibleOffers().length;
+    }
+
+    return this.computeVisibleOffers(draftFilters).length;
+  });
   protected readonly nextRadiusKm = computed(() => {
     const currentRadiusKm = this.radiusKm();
     const nextPresetRadiusKm = RADIUS_PRESET_OPTIONS.find((option) => option > currentRadiusKm);
@@ -701,29 +710,7 @@ export class BrowseOffersPage implements OnDestroy {
     });
   });
   protected readonly visibleOffers = computed(() => {
-    const selectedBusinessId = this.selectedBusinessId();
-    const appliedFilters = this.filterModalState();
-    let offers = selectedBusinessId === null
-      ? this.offers()
-      : this.offers().filter((offer) => offer.business.id === selectedBusinessId);
-
-    const referencePoint = this.mapReferencePoint();
-    if (referencePoint !== null) {
-      const scopeRadiusMeters = this.radiusKm() * 1000;
-      offers = offers.filter((offer) => {
-        const pickupAddress = offer.pickupLocation.address;
-        const distanceMeters = resolveDistanceMeters(
-          referencePoint.latitude,
-          referencePoint.longitude,
-          pickupAddress.latitude ?? offer.business.address.latitude ?? null,
-          pickupAddress.longitude ?? offer.business.address.longitude ?? null,
-        );
-        return distanceMeters !== null && distanceMeters <= scopeRadiusMeters;
-      });
-    }
-
-    offers = offers.filter((offer) => this.matchesAppliedOfferFilters(offer, appliedFilters));
-    return this.sortVisibleOffers(offers, appliedFilters.sortBy);
+    return this.computeVisibleOffers(this.filterModalState());
   });
   protected readonly visibleOfferCards = computed<VisibleOfferCardItem[]>(() =>
     this.visibleOffers().map((offer) => ({
@@ -909,10 +896,12 @@ export class BrowseOffersPage implements OnDestroy {
   }
 
   protected openFilterModal(): void {
+    this.filterModalDraftFilters.set(cloneOfferFilters(this.filterModalState()));
     this.filterModalOpen.set(true);
   }
 
   protected closeFilterModal(): void {
+    this.filterModalDraftFilters.set(null);
     this.filterModalOpen.set(false);
   }
 
@@ -922,6 +911,7 @@ export class BrowseOffersPage implements OnDestroy {
     const locationHandledAsync = this.applyFilterLocation(nextFilters.location);
 
     this.appliedOfferFilters.set(nextFilters);
+    this.filterModalDraftFilters.set(null);
     this.filterModalOpen.set(false);
     this.pickupTodayOnly.set(nextFilters.pickupDay === 'today');
     this.includeUnavailable.set(!nextFilters.hideSoldOut);
@@ -934,6 +924,10 @@ export class BrowseOffersPage implements OnDestroy {
       this.loadOffers();
       this.queueMapRender(true);
     }
+  }
+
+  protected updateFilterModalDraft(filters: OfferFilters): void {
+    this.filterModalDraftFilters.set(cloneOfferFilters(filters));
   }
 
   protected openLocationPicker(): void {
@@ -1430,7 +1424,58 @@ export class BrowseOffersPage implements OnDestroy {
     return this.isSameCalendarDay(pickupFrom, new Date());
   }
 
-  private matchesAppliedOfferFilters(offer: MarketplaceOfferModel, filters: OfferFilters): boolean {
+  private computeVisibleOffers(filters: OfferFilters): MarketplaceOfferModel[] {
+    const selectedBusinessId = this.selectedBusinessId();
+    const normalizedFilters = normalizeOfferFilters(filters);
+    const referencePoint = this.resolveReferencePointForFilters(normalizedFilters);
+    let offers = selectedBusinessId === null
+      ? this.offers()
+      : this.offers().filter((offer) => offer.business.id === selectedBusinessId);
+
+    if (referencePoint !== null) {
+      const scopeRadiusMeters = normalizedFilters.distanceKm * 1000;
+      offers = offers.filter((offer) => {
+        const pickupAddress = offer.pickupLocation.address;
+        const distanceMeters = resolveDistanceMeters(
+          referencePoint.latitude,
+          referencePoint.longitude,
+          pickupAddress.latitude ?? offer.business.address.latitude ?? null,
+          pickupAddress.longitude ?? offer.business.address.longitude ?? null,
+        );
+        return distanceMeters !== null && distanceMeters <= scopeRadiusMeters;
+      });
+    }
+
+    offers = offers.filter((offer) => this.matchesOfferFilters(offer, normalizedFilters));
+    return this.sortVisibleOffers(offers, normalizedFilters.sortBy);
+  }
+
+  private resolveReferencePointForFilters(filters: OfferFilters): { latitude: number; longitude: number } | null {
+    const normalizedLocation = filters.location.trim();
+    if (!normalizedLocation) {
+      return null;
+    }
+
+    if (normalizedLocation.toLowerCase() === this.currentLocationOptionLabel.toLowerCase()) {
+      const viewerLocation = this.viewerLocation();
+      return viewerLocation === null
+        ? null
+        : {
+            latitude: viewerLocation.latitude,
+            longitude: viewerLocation.longitude,
+          };
+    }
+
+    const matchingCity = this.cityOptions().find((option) => option.city.toLowerCase() === normalizedLocation.toLowerCase());
+    return matchingCity === undefined
+      ? null
+      : {
+          latitude: matchingCity.latitude,
+          longitude: matchingCity.longitude,
+        };
+  }
+
+  private matchesOfferFilters(offer: MarketplaceOfferModel, filters: OfferFilters): boolean {
     if (filters.pickupDay !== 'any' && !this.matchesPickupDayFilter(offer, filters)) {
       return false;
     }

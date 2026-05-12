@@ -588,8 +588,9 @@
         [filters]="filterModalState()"
         [locationOptions]="filterLocationOptions()"
         [currentLocationLabel]="currentLocationOptionLabel"
-        [resultCount]="summary().visibleOffers"
+        [resultCount]="filterModalResultCount()"
         (close)="closeFilterModal()"
+        (draftFiltersChange)="updateFilterModalDraft($event)"
         (applyFilters)="applyOfferFilters($event)"
       ></app-offer-filter-modal>
     </div>
