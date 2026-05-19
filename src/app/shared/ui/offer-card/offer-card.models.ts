@@ -1,4 +1,4 @@
-import { OfferStatus } from '../../../feature/offer/models/offer.model';
+import { OfferStatus } from '../../models/offer.model';
 
 export type OfferCardVariant = 'home' | 'list' | 'detail' | 'map';
 

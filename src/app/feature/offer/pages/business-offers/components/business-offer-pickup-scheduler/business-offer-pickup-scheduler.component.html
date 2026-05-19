@@ -1,0 +1,374 @@
+<div [formGroup]="form()">
+  <div class="create-offer-card__header">
+    <div class="create-offer-card__heading">
+      <div>
+        <h2>Pickup details</h2>
+      </div>
+    </div>
+  </div>
+
+  <label class="create-offer-checkbox">
+    <input type="checkbox" formControlName="useBusinessProfileAddress" />
+    <span>Use business profile address</span>
+  </label>
+
+  @if (usesBusinessProfileAddress()) {
+    <div class="create-offer-address-summary">
+      <strong>{{ businessName() }}</strong>
+      <span>{{ businessProfileAddressLabel() }}</span>
+    </div>
+  } @else {
+    <div class="create-offer-grid create-offer-grid--pickup">
+      <div class="create-offer-field create-offer-field--full">
+        <label class="create-offer-field__label" for="pickup-street">Pickup street <span class="create-offer-field__required">*</span></label>
+        <input id="pickup-street" class="form-control create-offer-field__control" type="text" formControlName="pickupStreet" />
+        <div class="field-message-slot">
+          @if (showFieldError('pickupStreet')) {
+            <p class="field-error">Enter the pickup street.</p>
+          }
+        </div>
+      </div>
+
+      <div class="create-offer-field">
+        <label class="create-offer-field__label" for="pickup-city">Pickup city <span class="create-offer-field__required">*</span></label>
+        <input id="pickup-city" class="form-control create-offer-field__control" type="text" formControlName="pickupCity" />
+        <div class="field-message-slot">
+          @if (showFieldError('pickupCity')) {
+            <p class="field-error">Enter the pickup city.</p>
+          }
+        </div>
+      </div>
+
+      <div class="create-offer-field">
+        <label class="create-offer-field__label" for="pickup-postal-code">Postal code <span class="create-offer-field__required">*</span></label>
+        <input
+          id="pickup-postal-code"
+          class="form-control create-offer-field__control"
+          type="text"
+          formControlName="pickupPostalCode"
+        />
+        <div class="field-message-slot">
+          @if (showFieldError('pickupPostalCode')) {
+            <p class="field-error">Enter the pickup postal code.</p>
+          }
+        </div>
+      </div>
+
+      <div class="create-offer-field">
+        <label class="create-offer-field__label" for="pickup-country">Country <span class="create-offer-field__required">*</span></label>
+        <select id="pickup-country" class="form-control create-offer-field__control" formControlName="pickupCountry">
+          @for (country of countries(); track country) {
+            <option [value]="country">{{ country }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  }
+
+  <div class="create-offer-field">
+    <div class="create-offer-field__label-row">
+      <label class="create-offer-field__label" for="pickup-note">Pickup note optional</label>
+      <span class="create-offer-field__counter">{{ form().get('pickupNote')?.value?.length ?? 0 }} / {{ pickupNoteMaxLength() }}</span>
+    </div>
+    <textarea
+      id="pickup-note"
+      class="form-control create-offer-field__control create-offer-field__control--textarea"
+      formControlName="pickupNote"
+    ></textarea>
+    <div class="field-message-slot">
+      @if (showFieldError('pickupNote')) {
+        <p class="field-error">Keep the pickup note under {{ pickupNoteMaxLength() }} characters.</p>
+      } @else {
+        <p class="field-hint">Optional instructions like the side entrance or counter number.</p>
+      }
+    </div>
+  </div>
+
+  @if (pickupWindowSummary(); as scheduleSummary) {
+    <div class="create-offer-schedule__summary">
+      <fa-icon [icon]="icons().clock" aria-hidden="true" />
+      <div>
+        <span>Pickup window preview</span>
+        <strong>{{ scheduleSummary }}</strong>
+      </div>
+      @if (pickupWindowRollsToNextDay()) {
+        <span class="create-offer-schedule__rollover">Ends next day</span>
+      }
+    </div>
+  }
+
+  <div class="create-offer-schedule">
+    <div class="create-offer-schedule__day">
+      <div class="create-offer-schedule__control create-offer-schedule__picker" [class.is-open]="isPickupSchedulePanelOpen('date')">
+        <span class="create-offer-field__label">Pickup day <span class="create-offer-field__required">*</span></span>
+        <button
+          id="pickup-day"
+          class="create-offer-schedule__trigger"
+          type="button"
+          aria-haspopup="dialog"
+          [attr.aria-expanded]="isPickupSchedulePanelOpen('date')"
+          (click)="pickupSchedulePanelToggled.emit('date')"
+        >
+          <span class="create-offer-schedule__trigger-main">
+            <fa-icon [icon]="icons().calendarDays" aria-hidden="true" />
+            <span
+              class="create-offer-schedule__trigger-value"
+              [class.is-placeholder]="!pickupBaseDateValue()"
+            >
+              {{ pickupBaseDateLabel() }}
+            </span>
+          </span>
+          <fa-icon [icon]="icons().arrowRight" class="create-offer-schedule__trigger-caret" aria-hidden="true" />
+        </button>
+
+        @if (isPickupSchedulePanelOpen('date')) {
+          <div class="create-offer-schedule__panel create-offer-schedule__panel--calendar" role="dialog" aria-label="Choose pickup day">
+            <div class="create-offer-schedule__panel-header">
+              <button class="create-offer-schedule__panel-nav" type="button" (click)="pickupMonthShifted.emit(-1)" aria-label="Previous month">
+                <fa-icon [icon]="icons().arrowLeft" aria-hidden="true" />
+              </button>
+              <strong>{{ pickupCalendarMonthLabel() }}</strong>
+              <button class="create-offer-schedule__panel-nav" type="button" (click)="pickupMonthShifted.emit(1)" aria-label="Next month">
+                <fa-icon [icon]="icons().arrowRight" aria-hidden="true" />
+              </button>
+            </div>
+
+            <div class="create-offer-schedule__quick-actions">
+              <button class="create-offer-schedule__quick-chip" type="button" (click)="pickupRelativeDateSelected.emit(0)">Today</button>
+              <button class="create-offer-schedule__quick-chip" type="button" (click)="pickupRelativeDateSelected.emit(1)">Tomorrow</button>
+            </div>
+
+            <div class="create-offer-schedule__weekday-row">
+              @for (weekday of pickupCalendarWeekdays(); track weekday) {
+                <span>{{ weekday }}</span>
+              }
+            </div>
+
+            <div class="create-offer-schedule__calendar-grid">
+              @for (day of pickupCalendarDays(); track day.date) {
+                <button
+                  class="create-offer-schedule__calendar-day"
+                  type="button"
+                  [class.is-muted]="!day.isCurrentMonth"
+                  [class.is-selected]="day.isSelected"
+                  [class.is-today]="day.isToday"
+                  (click)="pickupDateSelected.emit(day.date)"
+                >
+                  {{ day.dayOfMonth }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="create-offer-schedule__times">
+      <div class="create-offer-schedule__slot">
+        <div class="create-offer-schedule__slot-head">
+          <span class="create-offer-field__label">Pickup from <span class="create-offer-field__required">*</span></span>
+        </div>
+
+        <div class="create-offer-schedule__control create-offer-schedule__picker" [class.is-open]="isPickupSchedulePanelOpen('pickupFrom')">
+          <span class="create-offer-schedule__control-label">Start time</span>
+          <button
+            id="pickup-from-time"
+            class="create-offer-schedule__trigger"
+            type="button"
+            aria-haspopup="dialog"
+            [attr.aria-expanded]="isPickupSchedulePanelOpen('pickupFrom')"
+            (click)="pickupSchedulePanelToggled.emit('pickupFrom')"
+          >
+            <span class="create-offer-schedule__trigger-main">
+              <fa-icon [icon]="icons().clock" aria-hidden="true" />
+              <span
+                class="create-offer-schedule__trigger-value"
+                [class.is-placeholder]="!pickupTimeValue('pickupFrom')"
+              >
+                {{ pickupTimeValue('pickupFrom') || 'Choose start time' }}
+              </span>
+            </span>
+            <fa-icon [icon]="icons().arrowRight" class="create-offer-schedule__trigger-caret" aria-hidden="true" />
+          </button>
+
+          @if (isPickupSchedulePanelOpen('pickupFrom')) {
+            <div class="create-offer-schedule__panel create-offer-schedule__panel--time" role="dialog" aria-label="Choose pickup start time">
+              <div class="create-offer-schedule__panel-header create-offer-schedule__panel-header--time">
+                <div>
+                  <span class="create-offer-schedule__panel-kicker">Pickup from</span>
+                  <strong>{{ pickupTimeValue('pickupFrom') || 'Choose start time' }}</strong>
+                </div>
+                <button
+                  class="create-offer-schedule__panel-link"
+                  type="button"
+                  [disabled]="!pickupTimeValue('pickupFrom')"
+                  (click)="pickupTimeCleared.emit('pickupFrom')"
+                >
+                  Clear
+                </button>
+              </div>
+
+              <div class="create-offer-schedule__quick-actions">
+                @for (preset of pickupQuickTimePresets(); track preset) {
+                  <button class="create-offer-schedule__quick-chip" type="button" (click)="pickupTimePresetApplied.emit({ fieldName: 'pickupFrom', value: preset })">
+                    {{ preset }}
+                  </button>
+                }
+              </div>
+
+              <div class="create-offer-schedule__time-columns">
+                <div class="create-offer-schedule__time-group">
+                  <span>Hour</span>
+                  <div class="create-offer-schedule__time-grid create-offer-schedule__time-grid--hours">
+                    @for (hour of pickupHourOptions(); track hour) {
+                      <button
+                        class="create-offer-schedule__time-chip"
+                        type="button"
+                        [class.is-selected]="pickupTimePart('pickupFrom', 'hour') === hour"
+                        (click)="pickupTimePartSelected.emit({ fieldName: 'pickupFrom', part: 'hour', value: hour })"
+                      >
+                        {{ hour }}
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                <div class="create-offer-schedule__time-group">
+                  <span>Minute</span>
+                  <div class="create-offer-schedule__time-grid create-offer-schedule__time-grid--minutes">
+                    @for (minute of pickupMinuteOptions(); track minute) {
+                      <button
+                        class="create-offer-schedule__time-chip"
+                        type="button"
+                        [class.is-selected]="pickupTimePart('pickupFrom', 'minute') === minute"
+                        (click)="pickupTimePartSelected.emit({ fieldName: 'pickupFrom', part: 'minute', value: minute })"
+                      >
+                        {{ minute }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="field-message-slot">
+          @if (showFieldError('pickupFrom')) {
+            <p class="field-error">Choose a pickup day and start time.</p>
+          }
+        </div>
+      </div>
+
+      <div class="create-offer-schedule__slot">
+        <div class="create-offer-schedule__slot-head">
+          <span class="create-offer-field__label">Pickup to <span class="create-offer-field__required">*</span></span>
+        </div>
+
+        <div class="create-offer-schedule__control create-offer-schedule__picker" [class.is-open]="isPickupSchedulePanelOpen('pickupTo')">
+          <span class="create-offer-schedule__control-label">End time</span>
+          <button
+            id="pickup-to-time"
+            class="create-offer-schedule__trigger"
+            type="button"
+            aria-haspopup="dialog"
+            [attr.aria-expanded]="isPickupSchedulePanelOpen('pickupTo')"
+            (click)="pickupSchedulePanelToggled.emit('pickupTo')"
+          >
+            <span class="create-offer-schedule__trigger-main">
+              <fa-icon [icon]="icons().clock" aria-hidden="true" />
+              <span
+                class="create-offer-schedule__trigger-value"
+                [class.is-placeholder]="!pickupTimeValue('pickupTo')"
+              >
+                {{ pickupTimeValue('pickupTo') || 'Choose end time' }}
+              </span>
+            </span>
+            <fa-icon [icon]="icons().arrowRight" class="create-offer-schedule__trigger-caret" aria-hidden="true" />
+          </button>
+
+          @if (isPickupSchedulePanelOpen('pickupTo')) {
+            <div class="create-offer-schedule__panel create-offer-schedule__panel--time" role="dialog" aria-label="Choose pickup end time">
+              <div class="create-offer-schedule__panel-header create-offer-schedule__panel-header--time">
+                <div>
+                  <span class="create-offer-schedule__panel-kicker">Pickup to</span>
+                  <strong>{{ pickupTimeValue('pickupTo') || 'Choose end time' }}</strong>
+                </div>
+                <button
+                  class="create-offer-schedule__panel-link"
+                  type="button"
+                  [disabled]="!pickupTimeValue('pickupTo')"
+                  (click)="pickupTimeCleared.emit('pickupTo')"
+                >
+                  Clear
+                </button>
+              </div>
+
+              <div class="create-offer-schedule__quick-actions">
+                @for (preset of pickupQuickTimePresets(); track preset) {
+                  <button class="create-offer-schedule__quick-chip" type="button" (click)="pickupTimePresetApplied.emit({ fieldName: 'pickupTo', value: preset })">
+                    {{ preset }}
+                  </button>
+                }
+              </div>
+
+              <div class="create-offer-schedule__time-columns">
+                <div class="create-offer-schedule__time-group">
+                  <span>Hour</span>
+                  <div class="create-offer-schedule__time-grid create-offer-schedule__time-grid--hours">
+                    @for (hour of pickupHourOptions(); track hour) {
+                      <button
+                        class="create-offer-schedule__time-chip"
+                        type="button"
+                        [class.is-selected]="pickupTimePart('pickupTo', 'hour') === hour"
+                        (click)="pickupTimePartSelected.emit({ fieldName: 'pickupTo', part: 'hour', value: hour })"
+                      >
+                        {{ hour }}
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                <div class="create-offer-schedule__time-group">
+                  <span>Minute</span>
+                  <div class="create-offer-schedule__time-grid create-offer-schedule__time-grid--minutes">
+                    @for (minute of pickupMinuteOptions(); track minute) {
+                      <button
+                        class="create-offer-schedule__time-chip"
+                        type="button"
+                        [class.is-selected]="pickupTimePart('pickupTo', 'minute') === minute"
+                        (click)="pickupTimePartSelected.emit({ fieldName: 'pickupTo', part: 'minute', value: minute })"
+                      >
+                        {{ minute }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="field-message-slot">
+          @if (showFieldError('pickupTo')) {
+            <p class="field-error">Choose a pickup end time.</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <p class="field-hint create-offer-schedule__hint">
+      If the end time is earlier than the start time, the pickup window will continue into the next day.
+    </p>
+  </div>
+
+  <div class="field-message-slot">
+    @if (showFieldError('pickupFrom') && !pickupBaseDateValue()) {
+      <p class="field-error">Choose a pickup day.</p>
+    }
+  </div>
+
+  @if (submitAttempted() && pickupWindowInvalid()) {
+    <p class="field-error create-offer-field__inline-error">End time must be different from the start time.</p>
+  }
+</div>

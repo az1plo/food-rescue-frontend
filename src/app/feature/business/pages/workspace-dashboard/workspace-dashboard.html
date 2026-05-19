@@ -1,5 +1,5 @@
 <section class="workspace-page workspace-dashboard-page">
-  <div class="workspace-dashboard-page__header">
+  <div class="workspace-dashboard-page__header workspace-page__header">
     <div>
       <h1>Portfolio dashboard</h1>
       <p>Track all of your businesses together, spot locations that need attention, and jump into the exact workspace that needs action.</p>
@@ -35,13 +35,9 @@
   }
 
   @if (loading()) {
-    <section class="surface workspace-dashboard-page__state" aria-busy="true">
-      <span class="eyebrow">Dashboard</span>
-      <h2>Loading owner dashboard</h2>
-      <p>We are pulling business lists and analytics snapshots from the backend now.</p>
-    </section>
+    <app-workspace-page-skeleton variant="dashboard" />
   } @else if (!businesses().length) {
-    <section class="surface workspace-dashboard-page__state workspace-dashboard-page__state--empty">
+    <section class="surface workspace-dashboard-page__state workspace-dashboard-page__state--empty workspace-page__state">
       <div>
         <span class="eyebrow">Owner workspace</span>
         <h2>No businesses yet</h2>
@@ -59,9 +55,9 @@
       </div>
     </section>
   } @else {
-    <section class="workspace-dashboard-page__summary">
+    <section class="workspace-dashboard-page__summary workspace-page__summary">
       @for (card of summaryCards(); track card.label) {
-        <article class="surface workspace-dashboard-page__summary-card">
+        <article class="surface workspace-dashboard-page__summary-card workspace-page__summary-card">
           <span class="eyebrow">{{ card.label }}</span>
           <strong>{{ card.value }}</strong>
           <p>{{ card.detail }}</p>
@@ -77,7 +73,7 @@
     }
 
     <div class="workspace-dashboard-page__layout">
-      <section class="surface dashboard-panel dashboard-panel--activity">
+      <section class="surface dashboard-panel dashboard-panel--activity workspace-page__panel">
         <div class="dashboard-panel__head">
           <div>
             <span class="eyebrow">Cross-business activity</span>
@@ -119,14 +115,14 @@
             }
           </div>
         } @else {
-          <div class="workspace-dashboard-page__empty-card">
+          <div class="workspace-dashboard-page__empty-card workspace-page__empty-card">
             <strong>No portfolio activity yet</strong>
             <p>As soon as your businesses start publishing offers and receiving paid orders, the portfolio trend will appear here.</p>
           </div>
         }
       </section>
 
-      <section class="surface dashboard-panel dashboard-panel--attention">
+      <section class="surface dashboard-panel dashboard-panel--attention workspace-page__panel">
         <div class="dashboard-panel__head">
           <div>
             <span class="eyebrow">Attention queue</span>
@@ -158,7 +154,7 @@
             }
           </div>
         } @else {
-          <div class="workspace-dashboard-page__empty-card">
+          <div class="workspace-dashboard-page__empty-card workspace-page__empty-card">
             <strong>Nothing urgent right now</strong>
             <p>Every tracked business is active, stocked with offers, and does not have an obvious operations bottleneck.</p>
           </div>
@@ -167,7 +163,7 @@
     </div>
 
     <div class="workspace-dashboard-page__layout workspace-dashboard-page__layout--secondary">
-      <section class="surface dashboard-panel">
+      <section class="surface dashboard-panel workspace-page__panel">
         <div class="dashboard-panel__head">
           <div>
             <span class="eyebrow">Business workspaces</span>
@@ -234,7 +230,7 @@
         </div>
       </section>
 
-      <section class="surface dashboard-panel">
+      <section class="surface dashboard-panel workspace-page__panel">
         <div class="dashboard-panel__head">
           <div>
             <span class="eyebrow">Top performers</span>

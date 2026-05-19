@@ -115,9 +115,12 @@
                 <button type="button" class="browse-filter-chip browse-filter-chip--filter" (click)="openFilterModal()">
                   <fa-icon [icon]="icons.list" aria-hidden="true" />
                   <span>Filter</span>
-                  @if (activeFilterCount()) {
-                    <strong>{{ activeFilterCount() }}</strong>
-                  }
+                  <strong
+                    class="browse-filter-chip__count"
+                    [class.browse-filter-chip__count--hidden]="!activeFilterCount()"
+                  >
+                    {{ activeFilterCount() || '' }}
+                  </strong>
                 </button>
 
                 @if (mapReferencePoint()) {
@@ -129,17 +132,15 @@
                       (change)="onRadiusPresetChange($event)"
                     >
                       @for (radiusOption of radiusPresetOptions; track radiusOption) {
-                        <option [value]="radiusOption.toString()">{{ radiusOption }} km</option>
+                        <option
+                          [value]="radiusOption.toString()"
+                          [selected]="radiusKm() === radiusOption"
+                        >
+                          {{ radiusOption }} km
+                        </option>
                       }
                     </select>
                   </label>
-                }
-
-                @if (hasActiveFilters()) {
-                  <button type="button" class="browse-filter-utility browse-filter-utility--clear" (click)="clearQuickFilters()">
-                    <fa-icon [icon]="icons.xmark" aria-hidden="true" />
-                    <span>Clear all</span>
-                  </button>
                 }
 
                 <div class="browse-segmented" role="tablist" aria-label="Browse view">

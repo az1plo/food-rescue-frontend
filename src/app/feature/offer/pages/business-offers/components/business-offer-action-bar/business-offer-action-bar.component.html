@@ -1,0 +1,26 @@
+<div class="create-offer-action-bar">
+  <button class="create-offer-button create-offer-button--secondary" type="button" (click)="cancelPressed.emit()">Cancel</button>
+
+  <div class="create-offer-action-bar__status" [attr.data-tone]="statusTone()">
+    <fa-icon [icon]="icons().circleCheck" aria-hidden="true" />
+    <span>{{ statusLabel() }}</span>
+  </div>
+
+  <div class="create-offer-action-bar__actions">
+    @if (showPrimaryAction()) {
+      @if (canGoBack()) {
+        <button class="create-offer-button create-offer-button--secondary" type="button" (click)="previousPressed.emit()">Back</button>
+      }
+
+      @if (isFinalStep()) {
+        <button class="create-offer-button create-offer-button--primary" type="button" [disabled]="saving()" (click)="savePressed.emit()">
+          Save offer
+        </button>
+      } @else if (canGoNext()) {
+        <button class="create-offer-button create-offer-button--primary" type="button" (click)="nextPressed.emit()">
+          {{ nextActionLabel() }}
+        </button>
+      }
+    }
+  </div>
+</div>

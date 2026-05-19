@@ -2,11 +2,12 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signa
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { BusinessWorkspaceStateService } from '../../../../core/services/business-workspace-state.service';
+import { MarketplaceOfferApiService } from '../../../../core/services/marketplace-offer-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { resolveBusinessIconUrl } from '../../../business/models/business.model';
-import { BusinessWorkspaceStateService } from '../../../business/services/business-workspace-state.service';
+import { OfferCartService } from '../../../../core/services/offer-cart.service';
 import { appIcons } from '../../../../shared/icons/app-icons';
-import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
+import { resolveBusinessIconUrl } from '../../../../shared/models/business.model';
 import { OfferCardComponent } from '../../../../shared/ui/offer-card/offer-card';
 import { OfferCardModel } from '../../../../shared/ui/offer-card/offer-card.models';
 import {
@@ -18,11 +19,10 @@ import {
   formatOfferRatingValue,
   marketplaceOfferLocationLabel,
 } from '../../../../shared/ui/offer-card/offer-card.utils';
+import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
 import { MarketplaceOfferModel } from '../../models/marketplace-offer.model';
 import { OfferCategory, OfferItemModel, OfferModel, resolveOfferImage } from '../../models/offer.model';
-import { MarketplaceOfferApiService } from '../../services/marketplace-offer-api.service';
 import { OfferApiService } from '../../services/offer-api.service';
-import { OfferCartService } from '../../services/offer-cart.service';
 
 interface ViewerLocation {
   latitude: number;
@@ -170,20 +170,22 @@ export class OfferDetailsPage {
         return;
       }
 
+      if (Object.keys(this.route.snapshot.queryParams).length > 0) {
+        void this.router.navigate(['/browse-offers', offerId], {
+          replaceUrl: true,
+        });
+      }
+
       this.loadOffer(offerId);
     });
   }
 
   protected goBackToBrowse(): void {
-    void this.router.navigate(['/browse-offers'], {
-      queryParams: this.route.snapshot.queryParams,
-    });
+    void this.router.navigate(['/browse-offers']);
   }
 
   protected openRelatedOffer(offer: MarketplaceOfferModel): void {
-    void this.router.navigate(['/browse-offers', offer.id], {
-      queryParams: this.route.snapshot.queryParams,
-    });
+    void this.router.navigate(['/browse-offers', offer.id]);
   }
 
   protected toggleCurrentOfferInCart(): void {

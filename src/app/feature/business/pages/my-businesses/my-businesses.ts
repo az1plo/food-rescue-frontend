@@ -4,6 +4,7 @@ import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { appIcons } from '../../../../shared/icons/app-icons';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
 import { CircleIconComponent } from '../../../../shared/ui/circle-icon/circle-icon';
+import { WorkspacePageSkeletonComponent } from '../../../../shared/ui/workspace-page-skeleton/workspace-page-skeleton';
 import { BusinessListComponent } from '../../components/business-list/business-list';
 import { BusinessWorkspaceStateService } from '../../services/business-workspace-state.service';
 
@@ -18,7 +19,7 @@ interface BusinessSummaryCard {
 
 @Component({
   selector: 'app-my-businesses-page',
-  imports: [ActionButtonComponent, CircleIconComponent, BusinessListComponent],
+  imports: [ActionButtonComponent, CircleIconComponent, BusinessListComponent, WorkspacePageSkeletonComponent],
   templateUrl: './my-businesses.html',
   styleUrl: './my-businesses.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

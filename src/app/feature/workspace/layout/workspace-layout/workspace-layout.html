@@ -1,0 +1,79 @@
+<div class="workspace-shell">
+  @if (workspaceLoading()) {
+    <aside class="workspace-shell__sidebar-skeleton" aria-hidden="true">
+      <div class="workspace-shell__sidebar-skeleton-inner">
+        <div class="workspace-shell__skeleton-brand">
+          <span class="workspace-shell__skeleton-logo"></span>
+        </div>
+
+        <div class="workspace-shell__skeleton-section">
+          <span class="workspace-shell__skeleton-line workspace-shell__skeleton-line--eyebrow"></span>
+
+          <div class="workspace-shell__skeleton-nav">
+            @for (skeletonId of sidebarSkeletonIds; track skeletonId) {
+              <span class="workspace-shell__skeleton-nav-item"></span>
+            }
+          </div>
+        </div>
+
+        <div class="workspace-shell__skeleton-footer">
+          <span class="workspace-shell__skeleton-footer-link"></span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="workspace-shell__content workspace-shell__content--skeleton" aria-hidden="true">
+      <div class="workspace-shell__header-skeleton">
+        <div class="workspace-shell__skeleton-breadcrumbs">
+          <span class="workspace-shell__skeleton-line workspace-shell__skeleton-line--crumb-lg"></span>
+          <span class="workspace-shell__skeleton-line workspace-shell__skeleton-line--crumb-sm"></span>
+          <span class="workspace-shell__skeleton-line workspace-shell__skeleton-line--crumb-md"></span>
+        </div>
+
+        <div class="workspace-shell__skeleton-actions">
+          <span class="workspace-shell__skeleton-pill workspace-shell__skeleton-pill--wide"></span>
+          <span class="workspace-shell__skeleton-pill workspace-shell__skeleton-pill--square"></span>
+          <span class="workspace-shell__skeleton-pill workspace-shell__skeleton-pill--account"></span>
+          <span class="workspace-shell__skeleton-pill workspace-shell__skeleton-pill--square"></span>
+        </div>
+      </div>
+
+      <div class="workspace-shell__inner workspace-shell__inner--skeleton">
+        <section class="workspace-shell__surface-skeleton workspace-shell__surface-skeleton--hero">
+          <span class="workspace-shell__skeleton-line workspace-shell__skeleton-line--title"></span>
+          <span class="workspace-shell__skeleton-line workspace-shell__skeleton-line--lead"></span>
+          <span class="workspace-shell__skeleton-line workspace-shell__skeleton-line--md"></span>
+
+          <div class="workspace-shell__skeleton-chip-row">
+            <span class="workspace-shell__skeleton-chip"></span>
+            <span class="workspace-shell__skeleton-chip"></span>
+            <span class="workspace-shell__skeleton-chip workspace-shell__skeleton-chip--short"></span>
+          </div>
+        </section>
+
+        <div class="workspace-shell__skeleton-grid">
+          @for (skeletonId of contentSkeletonIds; track skeletonId) {
+            <section class="workspace-shell__surface-skeleton workspace-shell__surface-skeleton--panel">
+              <span class="workspace-shell__skeleton-line workspace-shell__skeleton-line--panel-title"></span>
+              <span class="workspace-shell__skeleton-line workspace-shell__skeleton-line--sm"></span>
+              <span class="workspace-shell__skeleton-line"></span>
+              <span class="workspace-shell__skeleton-line workspace-shell__skeleton-line--md"></span>
+            </section>
+          }
+        </div>
+      </div>
+    </main>
+  } @else {
+    <app-workspace-sidebar></app-workspace-sidebar>
+
+    <main class="workspace-shell__content">
+      <app-workspace-header></app-workspace-header>
+
+      <div class="workspace-shell__inner">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  }
+
+  <app-support-chat-widget></app-support-chat-widget>
+</div>

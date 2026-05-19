@@ -1,0 +1,152 @@
+@if (offer(); as currentOffer) {
+  <div class="offer-detail">
+    <span class="eyebrow">Offer details</span>
+
+    <div class="offer-detail__hero">
+      <img [src]="resolveOfferImage(currentOffer)" [alt]="currentOffer.title" />
+
+      <div class="offer-detail__hero-copy">
+        <div class="offer-detail__title-row">
+          <div>
+            <h2>{{ currentOffer.title }}</h2>
+            <span class="offer-workspace-card__status" [attr.data-tone]="statusMetaFor(currentOffer.status).tone">
+              {{ statusMetaFor(currentOffer.status).label }}
+            </span>
+          </div>
+
+          <div class="offer-detail__price-stack">
+            <strong>{{ formatPrice(currentOffer.price) }}</strong>
+            @if (hasDiscount(currentOffer.price, currentOffer.originalPrice)) {
+              <span class="offer-workspace-card__original-price">{{ formatPrice(currentOffer.originalPrice ?? currentOffer.price) }}</span>
+              <small>Save {{ discountPercent(currentOffer.price, currentOffer.originalPrice) }}%</small>
+            }
+          </div>
+        </div>
+
+        <p>{{ currentOffer.description || 'No description yet. Use the editor to explain what customers can expect.' }}</p>
+
+        <div class="offer-detail__meta-tags">
+          <span>{{ formatCategory(currentOffer.category) }}</span>
+          @if (currentOffer.illustrativeImage) {
+            <span data-tone="warning">Illustrative image</span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="offer-detail__grid">
+      <section class="offer-detail__panel">
+        <span class="eyebrow">Pickup</span>
+        <div class="offer-detail__list">
+          <div>
+            <fa-icon [icon]="icons().calendarDays" aria-hidden="true" />
+            <span>{{ currentOffer.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }} - {{ currentOffer.pickupTimeWindow.to | date: 'd. M. y, HH:mm' }}</span>
+          </div>
+          <div>
+            <fa-icon [icon]="icons().locationDot" aria-hidden="true" />
+            <span>
+              {{ currentOffer.pickupLocation.address.street }}, {{ currentOffer.pickupLocation.address.city }},
+              {{ currentOffer.pickupLocation.address.postalCode }}, {{ currentOffer.pickupLocation.address.country }}
+            </span>
+          </div>
+          @if (currentOffer.pickupLocation.note) {
+            <div>
+              <fa-icon [icon]="icons().circleInfo" aria-hidden="true" />
+              <span>{{ currentOffer.pickupLocation.note }}</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="offer-detail__panel">
+        <span class="eyebrow">Contents</span>
+        <div class="offer-detail__chips">
+          @for (item of currentOffer.items; track item.name + '-' + item.quantity) {
+            <span>{{ item.quantity }}x {{ item.name }}</span>
+          }
+        </div>
+
+        <div class="offer-detail__summary">
+          <div>
+            <span class="label">Category</span>
+            <span class="value">{{ formatCategory(currentOffer.category) }}</span>
+          </div>
+          <div>
+            <span class="label">Available quantity</span>
+            <span class="value">{{ currentOffer.quantityAvailable }}</span>
+          </div>
+          <div>
+            <span class="label">Created</span>
+            <span class="value">{{ currentOffer.createdAt | date: 'd. M. y' }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="offer-detail__panel">
+        <span class="eyebrow">Allergens</span>
+        <div class="offer-detail__allergen-columns">
+          <div>
+            <span class="label">Contains</span>
+            @if (currentOffer.containsAllergens.length) {
+              <div class="offer-detail__chips">
+                @for (allergen of currentOffer.containsAllergens; track allergen) {
+                  <span>{{ formatAllergen(allergen) }}</span>
+                }
+              </div>
+            } @else {
+              <p class="offer-detail__muted">No confirmed allergens listed.</p>
+            }
+          </div>
+
+          <div>
+            <span class="label">May contain</span>
+            @if (currentOffer.mayContainAllergens.length) {
+              <div class="offer-detail__chips">
+                @for (allergen of currentOffer.mayContainAllergens; track allergen) {
+                  <span>{{ formatAllergen(allergen) }}</span>
+                }
+              </div>
+            } @else {
+              <p class="offer-detail__muted">No trace allergens listed.</p>
+            }
+          </div>
+        </div>
+
+        @if (currentOffer.otherAllergenNote) {
+          <div class="offer-detail__note">
+            <span class="label">Other note</span>
+            <p>{{ currentOffer.otherAllergenNote }}</p>
+          </div>
+        }
+      </section>
+    </div>
+
+    <div class="button-row">
+      @if (statusMetaFor(currentOffer.status).editable) {
+        <app-action-button
+          label="Edit offer"
+          variant="secondary"
+          iconPosition="start"
+          [icon]="icons().pen"
+          (pressed)="offerEditRequested.emit(currentOffer)"
+        />
+      }
+
+      @if (statusMetaFor(currentOffer.status).deletable) {
+        <app-action-button
+          label="Delete offer"
+          variant="danger"
+          iconPosition="start"
+          [icon]="icons().trashCan"
+          [disabled]="isRemoving(currentOffer.id)"
+          (pressed)="offerDeleteRequested.emit(currentOffer)"
+        />
+      }
+    </div>
+  </div>
+} @else {
+  <div class="business-offers-page__empty business-offers-page__empty--detail">
+    <h3>Select an offer</h3>
+    <p>Pick an offer from the catalog to review details, or create a new one when the business is ready.</p>
+  </div>
+}

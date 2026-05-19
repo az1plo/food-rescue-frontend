@@ -1,0 +1,11 @@
+@for (step of steps(); track step) {
+  <button
+    class="create-offer-stepper__step"
+    type="button"
+    [class.is-active]="currentStep() === step"
+    (click)="stepSelected.emit(step)"
+  >
+    <span class="create-offer-stepper__index">{{ $index + 1 }}</span>
+    <span>{{ labelForStep(step) }}</span>
+  </button>
+}

@@ -1,5 +1,5 @@
 <section class="workspace-page business-analytics-page">
-  <div class="business-analytics-page__header">
+  <div class="business-analytics-page__header workspace-page__header">
     <div>
       <h1>{{ business()?.name || 'Analytics' }}</h1>
       <p>Track rescue performance, claim speed, pickup timing, and which item mixes actually convert into successful pickups.</p>
@@ -45,14 +45,10 @@
   }
 
   @if (loading()) {
-    <section class="surface business-analytics-page__state" aria-busy="true">
-      <span class="eyebrow">Analytics</span>
-      <h2>Loading business analytics</h2>
-      <p>We are pulling live performance data for this workspace now.</p>
-    </section>
+    <app-workspace-page-skeleton variant="analytics" />
   } @else if (analytics(); as snapshot) {
     <section class="business-analytics-page__hero">
-      <article class="surface analytics-highlight">
+      <article class="surface analytics-highlight workspace-page__panel">
         <span class="eyebrow">Recovered revenue</span>
         <strong>{{ formatCurrency(snapshot.overview.recoveredRevenue) }}</strong>
         <p>Confirmed pickup value already rescued through this business.</p>
@@ -69,26 +65,26 @@
         </div>
       </article>
 
-      <div class="business-analytics-page__kpis">
-        <article class="surface analytics-kpi">
+      <div class="business-analytics-page__kpis workspace-page__summary">
+        <article class="surface analytics-kpi workspace-page__summary-card">
           <span class="eyebrow">Live now</span>
           <strong>{{ snapshot.overview.availableOffers }}</strong>
           <p>Offers currently visible in the customer catalog.</p>
         </article>
 
-        <article class="surface analytics-kpi">
+        <article class="surface analytics-kpi workspace-page__summary-card">
           <span class="eyebrow">Pickup queue</span>
           <strong>{{ snapshot.overview.activeReservations }}</strong>
           <p>Orders still waiting for a real pickup.</p>
         </article>
 
-        <article class="surface analytics-kpi">
+        <article class="surface analytics-kpi workspace-page__summary-card">
           <span class="eyebrow">Pickup success</span>
           <strong>{{ formatPercent(snapshot.overview.pickupSuccessRate) }}</strong>
           <p>Share of orders that reached confirmed pickup.</p>
         </article>
 
-        <article class="surface analytics-kpi">
+        <article class="surface analytics-kpi workspace-page__summary-card">
           <span class="eyebrow">Claim speed</span>
           <strong>{{ formatHours(snapshot.overview.averageHoursToFirstReservation) }}</strong>
           <p>Average time from publish to first paid order.</p>
@@ -97,7 +93,7 @@
     </section>
 
     <div class="business-analytics-page__layout">
-      <section class="surface analytics-panel analytics-panel--activity">
+      <section class="surface analytics-panel analytics-panel--activity workspace-page__panel">
         <div class="analytics-panel__head">
           <div>
             <span class="eyebrow">Activity trend</span>
@@ -133,7 +129,7 @@
         </div>
       </section>
 
-      <section class="surface analytics-panel analytics-panel--insights">
+      <section class="surface analytics-panel analytics-panel--insights workspace-page__panel">
         <div class="analytics-panel__head">
           <div>
             <span class="eyebrow">Signals</span>
@@ -162,7 +158,7 @@
     </div>
 
     <div class="business-analytics-page__layout business-analytics-page__layout--secondary">
-      <section class="surface analytics-panel">
+      <section class="surface analytics-panel workspace-page__panel">
         <div class="analytics-panel__head">
           <div>
             <span class="eyebrow">Catalog health</span>
@@ -199,14 +195,14 @@
             </div>
           </div>
         } @else {
-          <div class="business-analytics-page__empty-card">
+          <div class="business-analytics-page__empty-card workspace-page__empty-card">
             <strong>No catalog data yet</strong>
             <p>Once this business starts publishing offers, status distribution will appear here.</p>
           </div>
         }
       </section>
 
-      <section class="surface analytics-panel">
+      <section class="surface analytics-panel workspace-page__panel">
         <div class="analytics-panel__head">
           <div>
             <span class="eyebrow">Pickup timing</span>
@@ -249,7 +245,7 @@
       </section>
     </div>
 
-    <section class="surface analytics-panel">
+    <section class="surface analytics-panel workspace-page__panel">
       <div class="analytics-panel__head">
         <div>
           <span class="eyebrow">Top items</span>
@@ -282,14 +278,14 @@
           }
         </div>
       } @else {
-        <div class="business-analytics-page__empty-card">
+        <div class="business-analytics-page__empty-card workspace-page__empty-card">
           <strong>No item mix data yet</strong>
           <p>Create offers with items and confirm pickups to start seeing which rescue combinations work best.</p>
         </div>
       }
     </section>
   } @else {
-    <section class="surface business-analytics-page__state">
+    <section class="surface business-analytics-page__state workspace-page__state">
       <span class="eyebrow">Analytics</span>
       <h2>Analytics are unavailable</h2>
       <p>Refresh this business again in a moment or return after more offer activity is recorded.</p>

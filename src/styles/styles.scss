@@ -142,6 +142,94 @@ textarea {
     0 2px 8px rgba(22, 39, 24, 0.04);
 }
 
+.workspace-page {
+  --workspace-page-surface-border: rgba(216, 226, 210, 0.9);
+  --workspace-page-surface-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(250, 252, 247, 0.98));
+  --workspace-page-surface-muted:
+    linear-gradient(180deg, rgba(247, 250, 244, 0.96), rgba(255, 255, 255, 0.98));
+  display: grid;
+  gap: 2.4rem;
+}
+
+.workspace-page .surface {
+  border: 1px solid var(--workspace-page-surface-border);
+  background: var(--workspace-page-surface-bg);
+  box-shadow:
+    0 18px 38px rgba(20, 38, 22, 0.07),
+    0 3px 10px rgba(20, 38, 22, 0.04);
+}
+
+.workspace-page__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 2rem;
+}
+
+.workspace-page__header > :first-child {
+  min-width: 0;
+}
+
+.workspace-page__header p {
+  margin: 0;
+  max-width: 72rem;
+  color: var(--color-text-muted);
+}
+
+.workspace-page__summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.6rem;
+}
+
+.workspace-page__summary-card,
+.workspace-page__panel,
+.workspace-page__state,
+.workspace-page__aside-card {
+  display: grid;
+  gap: 1.6rem;
+  padding: 2.4rem;
+}
+
+.workspace-page__summary-card {
+  align-content: start;
+  background: var(--workspace-page-surface-muted);
+}
+
+.workspace-page__summary-card strong {
+  color: var(--color-primary-strong);
+  font-size: clamp(2.8rem, 3vw, 3.6rem);
+  line-height: 1;
+}
+
+.workspace-page__summary-card p,
+.workspace-page__panel p,
+.workspace-page__state p,
+.workspace-page__empty-card p,
+.workspace-page__aside-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.workspace-page__state,
+.workspace-page__aside-card {
+  align-content: start;
+}
+
+.workspace-page__empty-card {
+  display: grid;
+  gap: 0.8rem;
+  padding: 2rem;
+  border: 1px dashed var(--workspace-page-surface-border);
+  border-radius: var(--radius-md);
+  background: rgba(242, 246, 238, 0.6);
+}
+
+.workspace-page__empty-card strong {
+  display: block;
+}
+
 .button-row {
   display: flex;
   flex-wrap: wrap;
@@ -956,6 +1044,10 @@ textarea.form-control {
 }
 
 @media (max-width: 1199px) {
+  .workspace-page__summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .create-offer-flow-card__options,
   .create-offer-allergens__columns {
     grid-template-columns: 1fr;
@@ -967,6 +1059,18 @@ textarea.form-control {
 }
 
 @media (max-width: 959px) {
+  .workspace-page__header,
+  .workspace-page__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-page__summary-card,
+  .workspace-page__panel,
+  .workspace-page__state,
+  .workspace-page__aside-card {
+    padding: 2rem;
+  }
+
   .create-offer-stepper,
   .create-offer-action-bar__actions {
     display: grid;

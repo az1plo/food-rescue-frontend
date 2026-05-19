@@ -14,6 +14,5 @@ type RouteTarget = string | readonly (string | number)[] | null;
 })
 export class BusinessListComponent {
   readonly businesses = input<BusinessWorkspaceListItem[]>([]);
-  readonly loading = input(false);
   readonly createRoute = input<RouteTarget>(null);
 }

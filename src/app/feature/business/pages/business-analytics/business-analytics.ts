@@ -6,7 +6,8 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { appIcons } from '../../../../shared/icons/app-icons';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
-import { OFFER_STATUS_META, OfferStatus } from '../../../offer/models/offer.model';
+import { WorkspacePageSkeletonComponent } from '../../../../shared/ui/workspace-page-skeleton/workspace-page-skeleton';
+import { OFFER_STATUS_META, OfferStatus } from '../../../../shared/models/offer.model';
 import { BusinessAnalyticsCatalogStatusModel, BusinessAnalyticsDaypartPerformanceModel, BusinessAnalyticsModel } from '../../models/business-analytics.model';
 import { BUSINESS_STATUS_META, BusinessModel } from '../../models/business.model';
 import { BusinessAnalyticsApiService } from '../../services/business-analytics-api.service';
@@ -14,7 +15,7 @@ import { BusinessWorkspaceStateService } from '../../services/business-workspace
 
 @Component({
   selector: 'app-business-analytics-page',
-  imports: [DatePipe, FontAwesomeModule, ActionButtonComponent],
+  imports: [DatePipe, FontAwesomeModule, ActionButtonComponent, WorkspacePageSkeletonComponent],
   templateUrl: './business-analytics.html',
   styleUrl: './business-analytics.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

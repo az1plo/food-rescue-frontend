@@ -1,0 +1,17 @@
+.app-shell {
+  --app-shell-header-height: 7.6rem;
+  display: grid;
+  min-height: 100vh;
+  grid-template-rows: auto 1fr auto;
+}
+
+.app-shell__main {
+  min-width: 0;
+  padding-top: var(--app-shell-header-height);
+}
+
+@media (max-width: 959px) {
+  .app-shell__main {
+    padding-top: 8rem;
+  }
+}

@@ -1,0 +1,98 @@
+<div class="business-offers-page__catalog-head">
+  <div>
+    <span class="eyebrow">Offer catalog</span>
+    <h2>{{ offerCount() }} {{ offerCount() === 1 ? 'offer' : 'offers' }}</h2>
+    <p>Use the catalog to review live entries, swap image links, and open the editor when something changes.</p>
+  </div>
+</div>
+
+@if (!offers().length) {
+  <div class="business-offers-page__empty">
+    <h3>No offers yet</h3>
+    <p>
+      {{ canCreateOffer()
+        ? 'Create the first rescue offer for this business and publish it to the browse page.'
+        : 'The catalog is empty for now. Activate the business first to publish the first rescue offer.' }}
+    </p>
+  </div>
+} @else {
+  <div class="business-offers-page__offer-list">
+    @for (offer of offers(); track offer.id) {
+      <article class="offer-workspace-card" [attr.data-selected]="selectedOfferId() === offer.id">
+        <div class="offer-workspace-card__media">
+          <img [src]="resolveOfferImage(offer)" [alt]="offer.title" />
+        </div>
+
+        <div class="offer-workspace-card__main">
+          <div class="offer-workspace-card__title-row">
+            <div>
+              <h3>{{ offer.title }}</h3>
+              <span class="offer-workspace-card__status" [attr.data-tone]="statusMetaFor(offer.status).tone">
+                {{ statusMetaFor(offer.status).label }}
+              </span>
+            </div>
+
+            <div class="offer-workspace-card__price-stack">
+              <strong>{{ formatPrice(offer.price) }}</strong>
+              @if (hasDiscount(offer.price, offer.originalPrice)) {
+                <span class="offer-workspace-card__original-price">{{ formatPrice(offer.originalPrice ?? offer.price) }}</span>
+              }
+            </div>
+          </div>
+
+          <p>{{ offer.description || 'No description yet. Add a short summary so customers know what they are reserving.' }}</p>
+
+          <div class="offer-workspace-card__badges">
+            <span>{{ formatCategory(offer.category) }}</span>
+            @if (offer.illustrativeImage) {
+              <span data-tone="warning">Illustrative image</span>
+            }
+          </div>
+
+          <div class="offer-workspace-card__meta">
+            <div>
+              <fa-icon [icon]="icons().calendarDays" aria-hidden="true" />
+              <span>{{ offer.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }} - {{ offer.pickupTimeWindow.to | date: 'HH:mm' }}</span>
+            </div>
+
+            <div>
+              <fa-icon [icon]="icons().list" aria-hidden="true" />
+              <span>{{ offerItemsSummary(offer) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="offer-workspace-card__actions">
+          <app-action-button
+            label="View"
+            variant="ghost"
+            iconPosition="start"
+            [icon]="icons().eye"
+            (pressed)="offerSelected.emit(offer.id)"
+          />
+
+          @if (statusMetaFor(offer.status).editable) {
+            <app-action-button
+              label="Edit"
+              variant="secondary"
+              iconPosition="start"
+              [icon]="icons().pen"
+              (pressed)="offerEditRequested.emit(offer)"
+            />
+          }
+
+          @if (statusMetaFor(offer.status).deletable) {
+            <app-action-button
+              label="Delete"
+              variant="danger"
+              iconPosition="start"
+              [icon]="icons().trashCan"
+              [disabled]="isRemoving(offer.id)"
+              (pressed)="offerDeleteRequested.emit(offer)"
+            />
+          }
+        </div>
+      </article>
+    }
+  </div>
+}

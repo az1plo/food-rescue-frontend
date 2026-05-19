@@ -10,12 +10,20 @@ import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import localeSk from '@angular/common/locales/sk';
 import { registerLocaleData } from '@angular/common';
-import { provideOAuthClient } from 'angular-oauth2-oidc';
+import { MemoryStorage, OAuthStorage, provideOAuthClient } from 'angular-oauth2-oidc';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { authInterceptor } from './core/auth-interceptor';
 
 registerLocaleData(localeSk, 'sk');
+
+function oAuthStorageFactory(): OAuthStorage {
+  if (typeof localStorage !== 'undefined') {
+    return localStorage;
+  }
+
+  return new MemoryStorage();
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -30,6 +38,7 @@ export const appConfig: ApplicationConfig = {
     { provide: LOCALE_ID, useValue: 'sk' },
     { provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR' },
     provideOAuthClient(),
+    { provide: OAuthStorage, useFactory: oAuthStorageFactory },
     provideTranslateService({
       defaultLanguage: 'sk',
       lang: 'sk',

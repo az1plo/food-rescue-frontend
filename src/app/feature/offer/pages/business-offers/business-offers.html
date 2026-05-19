@@ -12,7 +12,7 @@
       </div>
     </header>
   } @else {
-    <div class="business-offers-page__header">
+    <div class="business-offers-page__header workspace-page__header">
       <div>
         <h1>{{ business()?.name || 'Offers' }}</h1>
         <p>{{ pageDescription() }}</p>
@@ -68,11 +68,7 @@
   }
 
   @if (loading()) {
-    <section class="surface business-offers-page__state" aria-busy="true">
-      <span class="eyebrow">Offers</span>
-      <h2>Loading business offers</h2>
-      <p>We are opening the offer catalog for this workspace now.</p>
-    </section>
+    <app-workspace-page-skeleton variant="catalog" />
   } @else if (isEditorMode()) {
     <form class="create-offer-page" [formGroup]="form" (ngSubmit)="saveOffer()">
       <input
@@ -92,1357 +88,211 @@
 
       @if (editorVisibleSteps().length > 1) {
         <nav class="create-offer-stepper" aria-label="Create offer steps">
-          @for (step of editorVisibleSteps(); track step) {
-            <button
-              class="create-offer-stepper__step"
-              type="button"
-              [class.is-active]="isEditorStep(step)"
-              (click)="goToEditorStep(step)"
-            >
-              <span class="create-offer-stepper__index">{{ $index + 1 }}</span>
-              <span>{{ editorStepLabel(step) }}</span>
-            </button>
-          }
+          <app-business-offer-stepper
+            [steps]="editorVisibleSteps()"
+            [currentStep]="editorCurrentStep()"
+            (stepSelected)="goToEditorStep($event)"
+          />
         </nav>
       }
 
-      @if (isEditorStep('entry')) {
+      @if (editorCurrentStep() === 'entry') {
         <section class="create-offer-flow-card">
-          <div class="create-offer-flow-card__copy">
-            <span class="create-offer-flow-card__eyebrow">Quick start</span>
-            <h2>Would you like AI to help create this offer faster?</h2>
-            <p>You can start with a real food photo for optional suggestions, or jump straight into manual setup.</p>
-          </div>
-
-          <div class="create-offer-flow-card__options">
-            <button class="create-offer-flow-card__option" type="button" (click)="startWithAiDraft()">
-              <span class="create-offer-flow-card__icon">
-                <fa-icon [icon]="icons.wandMagicSparkles" aria-hidden="true" />
-              </span>
-              <strong>Use AI draft</strong>
-              <p>Upload a real food photo and get optional title, description, and item suggestions.</p>
-            </button>
-
-            <button class="create-offer-flow-card__option" type="button" (click)="startManualSetup()">
-              <span class="create-offer-flow-card__icon">
-                <fa-icon [icon]="icons.pen" aria-hidden="true" />
-              </span>
-              <strong>Create manually</strong>
-              <p>Fill in the offer yourself with a shorter, step-by-step setup flow.</p>
-            </button>
-          </div>
+          <app-business-offer-flow-choice
+            [icons]="icons"
+            (aiDraftSelected)="startWithAiDraft()"
+            (manualSetupSelected)="startManualSetup()"
+          />
         </section>
       } @else {
-      <div class="create-offer-page__grid" [attr.data-step]="editorCurrentStep()">
-        @if (isEditorStep('ai')) {
-        <div class="create-offer-page__column">
-          @if (isEditorStep('ai')) {
-          <section class="create-offer-card create-offer-ai create-offer-section create-offer-section--ai">
-            <div class="create-offer-card__header">
-              <div class="create-offer-card__heading">
-                <span class="create-offer-card__icon">
-                  <fa-icon [icon]="icons.wandMagicSparkles" aria-hidden="true" />
-                </span>
-                <div>
-                  <h2>AI draft from real food photo</h2>
-                </div>
-              </div>
-
-              <span class="create-offer-card__badge">Optional</span>
-            </div>
-
-            <div class="create-offer-ai__layout">
-              <div class="create-offer-ai__preview">
-                @if (originalPhotoAsset(); as originalPhoto) {
-                  <div class="create-offer-ai__preview-frame">
-                    <img [src]="originalPhoto.previewUrl" [alt]="originalPhoto.fileName" />
-                  </div>
-
-                  <div class="create-offer-ai__preview-actions">
-                    <label class="create-offer-button create-offer-button--secondary" for="create-offer-original-photo-input">
-                      <fa-icon [icon]="icons.camera" aria-hidden="true" />
-                      <span>Change photo</span>
-                    </label>
-
-                    <button class="create-offer-icon-button" type="button" (click)="removeOriginalPhoto()" aria-label="Remove photo">
-                      <fa-icon [icon]="icons.trashCan" aria-hidden="true" />
-                    </button>
-                  </div>
-                } @else {
-                  <div class="create-offer-ai__empty">
-                    <fa-icon [icon]="icons.image" aria-hidden="true" />
-                    <p>Upload a food photo to get optional suggestions.</p>
-                    <label class="create-offer-button create-offer-button--secondary" for="create-offer-original-photo-input">
-                      <fa-icon [icon]="icons.upload" aria-hidden="true" />
-                      <span>Change photo</span>
-                    </label>
-                  </div>
-                }
-              </div>
-
-              <div class="create-offer-ai__suggestions">
-                <div class="create-offer-ai__suggestions-head">
-                  <span>Suggested from your photo</span>
-                  <button
-                    class="create-offer-button create-offer-button--ghost"
-                    type="button"
-                    [disabled]="draftingFromImage() || !hasOriginalPhoto()"
-                    (click)="autofillDraftFromPhoto()"
-                  >
-                    <fa-icon [icon]="icons.wandMagicSparkles" aria-hidden="true" />
-                    <span>{{ draftingFromImage() ? 'Analyzing photo...' : 'Analyze photo' }}</span>
-                  </button>
-                </div>
-
-                @if (aiDraftSuggestion(); as suggestion) {
-                  <div class="create-offer-ai__suggestion-list">
-                    <article class="create-offer-ai__suggestion">
-                      <div>
-                        <span class="create-offer-ai__suggestion-label">Title</span>
-                        <strong>{{ suggestion.suggestedTitle }}</strong>
-                      </div>
-                      <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
-                    </article>
-
-                    <article class="create-offer-ai__suggestion">
-                      <div>
-                        <span class="create-offer-ai__suggestion-label">Description</span>
-                        <strong>{{ suggestion.suggestedDescription || 'No description suggested.' }}</strong>
-                      </div>
-                      <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
-                    </article>
-
-                    <article class="create-offer-ai__suggestion">
-                      <div>
-                        <span class="create-offer-ai__suggestion-label">Category</span>
-                        <strong>{{ suggestedCategoryLabel() }}</strong>
-                      </div>
-                      <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
-                    </article>
-                  </div>
-                } @else {
-                  <div class="create-offer-ai__suggestions-empty">
-                    <p>{{ hasOriginalPhoto() ? 'Analyze the uploaded photo to get optional suggestions.' : 'Upload a food photo to get optional suggestions.' }}</p>
-                  </div>
-                }
-              </div>
-            </div>
-
-            @if (visibleDetectedItems().length) {
-              <div class="create-offer-card__meta-block">
-                <span class="create-offer-card__meta-label">Detected items</span>
-                <div class="create-offer-ai__chips">
-                  @for (item of visibleDetectedItems(); track item) {
-                    <span class="create-offer-ai__chip">{{ item }}</span>
-                  }
-
-                  @if (hiddenDetectedItemCount()) {
-                    <span class="create-offer-ai__chip create-offer-ai__chip--muted">+{{ hiddenDetectedItemCount() }} more</span>
-                  }
-                </div>
-              </div>
-            }
-
-            <div class="create-offer-card__note">
-              <fa-icon [icon]="icons.circleInfo" aria-hidden="true" />
-              <span>AI suggestions are optional and can be edited.</span>
-            </div>
-          </section>
-          }
-        </div>
-        }
-
-        @if (isEditorStep('details') || isEditorStep('operations')) {
-        <div class="create-offer-page__column">
-          @if (isEditorStep('details')) {
-          <section class="create-offer-card create-offer-section create-offer-section--basics">
-            <div class="create-offer-card__header">
-              <div class="create-offer-card__heading">
-                <div>
-                  <h2>Offer basics</h2>
-                </div>
-              </div>
-            </div>
-
-            <div class="create-offer-field">
-              <div class="create-offer-field__label-row">
-                <label class="create-offer-field__label" for="offer-title">Offer title <span class="create-offer-field__required">*</span></label>
-                <span class="create-offer-field__counter">{{ form.controls.title.value.length }} / {{ titleMaxLength }}</span>
-              </div>
-              <input id="offer-title" class="form-control create-offer-field__control" type="text" formControlName="title" />
-              <div class="field-message-slot">
-                @if (showFieldError('title')) {
-                  <p class="field-error">Enter an offer title.</p>
-                }
-              </div>
-            </div>
-
-            <div class="create-offer-field">
-              <div class="create-offer-field__label-row">
-                <label class="create-offer-field__label" for="offer-category">Category <span class="create-offer-field__required">*</span></label>
-              </div>
-              <select id="offer-category" class="form-control create-offer-field__control" formControlName="category">
-                @for (option of categoryOptions; track option.value) {
-                  <option [value]="option.value">{{ option.label }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="create-offer-field">
-              <div class="create-offer-field__label-row">
-                <label class="create-offer-field__label" for="offer-description">Description <span class="create-offer-field__required">*</span></label>
-                <span class="create-offer-field__counter">{{ form.controls.description.value.length }} / {{ descriptionMaxLength }}</span>
-              </div>
-              <textarea
-                id="offer-description"
-                class="form-control create-offer-field__control create-offer-field__control--textarea create-offer-field__control--description"
-                formControlName="description"
-              ></textarea>
-              <div class="field-message-slot">
-                @if (showFieldError('description')) {
-                  <p class="field-error">
-                    {{ form.controls.description.hasError('required')
-                      ? 'Add a description for customers.'
-                      : 'Keep the description under ' + descriptionMaxLength + ' characters.' }}
-                  </p>
-                } @else {
-                  <p class="field-hint">Keep it clear and appealing. Customers see this first.</p>
-                }
-              </div>
-            </div>
-          </section>
-          }
-
-          @if (isEditorStep('operations')) {
-          <section class="create-offer-card create-offer-section create-offer-section--pickup">
-            <div class="create-offer-card__header">
-              <div class="create-offer-card__heading">
-                <div>
-                  <h2>Pickup details</h2>
-                </div>
-              </div>
-            </div>
-
-            <label class="create-offer-checkbox">
-              <input type="checkbox" formControlName="useBusinessProfileAddress" />
-              <span>Use business profile address</span>
-            </label>
-
-            @if (usesBusinessProfileAddress()) {
-              <div class="create-offer-address-summary">
-                <strong>{{ business()?.name }}</strong>
-                <span>{{ businessProfileAddressLabel() }}</span>
-              </div>
-            } @else {
-              <div class="create-offer-grid create-offer-grid--pickup">
-                <div class="create-offer-field create-offer-field--full">
-                  <label class="create-offer-field__label" for="pickup-street">Pickup street <span class="create-offer-field__required">*</span></label>
-                  <input id="pickup-street" class="form-control create-offer-field__control" type="text" formControlName="pickupStreet" />
-                  <div class="field-message-slot">
-                    @if (showFieldError('pickupStreet')) {
-                      <p class="field-error">Enter the pickup street.</p>
-                    }
-                  </div>
-                </div>
-
-                <div class="create-offer-field">
-                  <label class="create-offer-field__label" for="pickup-city">Pickup city <span class="create-offer-field__required">*</span></label>
-                  <input id="pickup-city" class="form-control create-offer-field__control" type="text" formControlName="pickupCity" />
-                  <div class="field-message-slot">
-                    @if (showFieldError('pickupCity')) {
-                      <p class="field-error">Enter the pickup city.</p>
-                    }
-                  </div>
-                </div>
-
-                <div class="create-offer-field">
-                  <label class="create-offer-field__label" for="pickup-postal-code">Postal code <span class="create-offer-field__required">*</span></label>
-                  <input
-                    id="pickup-postal-code"
-                    class="form-control create-offer-field__control"
-                    type="text"
-                    formControlName="pickupPostalCode"
-                  />
-                  <div class="field-message-slot">
-                    @if (showFieldError('pickupPostalCode')) {
-                      <p class="field-error">Enter the pickup postal code.</p>
-                    }
-                  </div>
-                </div>
-
-                <div class="create-offer-field">
-                  <label class="create-offer-field__label" for="pickup-country">Country <span class="create-offer-field__required">*</span></label>
-                  <select id="pickup-country" class="form-control create-offer-field__control" formControlName="pickupCountry">
-                    @for (country of countries; track country) {
-                      <option [value]="country">{{ country }}</option>
-                    }
-                  </select>
-                </div>
-              </div>
-            }
-
-            <div class="create-offer-field">
-              <div class="create-offer-field__label-row">
-                <label class="create-offer-field__label" for="pickup-note">Pickup note optional</label>
-                <span class="create-offer-field__counter">{{ form.controls.pickupNote.value.length }} / {{ pickupNoteMaxLength }}</span>
-              </div>
-              <textarea
-                id="pickup-note"
-                class="form-control create-offer-field__control create-offer-field__control--textarea"
-                formControlName="pickupNote"
-              ></textarea>
-              <div class="field-message-slot">
-                @if (showFieldError('pickupNote')) {
-                  <p class="field-error">Keep the pickup note under {{ pickupNoteMaxLength }} characters.</p>
-                } @else {
-                  <p class="field-hint">Optional instructions like the side entrance or counter number.</p>
-                }
-              </div>
-            </div>
-
-            @if (pickupWindowSummary(); as scheduleSummary) {
-              <div class="create-offer-schedule__summary">
-                <fa-icon [icon]="icons.clock" aria-hidden="true" />
-                <div>
-                  <span>Pickup window preview</span>
-                  <strong>{{ scheduleSummary }}</strong>
-                </div>
-                @if (pickupWindowRollsToNextDay()) {
-                  <span class="create-offer-schedule__rollover">Ends next day</span>
-                }
-              </div>
-            }
-
-            <div class="create-offer-schedule">
-              <div class="create-offer-schedule__day">
-                <div class="create-offer-schedule__control create-offer-schedule__picker" [class.is-open]="isPickupSchedulePanelOpen('date')">
-                  <span class="create-offer-field__label">Pickup day <span class="create-offer-field__required">*</span></span>
-                  <button
-                    id="pickup-day"
-                    class="create-offer-schedule__trigger"
-                    type="button"
-                    aria-haspopup="dialog"
-                    [attr.aria-expanded]="isPickupSchedulePanelOpen('date')"
-                    (click)="togglePickupSchedulePanel('date')"
-                  >
-                    <span class="create-offer-schedule__trigger-main">
-                      <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
-                      <span
-                        class="create-offer-schedule__trigger-value"
-                        [class.is-placeholder]="!pickupBaseDateValue()"
-                      >
-                        {{ pickupBaseDateLabel() }}
-                      </span>
-                    </span>
-                    <fa-icon [icon]="icons.arrowRight" class="create-offer-schedule__trigger-caret" aria-hidden="true" />
-                  </button>
-
-                  @if (isPickupSchedulePanelOpen('date')) {
-                    <div class="create-offer-schedule__panel create-offer-schedule__panel--calendar" role="dialog" aria-label="Choose pickup day">
-                      <div class="create-offer-schedule__panel-header">
-                        <button class="create-offer-schedule__panel-nav" type="button" (click)="shiftPickupCalendarMonth(-1)" aria-label="Previous month">
-                          <fa-icon [icon]="icons.arrowLeft" aria-hidden="true" />
-                        </button>
-                        <strong>{{ pickupCalendarMonthLabel() }}</strong>
-                        <button class="create-offer-schedule__panel-nav" type="button" (click)="shiftPickupCalendarMonth(1)" aria-label="Next month">
-                          <fa-icon [icon]="icons.arrowRight" aria-hidden="true" />
-                        </button>
-                      </div>
-
-                      <div class="create-offer-schedule__quick-actions">
-                        <button class="create-offer-schedule__quick-chip" type="button" (click)="selectPickupRelativeDate(0)">Today</button>
-                        <button class="create-offer-schedule__quick-chip" type="button" (click)="selectPickupRelativeDate(1)">Tomorrow</button>
-                      </div>
-
-                      <div class="create-offer-schedule__weekday-row">
-                        @for (weekday of pickupCalendarWeekdays; track weekday) {
-                          <span>{{ weekday }}</span>
-                        }
-                      </div>
-
-                      <div class="create-offer-schedule__calendar-grid">
-                        @for (day of pickupCalendarDays(); track day.date) {
-                          <button
-                            class="create-offer-schedule__calendar-day"
-                            type="button"
-                            [class.is-muted]="!day.isCurrentMonth"
-                            [class.is-selected]="day.isSelected"
-                            [class.is-today]="day.isToday"
-                            (click)="selectPickupDate(day.date)"
-                          >
-                            {{ day.dayOfMonth }}
-                          </button>
-                        }
-                      </div>
-                    </div>
-                  }
-                </div>
-              </div>
-
-              <div class="create-offer-schedule__times">
-                <div class="create-offer-schedule__slot">
-                  <div class="create-offer-schedule__slot-head">
-                    <span class="create-offer-field__label">Pickup from <span class="create-offer-field__required">*</span></span>
-                  </div>
-
-                  <div class="create-offer-schedule__control create-offer-schedule__picker" [class.is-open]="isPickupSchedulePanelOpen('pickupFrom')">
-                    <span class="create-offer-schedule__control-label">Start time</span>
-                    <button
-                      id="pickup-from-time"
-                      class="create-offer-schedule__trigger"
-                      type="button"
-                      aria-haspopup="dialog"
-                      [attr.aria-expanded]="isPickupSchedulePanelOpen('pickupFrom')"
-                      (click)="togglePickupSchedulePanel('pickupFrom')"
-                    >
-                      <span class="create-offer-schedule__trigger-main">
-                        <fa-icon [icon]="icons.clock" aria-hidden="true" />
-                        <span
-                          class="create-offer-schedule__trigger-value"
-                          [class.is-placeholder]="!pickupTimeValue('pickupFrom')"
-                        >
-                          {{ pickupTimeValue('pickupFrom') || 'Choose start time' }}
-                        </span>
-                      </span>
-                      <fa-icon [icon]="icons.arrowRight" class="create-offer-schedule__trigger-caret" aria-hidden="true" />
-                    </button>
-
-                    @if (isPickupSchedulePanelOpen('pickupFrom')) {
-                      <div class="create-offer-schedule__panel create-offer-schedule__panel--time" role="dialog" aria-label="Choose pickup start time">
-                        <div class="create-offer-schedule__panel-header create-offer-schedule__panel-header--time">
-                          <div>
-                            <span class="create-offer-schedule__panel-kicker">Pickup from</span>
-                            <strong>{{ pickupTimeValue('pickupFrom') || 'Choose start time' }}</strong>
-                          </div>
-                          <button
-                            class="create-offer-schedule__panel-link"
-                            type="button"
-                            [disabled]="!pickupTimeValue('pickupFrom')"
-                            (click)="clearPickupTimeValue('pickupFrom')"
-                          >
-                            Clear
-                          </button>
-                        </div>
-
-                        <div class="create-offer-schedule__quick-actions">
-                          @for (preset of pickupQuickTimePresets; track preset) {
-                            <button class="create-offer-schedule__quick-chip" type="button" (click)="applyPickupTimePreset('pickupFrom', preset)">
-                              {{ preset }}
-                            </button>
-                          }
-                        </div>
-
-                        <div class="create-offer-schedule__time-columns">
-                          <div class="create-offer-schedule__time-group">
-                            <span>Hour</span>
-                            <div class="create-offer-schedule__time-grid create-offer-schedule__time-grid--hours">
-                              @for (hour of pickupHourOptions; track hour) {
-                                <button
-                                  class="create-offer-schedule__time-chip"
-                                  type="button"
-                                  [class.is-selected]="pickupTimePart('pickupFrom', 'hour') === hour"
-                                  (click)="selectPickupTimePart('pickupFrom', 'hour', hour)"
-                                >
-                                  {{ hour }}
-                                </button>
-                              }
-                            </div>
-                          </div>
-
-                          <div class="create-offer-schedule__time-group">
-                            <span>Minute</span>
-                            <div class="create-offer-schedule__time-grid create-offer-schedule__time-grid--minutes">
-                              @for (minute of pickupMinuteOptions; track minute) {
-                                <button
-                                  class="create-offer-schedule__time-chip"
-                                  type="button"
-                                  [class.is-selected]="pickupTimePart('pickupFrom', 'minute') === minute"
-                                  (click)="selectPickupTimePart('pickupFrom', 'minute', minute)"
-                                >
-                                  {{ minute }}
-                                </button>
-                              }
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-
-                  <div class="field-message-slot">
-                    @if (showFieldError('pickupFrom')) {
-                      <p class="field-error">Choose a pickup day and start time.</p>
-                    }
-                  </div>
-                </div>
-
-                <div class="create-offer-schedule__slot">
-                  <div class="create-offer-schedule__slot-head">
-                    <span class="create-offer-field__label">Pickup to <span class="create-offer-field__required">*</span></span>
-                  </div>
-
-                  <div class="create-offer-schedule__control create-offer-schedule__picker" [class.is-open]="isPickupSchedulePanelOpen('pickupTo')">
-                    <span class="create-offer-schedule__control-label">End time</span>
-                    <button
-                      id="pickup-to-time"
-                      class="create-offer-schedule__trigger"
-                      type="button"
-                      aria-haspopup="dialog"
-                      [attr.aria-expanded]="isPickupSchedulePanelOpen('pickupTo')"
-                      (click)="togglePickupSchedulePanel('pickupTo')"
-                    >
-                      <span class="create-offer-schedule__trigger-main">
-                        <fa-icon [icon]="icons.clock" aria-hidden="true" />
-                        <span
-                          class="create-offer-schedule__trigger-value"
-                          [class.is-placeholder]="!pickupTimeValue('pickupTo')"
-                        >
-                          {{ pickupTimeValue('pickupTo') || 'Choose end time' }}
-                        </span>
-                      </span>
-                      <fa-icon [icon]="icons.arrowRight" class="create-offer-schedule__trigger-caret" aria-hidden="true" />
-                    </button>
-
-                    @if (isPickupSchedulePanelOpen('pickupTo')) {
-                      <div class="create-offer-schedule__panel create-offer-schedule__panel--time" role="dialog" aria-label="Choose pickup end time">
-                        <div class="create-offer-schedule__panel-header create-offer-schedule__panel-header--time">
-                          <div>
-                            <span class="create-offer-schedule__panel-kicker">Pickup to</span>
-                            <strong>{{ pickupTimeValue('pickupTo') || 'Choose end time' }}</strong>
-                          </div>
-                          <button
-                            class="create-offer-schedule__panel-link"
-                            type="button"
-                            [disabled]="!pickupTimeValue('pickupTo')"
-                            (click)="clearPickupTimeValue('pickupTo')"
-                          >
-                            Clear
-                          </button>
-                        </div>
-
-                        <div class="create-offer-schedule__quick-actions">
-                          @for (preset of pickupQuickTimePresets; track preset) {
-                            <button class="create-offer-schedule__quick-chip" type="button" (click)="applyPickupTimePreset('pickupTo', preset)">
-                              {{ preset }}
-                            </button>
-                          }
-                        </div>
-
-                        <div class="create-offer-schedule__time-columns">
-                          <div class="create-offer-schedule__time-group">
-                            <span>Hour</span>
-                            <div class="create-offer-schedule__time-grid create-offer-schedule__time-grid--hours">
-                              @for (hour of pickupHourOptions; track hour) {
-                                <button
-                                  class="create-offer-schedule__time-chip"
-                                  type="button"
-                                  [class.is-selected]="pickupTimePart('pickupTo', 'hour') === hour"
-                                  (click)="selectPickupTimePart('pickupTo', 'hour', hour)"
-                                >
-                                  {{ hour }}
-                                </button>
-                              }
-                            </div>
-                          </div>
-
-                          <div class="create-offer-schedule__time-group">
-                            <span>Minute</span>
-                            <div class="create-offer-schedule__time-grid create-offer-schedule__time-grid--minutes">
-                              @for (minute of pickupMinuteOptions; track minute) {
-                                <button
-                                  class="create-offer-schedule__time-chip"
-                                  type="button"
-                                  [class.is-selected]="pickupTimePart('pickupTo', 'minute') === minute"
-                                  (click)="selectPickupTimePart('pickupTo', 'minute', minute)"
-                                >
-                                  {{ minute }}
-                                </button>
-                              }
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-
-                  <div class="field-message-slot">
-                    @if (showFieldError('pickupTo')) {
-                      <p class="field-error">Choose a pickup end time.</p>
-                    }
-                  </div>
-                </div>
-              </div>
-
-              <p class="field-hint create-offer-schedule__hint">
-                If the end time is earlier than the start time, the pickup window will continue into the next day.
-              </p>
-            </div>
-
-            <div class="field-message-slot">
-              @if (showFieldError('pickupFrom') && !pickupBaseDateValue()) {
-                <p class="field-error">Choose a pickup day.</p>
-              }
-            </div>
-
-            @if (submitAttempted() && isPickupWindowInvalid()) {
-              <p class="field-error create-offer-field__inline-error">End time must be different from the start time.</p>
-            }
-          </section>
-          }
-        </div>
-        }
-
-        @if (isEditorStep('details') || isEditorStep('operations')) {
-        <div class="create-offer-page__column">
-          @if (isEditorStep('details')) {
-          <section class="create-offer-card create-offer-section create-offer-section--pricing">
-            <div class="create-offer-card__header">
-              <div class="create-offer-card__heading">
-                <div>
-                  <h2>Pricing and availability</h2>
-                </div>
-              </div>
-            </div>
-
-            <div class="create-offer-grid create-offer-grid--pricing">
-              <div class="create-offer-field">
-                <label class="create-offer-field__label" for="offer-price">Current price <span class="create-offer-field__required">*</span></label>
-                <div class="create-offer-field__currency">
-                  <span>&euro;</span>
-                  <input id="offer-price" class="form-control create-offer-field__control" type="number" min="0" step="0.01" formControlName="price" />
-                </div>
-                <div class="field-message-slot">
-                  @if (showFieldError('price')) {
-                    <p class="field-error">Enter a valid price.</p>
-                  }
-                </div>
-              </div>
-
-              <div class="create-offer-field">
-                <label class="create-offer-field__label" for="offer-original-price">Original price (optional)</label>
-                <div class="create-offer-field__currency">
-                  <span>&euro;</span>
-                  <input
-                    id="offer-original-price"
-                    class="form-control create-offer-field__control"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    formControlName="originalPrice"
-                  />
-                </div>
-                <div class="field-message-slot">
-                  @if (showFieldError('originalPrice') || (submitAttempted() && isOriginalPriceInvalid())) {
-                    <p class="field-error">Original price must be equal to or greater than the current price.</p>
-                  }
-                </div>
-              </div>
-
-              <div class="create-offer-field">
-                <label class="create-offer-field__label" for="offer-quantity">Quantity available <span class="create-offer-field__required">*</span></label>
-                <input
-                  id="offer-quantity"
-                  class="form-control create-offer-field__control"
-                  type="number"
-                  min="1"
-                  step="1"
-                  formControlName="quantityAvailable"
+        <div class="create-offer-page__grid" [attr.data-step]="editorCurrentStep()">
+          @if (editorCurrentStep() === 'ai') {
+            <div class="create-offer-page__column">
+              <section class="create-offer-card create-offer-ai create-offer-section create-offer-section--ai">
+                <app-business-offer-ai-draft
+                  [icons]="icons"
+                  [originalPhotoAsset]="originalPhotoAsset()"
+                  [draftingFromImage]="draftingFromImage()"
+                  [aiDraftSuggestion]="aiDraftSuggestion()"
+                  [visibleDetectedItems]="visibleDetectedItems()"
+                  [hiddenDetectedItemCount]="hiddenDetectedItemCount()"
+                  (originalPhotoRemoved)="removeOriginalPhoto()"
+                  (draftRequested)="autofillDraftFromPhoto()"
                 />
-                <div class="field-message-slot">
-                  @if (showFieldError('quantityAvailable')) {
-                    <p class="field-error">Enter a quantity greater than zero.</p>
-                  }
-                </div>
-              </div>
+              </section>
             </div>
-
-            <p class="create-offer-field__hint">
-              Original price must be equal to or greater than the current price to show a discount.
-            </p>
-          </section>
-
-          <section class="create-offer-card create-offer-section create-offer-section--contents" formArrayName="items">
-            <div class="create-offer-card__header">
-              <div class="create-offer-card__heading">
-                <div>
-                  <h2>Offer contents</h2>
-                  <p>List what's included in this offer. At least one item is required.</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="create-offer-contents">
-              <div class="create-offer-contents__head">
-                <span></span>
-                <span>Item name</span>
-                <span>Quantity</span>
-                <span></span>
-              </div>
-
-              <div class="create-offer-contents__list">
-                @for (itemGroup of offerItemControls(); track $index; let index = $index) {
-                  <div class="create-offer-contents__row" [formGroup]="itemGroup">
-                    <span class="create-offer-contents__handle" aria-hidden="true"></span>
-
-                    <div class="create-offer-field">
-                      <input
-                        class="form-control create-offer-field__control"
-                        [id]="'offer-item-name-' + index"
-                        type="text"
-                        placeholder="Item name"
-                        formControlName="name"
-                      />
-                      <div class="field-message-slot">
-                        @if (showItemFieldError(index, 'name')) {
-                          <p class="field-error">Enter an item name.</p>
-                        }
-                      </div>
-                    </div>
-
-                    <div class="create-offer-field">
-                      <input
-                        class="form-control create-offer-field__control"
-                        [id]="'offer-item-quantity-' + index"
-                        type="number"
-                        min="1"
-                        step="1"
-                        formControlName="quantity"
-                      />
-                      <div class="field-message-slot">
-                        @if (showItemFieldError(index, 'quantity')) {
-                          <p class="field-error">Enter a valid quantity.</p>
-                        }
-                      </div>
-                    </div>
-
-                    <button
-                      class="create-offer-icon-button"
-                      type="button"
-                      [disabled]="offerItemControls().length === 1"
-                      (click)="removeOfferItem(index)"
-                      aria-label="Remove item"
-                    >
-                      <fa-icon [icon]="icons.trashCan" aria-hidden="true" />
-                    </button>
-                  </div>
-                }
-              </div>
-
-              <button class="create-offer-button create-offer-button--secondary create-offer-contents__add" type="button" (click)="addOfferItem()">
-                <fa-icon [icon]="icons.plus" aria-hidden="true" />
-                <span>Add item</span>
-              </button>
-            </div>
-          </section>
           }
 
-          @if (isEditorStep('operations')) {
-          <section class="create-offer-card create-offer-image create-offer-section create-offer-section--image">
-            <div class="create-offer-card__header">
-              <div class="create-offer-card__heading">
-                <div>
-                  <h2>Final offer image</h2>
-                  <p>Choose the image customers will see.</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="create-offer-image__tabs">
-              <button
-                class="create-offer-image__tab"
-                type="button"
-                [class.is-active]="selectedSourceIs('manual-url')"
-                (click)="selectFinalImageSource('manual-url')"
-              >
-                Manual URL / preset
-              </button>
-              <button
-                class="create-offer-image__tab"
-                type="button"
-                [class.is-active]="selectedSourceIs('original-photo')"
-                (click)="selectFinalImageSource('original-photo')"
-              >
-                Original photo
-              </button>
-              <button
-                class="create-offer-image__tab"
-                type="button"
-                [class.is-active]="selectedSourceIs('own-upload')"
-                (click)="selectFinalImageSource('own-upload')"
-              >
-                Upload new image
-              </button>
-              <button
-                class="create-offer-image__tab"
-                type="button"
-                [class.is-active]="selectedSourceIs('ai-cover')"
-                (click)="selectFinalImageSource('ai-cover')"
-              >
-                <span>AI illustrative cover</span>
-                <small>Illustration only</small>
-              </button>
-            </div>
-
-            @if (selectedSourceIs('manual-url')) {
-              <div class="create-offer-image__panel">
-                <div class="create-offer-field">
-                  <label class="create-offer-field__label" for="offer-image-url">Manual URL</label>
-                  <input
-                    id="offer-image-url"
-                    class="form-control create-offer-field__control"
-                    type="text"
-                    formControlName="imageUrl"
-                    (input)="onManualImageUrlInput()"
+          @if (editorCurrentStep() === 'details' || editorCurrentStep() === 'operations') {
+            <div class="create-offer-page__column">
+              @if (editorCurrentStep() === 'details') {
+                <section class="create-offer-card create-offer-section create-offer-section--basics">
+                  <app-business-offer-basics-form
+                    [form]="form"
+                    [categoryOptions]="categoryOptions"
+                    [titleMaxLength]="titleMaxLength"
+                    [descriptionMaxLength]="descriptionMaxLength"
+                    [submitAttempted]="submitAttempted()"
                   />
-                  <div class="field-message-slot">
-                    <p class="field-hint">Choose a preset or keep your hosted image URL.</p>
-                  </div>
-                </div>
+                </section>
+              }
 
-                <div class="create-offer-image__presets">
-                  @for (option of imageOptions; track option.url) {
-                    <button
-                      class="create-offer-image__preset"
-                      type="button"
-                      [class.is-active]="form.controls.imageUrl.value === option.url"
-                      (click)="applyImagePreset(option)"
-                    >
-                      <img [src]="option.url" [alt]="option.label" />
-                      <span>{{ option.label }}</span>
-                    </button>
-                  }
-                </div>
-              </div>
-            }
-
-            @if (selectedSourceIs('original-photo')) {
-              <div class="create-offer-image__panel">
-                @if (originalPhotoAsset(); as originalPhoto) {
-                  <div class="create-offer-image__asset-row">
-                    <div class="create-offer-image__asset-copy">
-                      <strong>{{ originalPhoto.fileName }}</strong>
-                      <span>Use the real food photo as the final image.</span>
-                    </div>
-
-                    <div class="create-offer-image__asset-actions">
-                      <label class="create-offer-button create-offer-button--secondary" for="create-offer-original-photo-input">
-                        <span>Change photo</span>
-                      </label>
-                      <button class="create-offer-icon-button" type="button" (click)="removeOriginalPhoto()" aria-label="Remove original photo">
-                        <fa-icon [icon]="icons.trashCan" aria-hidden="true" />
-                      </button>
-                    </div>
-                  </div>
-                } @else {
-                  <div class="create-offer-image__empty">
-                    <fa-icon [icon]="icons.camera" aria-hidden="true" />
-                    <p>Upload the original food photo in the AI draft section first.</p>
-                  </div>
-                }
-              </div>
-            }
-
-            @if (selectedSourceIs('own-upload')) {
-              <div class="create-offer-image__panel">
-                @if (ownImageAsset(); as ownImage) {
-                  <div class="create-offer-image__asset-row">
-                    <div class="create-offer-image__asset-copy">
-                      <strong>{{ ownImage.fileName }}</strong>
-                      <span>{{ ownImage.contentType }}</span>
-                    </div>
-
-                    <div class="create-offer-image__asset-actions">
-                      <label class="create-offer-button create-offer-button--secondary" for="create-offer-own-image-input">
-                        <span>Change photo</span>
-                      </label>
-                      <button class="create-offer-icon-button" type="button" (click)="removeOwnUploadedImage()" aria-label="Remove uploaded image">
-                        <fa-icon [icon]="icons.trashCan" aria-hidden="true" />
-                      </button>
-                    </div>
-                  </div>
-                } @else {
-                  <div class="create-offer-image__empty">
-                    <fa-icon [icon]="icons.upload" aria-hidden="true" />
-                    <p>Upload a new image to use as the final customer-facing cover.</p>
-                    <label class="create-offer-button create-offer-button--secondary" for="create-offer-own-image-input">
-                      <fa-icon [icon]="icons.upload" aria-hidden="true" />
-                      <span>Change photo</span>
-                    </label>
-                  </div>
-                }
-              </div>
-            }
-
-            @if (selectedSourceIs('ai-cover')) {
-              <div class="create-offer-image__panel">
-                <div class="create-offer-image__asset-row">
-                  <div class="create-offer-image__asset-copy">
-                    <strong>AI illustrative cover</strong>
-                    <span>Illustration only</span>
-                  </div>
-
-                  <div class="create-offer-image__asset-actions">
-                    <button
-                      class="create-offer-button create-offer-button--secondary"
-                      type="button"
-                      [disabled]="generatingCover() || !canGenerateAiCover()"
-                      (click)="generateIllustrativeCover()"
-                    >
-                      <fa-icon [icon]="icons.wandMagicSparkles" aria-hidden="true" />
-                      <span>{{ generatingCover() ? 'Generating cover...' : 'Change photo' }}</span>
-                    </button>
-
-                    @if (hasAiCover()) {
-                      <button class="create-offer-icon-button" type="button" (click)="removeAiCover()" aria-label="Remove AI cover">
-                        <fa-icon [icon]="icons.trashCan" aria-hidden="true" />
-                      </button>
-                    }
-                  </div>
-                </div>
-
-                @if (!hasAiCover()) {
-                  <p class="field-hint">Generate an illustrative cover once the title is ready.</p>
-                }
-              </div>
-            }
-
-            <div class="create-offer-image__preview">
-              @if (selectedFinalImagePreview(); as previewUrl) {
-                <div class="create-offer-image__preview-frame">
-                  <img [src]="previewUrl" [alt]="form.controls.title.value || 'Offer preview'" />
-                  <div class="create-offer-image__preview-badges">
-                    <span class="create-offer-image__preview-badge">{{ selectedFinalImageSourceLabel() }}</span>
-                    @if (selectedFinalImageIllustrative()) {
-                      <span class="create-offer-image__preview-badge create-offer-image__preview-badge--soft">Illustration only</span>
-                    }
-                  </div>
-                </div>
-              } @else {
-                <div class="create-offer-image__empty">
-                  <fa-icon [icon]="icons.image" aria-hidden="true" />
-                  <p>Select an image source to preview the final offer.</p>
-                </div>
+              @if (editorCurrentStep() === 'operations') {
+                <section class="create-offer-card create-offer-section create-offer-section--pickup">
+                  <app-business-offer-pickup-scheduler
+                    [icons]="icons"
+                    [form]="form"
+                    [countries]="countries"
+                    [businessName]="business()?.name || ''"
+                    [businessProfileAddressLabel]="businessProfileAddressLabel()"
+                    [pickupNoteMaxLength]="pickupNoteMaxLength"
+                    [submitAttempted]="submitAttempted()"
+                    [pickupBaseDateValue]="pickupBaseDateValue()"
+                    [pickupBaseDateLabel]="pickupBaseDateLabel()"
+                    [pickupWindowSummary]="pickupWindowSummary()"
+                    [pickupWindowRollsToNextDay]="pickupWindowRollsToNextDay()"
+                    [pickupSchedulePanel]="pickupSchedulePanel()"
+                    [pickupCalendarMonthLabel]="pickupCalendarMonthLabel()"
+                    [pickupCalendarDays]="pickupCalendarDays()"
+                    [pickupCalendarWeekdays]="pickupCalendarWeekdays"
+                    [pickupQuickTimePresets]="pickupQuickTimePresets"
+                    [pickupHourOptions]="pickupHourOptions"
+                    [pickupMinuteOptions]="pickupMinuteOptions"
+                    [pickupFromTimeValue]="pickupTimeValue('pickupFrom')"
+                    [pickupToTimeValue]="pickupTimeValue('pickupTo')"
+                    [pickupFromHour]="pickupTimePart('pickupFrom', 'hour')"
+                    [pickupFromMinute]="pickupTimePart('pickupFrom', 'minute')"
+                    [pickupToHour]="pickupTimePart('pickupTo', 'hour')"
+                    [pickupToMinute]="pickupTimePart('pickupTo', 'minute')"
+                    [pickupWindowInvalid]="isPickupWindowInvalid()"
+                    (pickupSchedulePanelToggled)="togglePickupSchedulePanel($event)"
+                    (pickupMonthShifted)="shiftPickupCalendarMonth($event)"
+                    (pickupRelativeDateSelected)="selectPickupRelativeDate($event)"
+                    (pickupDateSelected)="selectPickupDate($event)"
+                    (pickupTimePresetApplied)="applyPickupTimePreset($event.fieldName, $event.value)"
+                    (pickupTimeCleared)="clearPickupTimeValue($event)"
+                    (pickupTimePartSelected)="selectPickupTimePart($event.fieldName, $event.part, $event.value)"
+                  />
+                </section>
               }
             </div>
-          </section>
+          }
 
-          <section class="create-offer-card create-offer-card--optional create-offer-allergens create-offer-section create-offer-section--allergens">
-            <div class="create-offer-card__header">
-              <div class="create-offer-card__heading">
-                <div>
-                  <span class="create-offer-card__kicker">Optional details</span>
-                  <h2>Allergens &amp; dietary info</h2>
-                  <p>Add this only when it helps customers make a safer choice.</p>
-                </div>
-              </div>
-
-              <span class="create-offer-card__badge create-offer-card__badge--optional">Optional</span>
-            </div>
-
-            <div class="create-offer-allergens__columns">
-              <div class="create-offer-allergens__group">
-                <div class="create-offer-allergens__group-head">
-                  <div>
-                    <span class="create-offer-field__label">Contains allergens</span>
-                    <p class="create-offer-field__hint">These allergens are present in the offer. Select all that apply.</p>
-                  </div>
-                  <span class="create-offer-allergens__count">{{ selectedAllergenOptions('containsAllergens').length }} selected</span>
-                </div>
-
-                @if (selectedAllergenOptions('containsAllergens').length) {
-                  <div class="create-offer-allergens__selected">
-                    @for (option of selectedAllergenOptions('containsAllergens'); track option.value) {
-                      <span class="create-offer-allergens__selected-chip">{{ option.label }}</span>
-                    }
-                  </div>
-                }
-
-                <label class="create-offer-allergens__search">
-                  <fa-icon [icon]="icons.magnifyingGlass" aria-hidden="true" />
-                  <input
-                    type="text"
-                    placeholder="Search allergens"
-                    [value]="containsAllergenQuery()"
-                    (input)="updateContainsAllergenQuery($any($event.target).value)"
+          @if (editorCurrentStep() === 'details' || editorCurrentStep() === 'operations') {
+            <div class="create-offer-page__column">
+              @if (editorCurrentStep() === 'details') {
+                <section class="create-offer-card create-offer-section create-offer-section--pricing">
+                  <app-business-offer-pricing-form
+                    [form]="form"
+                    [submitAttempted]="submitAttempted()"
                   />
-                </label>
+                </section>
 
-                <div class="create-offer-allergens__list">
-                  @for (option of filteredContainsAllergenOptions(); track option.value) {
-                    <label class="create-offer-allergens__option" [class.is-active]="hasAllergen('containsAllergens', option.value)">
-                      <input
-                        type="checkbox"
-                        [checked]="hasAllergen('containsAllergens', option.value)"
-                        (change)="toggleContainsAllergen(option.value)"
-                      />
-                      <span class="create-offer-allergens__option-copy">{{ option.label }}</span>
-                      @if (hasAllergen('containsAllergens', option.value)) {
-                        <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
-                      }
-                    </label>
-                  } @empty {
-                    <p class="create-offer-allergens__empty">No allergens match this search.</p>
-                  }
-                </div>
-              </div>
-
-              <div class="create-offer-allergens__group">
-                <div class="create-offer-allergens__group-head">
-                  <div>
-                    <span class="create-offer-field__label">May contain allergens</span>
-                    <p class="create-offer-field__hint">These allergens may be present. Select all that apply.</p>
-                  </div>
-                  <span class="create-offer-allergens__count">{{ selectedAllergenOptions('mayContainAllergens').length }} selected</span>
-                </div>
-
-                @if (selectedAllergenOptions('mayContainAllergens').length) {
-                  <div class="create-offer-allergens__selected">
-                    @for (option of selectedAllergenOptions('mayContainAllergens'); track option.value) {
-                      <span class="create-offer-allergens__selected-chip">{{ option.label }}</span>
-                    }
-                  </div>
-                }
-
-                <label class="create-offer-allergens__search">
-                  <fa-icon [icon]="icons.magnifyingGlass" aria-hidden="true" />
-                  <input
-                    type="text"
-                    placeholder="Search allergens"
-                    [value]="mayContainAllergenQuery()"
-                    (input)="updateMayContainAllergenQuery($any($event.target).value)"
+                <section class="create-offer-card create-offer-section create-offer-section--contents" formArrayName="items">
+                  <app-business-offer-contents-form
+                    [icons]="icons"
+                    [itemGroups]="offerItemControls()"
+                    [submitAttempted]="submitAttempted()"
+                    (itemAdded)="addOfferItem()"
+                    (itemRemoved)="removeOfferItem($event)"
                   />
-                </label>
+                </section>
+              }
 
-                <div class="create-offer-allergens__list">
-                  @for (option of filteredMayContainAllergenOptions(); track option.value) {
-                    <label class="create-offer-allergens__option" [class.is-active]="hasAllergen('mayContainAllergens', option.value)">
-                      <input
-                        type="checkbox"
-                        [checked]="hasAllergen('mayContainAllergens', option.value)"
-                        (change)="toggleMayContainAllergen(option.value)"
-                      />
-                      <span class="create-offer-allergens__option-copy">{{ option.label }}</span>
-                      @if (hasAllergen('mayContainAllergens', option.value)) {
-                        <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
-                      }
-                    </label>
-                  } @empty {
-                    <p class="create-offer-allergens__empty">No allergens match this search.</p>
-                  }
-                </div>
-              </div>
+              @if (editorCurrentStep() === 'operations') {
+                <section class="create-offer-card create-offer-image create-offer-section create-offer-section--image">
+                  <div class="create-offer-card__header">
+                    <div class="create-offer-card__heading">
+                      <div>
+                        <h2>Final offer image</h2>
+                        <p>Choose the image customers will see.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <app-business-offer-image-picker
+                    [icons]="icons"
+                    [imageOptions]="imageOptions"
+                    [manualImageControl]="form.controls.imageUrl"
+                    [offerTitle]="form.controls.title.value"
+                    [finalImageSource]="finalImageSource()"
+                    [originalPhotoAsset]="originalPhotoAsset()"
+                    [ownImageAsset]="ownImageAsset()"
+                    [aiCoverAsset]="aiCoverAsset()"
+                    [selectedFinalImagePreview]="selectedFinalImagePreview()"
+                    [selectedFinalImageIllustrative]="selectedFinalImageIllustrative()"
+                    [generatingCover]="generatingCover()"
+                    [canGenerateAiCover]="canGenerateAiCover()"
+                    (sourceSelected)="selectFinalImageSource($event)"
+                    (manualImageInput)="onManualImageUrlInput()"
+                    (imagePresetSelected)="applyImagePreset($event)"
+                    (originalPhotoRemoved)="removeOriginalPhoto()"
+                    (ownUploadedImageRemoved)="removeOwnUploadedImage()"
+                    (aiCoverRemoved)="removeAiCover()"
+                    (aiCoverGenerationRequested)="generateIllustrativeCover()"
+                  />
+                </section>
+
+                <section class="create-offer-card create-offer-card--optional create-offer-allergens create-offer-section create-offer-section--allergens">
+                  <app-business-offer-allergens-form
+                    [icons]="icons"
+                    [form]="form"
+                    [allergenOptions]="allergenOptions"
+                    [filteredContainsAllergenOptions]="filteredContainsAllergenOptions()"
+                    [filteredMayContainAllergenOptions]="filteredMayContainAllergenOptions()"
+                    [containsAllergenQuery]="containsAllergenQuery()"
+                    [mayContainAllergenQuery]="mayContainAllergenQuery()"
+                    [otherAllergenNoteMaxLength]="otherAllergenNoteMaxLength"
+                    [submitAttempted]="submitAttempted()"
+                    (containsAllergenQueryChanged)="updateContainsAllergenQuery($event)"
+                    (mayContainAllergenQueryChanged)="updateMayContainAllergenQuery($event)"
+                    (containsAllergenToggled)="toggleContainsAllergen($event)"
+                    (mayContainAllergenToggled)="toggleMayContainAllergen($event)"
+                  />
+                </section>
+              }
             </div>
-
-            <div class="create-offer-field">
-              <div class="create-offer-field__label-row">
-                <label class="create-offer-field__label" for="offer-other-allergen-note">Other allergen information (optional)</label>
-                <span class="create-offer-field__counter">{{ form.controls.otherAllergenNote.value.length }} / {{ otherAllergenNoteMaxLength }}</span>
-              </div>
-
-              <textarea
-                id="offer-other-allergen-note"
-                class="form-control create-offer-field__control create-offer-field__control--textarea"
-                formControlName="otherAllergenNote"
-              ></textarea>
-
-              <div class="field-message-slot">
-                @if (showFieldError('otherAllergenNote')) {
-                  <p class="field-error">Keep the allergen note under {{ otherAllergenNoteMaxLength }} characters.</p>
-                } @else {
-                  <p class="field-hint">Add any additional allergen notes for your customers.</p>
-                }
-              </div>
-            </div>
-          </section>
           }
         </div>
-        }
-      </div>
       }
 
-      <div class="create-offer-action-bar">
-        <button class="create-offer-button create-offer-button--secondary" type="button" (click)="cancelEditing()">Cancel</button>
-
-        <div class="create-offer-action-bar__status" [attr.data-tone]="editorStatusTone()">
-          <fa-icon [icon]="icons.circleCheck" aria-hidden="true" />
-          <span>{{ editorWizardStatusLabel() }}</span>
-        </div>
-
-        <div class="create-offer-action-bar__actions">
-          @if (shouldShowPrimaryEditorAction()) {
-            @if (canGoBackStep()) {
-              <button class="create-offer-button create-offer-button--secondary" type="button" (click)="goToPreviousStep()">Back</button>
-            }
-
-            @if (isFinalEditorStep()) {
-              <button class="create-offer-button create-offer-button--primary" type="submit" [disabled]="saving()">
-                Save offer
-              </button>
-            } @else if (canGoToNextStep()) {
-              <button class="create-offer-button create-offer-button--primary" type="button" (click)="goToNextStep()">
-                {{ nextEditorActionLabel() }}
-              </button>
-            }
-          }
-        </div>
-      </div>
+      <app-business-offer-action-bar
+        [icons]="icons"
+        [saving]="saving()"
+        [formDirty]="form.dirty"
+        [mode]="mode()"
+        [currentStep]="editorCurrentStep()"
+        [editorFlowChoice]="editorFlowChoice()"
+        [visibleSteps]="editorVisibleSteps()"
+        (cancelPressed)="cancelEditing()"
+        (previousPressed)="goToPreviousStep()"
+        (nextPressed)="goToNextStep()"
+        (savePressed)="saveOffer()"
+      />
     </form>
   } @else {
     <div class="business-offers-page__layout">
-      <section class="surface business-offers-page__catalog">
-        <div class="business-offers-page__catalog-head">
-          <div>
-            <span class="eyebrow">Offer catalog</span>
-            <h2>{{ offerCount() }} {{ offerCount() === 1 ? 'offer' : 'offers' }}</h2>
-            <p>Use the catalog to review live entries, swap image links, and open the editor when something changes.</p>
-          </div>
-        </div>
-
-        @if (!offers().length) {
-          <div class="business-offers-page__empty">
-            <h3>No offers yet</h3>
-            <p>
-              {{ canCreateOffer()
-                ? 'Create the first rescue offer for this business and publish it to the browse page.'
-                : 'The catalog is empty for now. Activate the business first to publish the first rescue offer.' }}
-            </p>
-          </div>
-        } @else {
-          <div class="business-offers-page__offer-list">
-            @for (offer of offers(); track offer.id) {
-              <article class="offer-workspace-card" [attr.data-selected]="selectedOfferId() === offer.id">
-                <div class="offer-workspace-card__media">
-                  <img [src]="resolveOfferImage(offer)" [alt]="offer.title" />
-                </div>
-
-                <div class="offer-workspace-card__main">
-                  <div class="offer-workspace-card__title-row">
-                    <div>
-                      <h3>{{ offer.title }}</h3>
-                      <span class="offer-workspace-card__status" [attr.data-tone]="statusMetaFor(offer.status).tone">
-                        {{ statusMetaFor(offer.status).label }}
-                      </span>
-                    </div>
-
-                    <div class="offer-workspace-card__price-stack">
-                      <strong>{{ formatPrice(offer.price) }}</strong>
-                      @if (hasDiscount(offer.price, offer.originalPrice)) {
-                        <span class="offer-workspace-card__original-price">{{ formatPrice(offer.originalPrice ?? offer.price) }}</span>
-                      }
-                    </div>
-                  </div>
-
-                  <p>{{ offer.description || 'No description yet. Add a short summary so customers know what they are reserving.' }}</p>
-
-                  <div class="offer-workspace-card__badges">
-                    <span>{{ formatCategory(offer.category) }}</span>
-                    @if (offer.illustrativeImage) {
-                      <span data-tone="warning">Illustrative image</span>
-                    }
-                  </div>
-
-                  <div class="offer-workspace-card__meta">
-                    <div>
-                      <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
-                      <span>{{ offer.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }} - {{ offer.pickupTimeWindow.to | date: 'HH:mm' }}</span>
-                    </div>
-
-                    <div>
-                      <fa-icon [icon]="icons.list" aria-hidden="true" />
-                      <span>{{ offerItemsSummary(offer) }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="offer-workspace-card__actions">
-                  <app-action-button
-                    label="View"
-                    variant="ghost"
-                    iconPosition="start"
-                    [icon]="icons.eye"
-                    (pressed)="selectOffer(offer.id)"
-                  />
-
-                  @if (statusMetaFor(offer.status).editable) {
-                    <app-action-button
-                      label="Edit"
-                      variant="secondary"
-                      iconPosition="start"
-                      [icon]="icons.pen"
-                      (pressed)="startEditOffer(offer)"
-                    />
-                  }
-
-                  @if (statusMetaFor(offer.status).deletable) {
-                    <app-action-button
-                      label="Delete"
-                      variant="danger"
-                      iconPosition="start"
-                      [icon]="icons.trashCan"
-                      [disabled]="isRemoving(offer.id)"
-                      (pressed)="deleteOffer(offer)"
-                    />
-                  }
-                </div>
-              </article>
-            }
-          </div>
-        }
+      <section class="surface business-offers-page__catalog workspace-page__panel">
+        <app-business-offers-catalog
+          [icons]="icons"
+          [offers]="offers()"
+          [selectedOfferId]="selectedOfferId()"
+          [canCreateOffer]="canCreateOffer()"
+          [removingIds]="removingIds()"
+          (offerSelected)="selectOffer($event)"
+          (offerEditRequested)="startEditOffer($event)"
+          (offerDeleteRequested)="deleteOffer($event)"
+        />
       </section>
 
-      <section class="surface business-offers-page__detail">
-        @if (selectedOffer(); as offer) {
-          <div class="offer-detail">
-            <span class="eyebrow">Offer details</span>
-
-            <div class="offer-detail__hero">
-              <img [src]="resolveOfferImage(offer)" [alt]="offer.title" />
-
-              <div class="offer-detail__hero-copy">
-                <div class="offer-detail__title-row">
-                  <div>
-                    <h2>{{ offer.title }}</h2>
-                    <span class="offer-workspace-card__status" [attr.data-tone]="statusMetaFor(offer.status).tone">
-                      {{ statusMetaFor(offer.status).label }}
-                    </span>
-                  </div>
-
-                  <div class="offer-detail__price-stack">
-                    <strong>{{ formatPrice(offer.price) }}</strong>
-                    @if (hasDiscount(offer.price, offer.originalPrice)) {
-                      <span class="offer-workspace-card__original-price">{{ formatPrice(offer.originalPrice ?? offer.price) }}</span>
-                      <small>Save {{ discountPercent(offer.price, offer.originalPrice) }}%</small>
-                    }
-                  </div>
-                </div>
-
-                <p>{{ offer.description || 'No description yet. Use the editor to explain what customers can expect.' }}</p>
-
-                <div class="offer-detail__meta-tags">
-                  <span>{{ formatCategory(offer.category) }}</span>
-                  @if (offer.illustrativeImage) {
-                    <span data-tone="warning">Illustrative image</span>
-                  }
-                </div>
-              </div>
-            </div>
-
-            <div class="offer-detail__grid">
-              <section class="offer-detail__panel">
-                <span class="eyebrow">Pickup</span>
-                <div class="offer-detail__list">
-                  <div>
-                    <fa-icon [icon]="icons.calendarDays" aria-hidden="true" />
-                    <span>{{ offer.pickupTimeWindow.from | date: 'd. M. y, HH:mm' }} - {{ offer.pickupTimeWindow.to | date: 'd. M. y, HH:mm' }}</span>
-                  </div>
-                  <div>
-                    <fa-icon [icon]="icons.locationDot" aria-hidden="true" />
-                    <span>
-                      {{ offer.pickupLocation.address.street }}, {{ offer.pickupLocation.address.city }},
-                      {{ offer.pickupLocation.address.postalCode }}, {{ offer.pickupLocation.address.country }}
-                    </span>
-                  </div>
-                  @if (offer.pickupLocation.note) {
-                    <div>
-                      <fa-icon [icon]="icons.circleInfo" aria-hidden="true" />
-                      <span>{{ offer.pickupLocation.note }}</span>
-                    </div>
-                  }
-                </div>
-              </section>
-
-              <section class="offer-detail__panel">
-                <span class="eyebrow">Contents</span>
-                <div class="offer-detail__chips">
-                  @for (item of offer.items; track item.name + '-' + item.quantity) {
-                    <span>{{ item.quantity }}x {{ item.name }}</span>
-                  }
-                </div>
-
-                <div class="offer-detail__summary">
-                  <div>
-                    <span class="label">Category</span>
-                    <span class="value">{{ formatCategory(offer.category) }}</span>
-                  </div>
-                  <div>
-                    <span class="label">Available quantity</span>
-                    <span class="value">{{ offer.quantityAvailable }}</span>
-                  </div>
-                  <div>
-                    <span class="label">Created</span>
-                    <span class="value">{{ offer.createdAt | date: 'd. M. y' }}</span>
-                  </div>
-                </div>
-              </section>
-
-              <section class="offer-detail__panel">
-                <span class="eyebrow">Allergens</span>
-                <div class="offer-detail__allergen-columns">
-                  <div>
-                    <span class="label">Contains</span>
-                    @if (offer.containsAllergens.length) {
-                      <div class="offer-detail__chips">
-                        @for (allergen of offer.containsAllergens; track allergen) {
-                          <span>{{ formatAllergen(allergen) }}</span>
-                        }
-                      </div>
-                    } @else {
-                      <p class="offer-detail__muted">No confirmed allergens listed.</p>
-                    }
-                  </div>
-
-                  <div>
-                    <span class="label">May contain</span>
-                    @if (offer.mayContainAllergens.length) {
-                      <div class="offer-detail__chips">
-                        @for (allergen of offer.mayContainAllergens; track allergen) {
-                          <span>{{ formatAllergen(allergen) }}</span>
-                        }
-                      </div>
-                    } @else {
-                      <p class="offer-detail__muted">No trace allergens listed.</p>
-                    }
-                  </div>
-                </div>
-
-                @if (offer.otherAllergenNote) {
-                  <div class="offer-detail__note">
-                    <span class="label">Other note</span>
-                    <p>{{ offer.otherAllergenNote }}</p>
-                  </div>
-                }
-              </section>
-            </div>
-
-            <div class="button-row">
-              @if (statusMetaFor(offer.status).editable) {
-                <app-action-button
-                  label="Edit offer"
-                  variant="secondary"
-                  iconPosition="start"
-                  [icon]="icons.pen"
-                  (pressed)="startEditOffer(offer)"
-                />
-              }
-
-              @if (statusMetaFor(offer.status).deletable) {
-                <app-action-button
-                  label="Delete offer"
-                  variant="danger"
-                  iconPosition="start"
-                  [icon]="icons.trashCan"
-                  [disabled]="isRemoving(offer.id)"
-                  (pressed)="deleteOffer(offer)"
-                />
-              }
-            </div>
-          </div>
-        } @else {
-          <div class="business-offers-page__empty business-offers-page__empty--detail">
-            <h3>Select an offer</h3>
-            <p>Pick an offer from the catalog to review details, or create a new one when the business is ready.</p>
-          </div>
-        }
+      <section class="surface business-offers-page__detail workspace-page__panel">
+        <app-business-offer-detail
+          [icons]="icons"
+          [offer]="selectedOffer()"
+          [removingIds]="removingIds()"
+          (offerEditRequested)="startEditOffer($event)"
+          (offerDeleteRequested)="deleteOffer($event)"
+        />
       </section>
     </div>
   }

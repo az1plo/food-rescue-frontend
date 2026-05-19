@@ -1,15 +1,16 @@
 import { Routes } from '@angular/router';
 import { adminRequiredGuard } from './core/guards/admin-required.guard';
+import { AppShellComponent } from './core/layout/app-shell/app-shell';
 import { PageNotFound } from './core/component/page-not-found/page-not-found';
 import { authRequiredGuard } from './core/guards/auth-required.guard';
-import { AppShellComponent } from './shared/layout/app-shell/app-shell';
+import { ownerWorkspaceRequiredGuard } from './core/guards/owner-workspace-required.guard';
 import { BusinessAnalyticsPage } from './feature/business/pages/business-analytics/business-analytics';
-import { WorkspaceHomeRedirectPage } from './shared/layout/workspace-home-redirect/workspace-home-redirect';
-import { WorkspaceAnalyticsRedirectPage } from './shared/layout/workspace-analytics-redirect/workspace-analytics-redirect';
-import { WorkspaceLayoutComponent } from './shared/layout/workspace-layout/workspace-layout';
-import { WorkspaceOffersRedirectPage } from './shared/layout/workspace-offers-redirect/workspace-offers-redirect';
-import { WorkspaceReservationsRedirectPage } from './shared/layout/workspace-reservations-redirect/workspace-reservations-redirect';
-import { WorkspaceSettingsRedirectPage } from './shared/layout/workspace-settings-redirect/workspace-settings-redirect';
+import { WorkspaceHomeRedirectPage } from './feature/workspace/pages/workspace-home-redirect/workspace-home-redirect';
+import { WorkspaceAnalyticsRedirectPage } from './feature/workspace/pages/workspace-analytics-redirect/workspace-analytics-redirect';
+import { WorkspaceLayoutComponent } from './feature/workspace/layout/workspace-layout/workspace-layout';
+import { WorkspaceOffersRedirectPage } from './feature/workspace/pages/workspace-offers-redirect/workspace-offers-redirect';
+import { WorkspaceReservationsRedirectPage } from './feature/workspace/pages/workspace-reservations-redirect/workspace-reservations-redirect';
+import { WorkspaceSettingsRedirectPage } from './feature/workspace/pages/workspace-settings-redirect/workspace-settings-redirect';
 import { AdminBusinessApprovalsPage } from './feature/business/pages/admin-business-approvals/admin-business-approvals';
 import { ForBusinessPage } from './feature/business/pages/for-business/for-business';
 import { BusinessDetailsPage } from './feature/business/pages/business-details/business-details';
@@ -21,12 +22,12 @@ import { HowItWorksPage } from './feature/info/pages/how-it-works/how-it-works';
 import { AuthCallbackPage } from './feature/auth/pages/auth-callback/auth-callback';
 import { LoginPage } from './feature/auth/pages/login/login';
 import { RegisterPage } from './feature/auth/pages/register/register';
-import { BusinessReservationsPage } from './feature/offer/pages/business-reservations/business-reservations';
 import { BusinessOffersPage } from './feature/offer/pages/business-offers/business-offers';
 import { BrowseOffersPage } from './feature/offer/pages/browse-offers/browse-offers';
-import { CartPage } from './feature/offer/pages/cart/cart';
+import { CartPage } from './feature/order/pages/cart/cart';
 import { OfferDetailsPage } from './feature/offer/pages/offer-details/offer-details';
-import { WorkspaceReservationsPage } from './feature/offer/pages/workspace-reservations/workspace-reservations';
+import { BusinessReservationsPage } from './feature/order/pages/business-reservations/business-reservations';
+import { WorkspaceReservationsPage } from './feature/order/pages/my-pickups/my-pickups';
 
 export const routes: Routes = [
   {
@@ -41,38 +42,44 @@ export const routes: Routes = [
       { path: 'orders', component: WorkspaceReservationsRedirectPage },
       { path: 'reservations', pathMatch: 'full', redirectTo: 'orders' },
       { path: 'settings', component: WorkspaceSettingsRedirectPage },
-      { path: 'my-businesses', component: MyBusinessesPage },
-      { path: 'my-businesses/new', component: BusinessDetailsPage, data: { mode: 'create' } },
+      { path: 'my-businesses', component: MyBusinessesPage, canActivate: [ownerWorkspaceRequiredGuard] },
+      { path: 'my-businesses/new', component: BusinessDetailsPage, data: { mode: 'create' }, canActivate: [ownerWorkspaceRequiredGuard] },
       {
         path: 'my-businesses/:id/analytics',
         component: BusinessAnalyticsPage,
+        canActivate: [ownerWorkspaceRequiredGuard],
         resolve: { business: businessDetailsResolver },
       },
       {
         path: 'my-businesses/:id/orders',
         component: BusinessReservationsPage,
+        canActivate: [ownerWorkspaceRequiredGuard],
         resolve: { business: businessDetailsResolver },
       },
       {
         path: 'my-businesses/:id/reservations',
         component: BusinessReservationsPage,
+        canActivate: [ownerWorkspaceRequiredGuard],
         resolve: { business: businessDetailsResolver },
       },
       {
         path: 'my-businesses/:id/offers',
         component: BusinessOffersPage,
+        canActivate: [ownerWorkspaceRequiredGuard],
         resolve: { business: businessDetailsResolver },
       },
       {
         path: 'my-businesses/:id/settings',
         component: BusinessDetailsPage,
         data: { mode: 'settings' },
+        canActivate: [ownerWorkspaceRequiredGuard],
         resolve: { business: businessDetailsResolver },
       },
       {
         path: 'my-businesses/:id',
         component: BusinessDetailsPage,
         data: { mode: 'details' },
+        canActivate: [ownerWorkspaceRequiredGuard],
         resolve: { business: businessDetailsResolver },
       },
       {

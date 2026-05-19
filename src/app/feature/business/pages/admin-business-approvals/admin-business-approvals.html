@@ -1,5 +1,5 @@
 <section class="workspace-page admin-business-approvals-page">
-  <div class="admin-business-approvals-page__header">
+  <div class="admin-business-approvals-page__header workspace-page__header">
     <div>
       <h1>Business approvals</h1>
       <p>Review newly submitted business profiles and confirm the ones that are ready to go live.</p>
@@ -18,7 +18,7 @@
     <div class="alert-banner alert-banner--danger">{{ errorMessage() }}</div>
   }
 
-  <section class="surface admin-business-approvals-page__summary">
+  <section class="surface admin-business-approvals-page__summary workspace-page__summary-card">
     <app-circle-icon [icon]="icons.circleCheck" tone="warning" />
     <div>
       <strong>{{ approvalCount() }}</strong>
@@ -27,13 +27,9 @@
   </section>
 
   @if (loading()) {
-    <section class="surface admin-business-approvals-page__state" aria-busy="true">
-      <span class="eyebrow">Approval queue</span>
-      <h2>Loading pending businesses</h2>
-      <p>We are opening the moderation queue now.</p>
-    </section>
+    <app-workspace-page-skeleton variant="queue" />
   } @else if (!pendingBusinesses().length) {
-    <section class="surface admin-business-approvals-page__state">
+    <section class="surface admin-business-approvals-page__state workspace-page__state">
       <span class="eyebrow">Approval queue</span>
       <h2>No pending businesses</h2>
       <p>Everything is approved for now. Come back here when new businesses arrive.</p>
@@ -41,7 +37,7 @@
   } @else {
     <div class="admin-business-approvals-page__list">
       @for (business of pendingBusinesses(); track business.id) {
-        <article class="surface approval-card">
+        <article class="surface approval-card workspace-page__panel">
           <div class="approval-card__main">
             <div class="approval-card__title">
               <div>
@@ -68,7 +64,6 @@
           </div>
 
           <div class="approval-card__actions">
-            <app-action-button label="View details" variant="ghost" [route]="['/workspace', 'my-businesses', business.id]" />
             <app-action-button
               label="Approve business"
               iconPosition="start"

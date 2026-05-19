@@ -1,6 +1,7 @@
-import { buildBusinessMark, resolveBusinessIconUrl } from '../../../feature/business/models/business.model';
-import { MarketplaceOfferModel } from '../../../feature/offer/models/marketplace-offer.model';
-import { OfferStatus, PickupTimeWindowModel, resolveOfferImage } from '../../../feature/offer/models/offer.model';
+import { buildBusinessMark, resolveBusinessIconUrl } from '../../models/business.model';
+import { PickupTimeWindowModel } from '../../models/location.model';
+import { MarketplaceOfferModel } from '../../models/marketplace-offer.model';
+import { OfferStatus, resolveOfferImage } from '../../models/offer.model';
 import { MarketplaceOfferCardOverrides, OfferCardModel } from './offer-card.models';
 
 export function buildOfferBusinessMark(businessName: string): string {
@@ -107,7 +108,8 @@ export function createMarketplaceOfferCardModel(
     pickup: overrides.pickup ?? null,
     distance: overrides.distance ?? null,
     image: overrides.image ?? resolveOfferImage(offer.imageUrl, offer.id),
-    availabilityLabel: overrides.availabilityLabel ?? formatOfferAvailabilityLabel(offer.quantityAvailable, offer.status),
+    availabilityLabel:
+      overrides.availabilityLabel ?? formatOfferAvailabilityLabel(offer.quantityAvailable, offer.status),
     inCart: overrides.inCart ?? false,
     selected: overrides.selected ?? false,
     status: offer.status,

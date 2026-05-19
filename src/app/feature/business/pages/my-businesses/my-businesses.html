@@ -1,5 +1,5 @@
 <section class="workspace-page my-businesses-page">
-  <div class="my-businesses-page__header">
+  <div class="my-businesses-page__header workspace-page__header">
     <div>
       <h1>My businesses</h1>
       <p>Manage all your saved business locations and open each business in its own workspace page.</p>
@@ -13,21 +13,24 @@
     />
   </div>
 
-  <div class="my-businesses-page__summary">
-    @for (summary of summaryCards(); track trackBusinessSummary($index, summary)) {
-      <article class="surface summary-card" [attr.data-tone]="summary.tone">
-        <app-circle-icon [icon]="summary.icon" />
-        <div>
-          <strong>{{ summary.value }}</strong>
-          <p>{{ summary.label }}</p>
-        </div>
-      </article>
-    }
-  </div>
+  @if (loading()) {
+    <app-workspace-page-skeleton variant="list" />
+  } @else {
+    <div class="my-businesses-page__summary workspace-page__summary">
+      @for (summary of summaryCards(); track trackBusinessSummary($index, summary)) {
+        <article class="surface summary-card workspace-page__summary-card" [attr.data-tone]="summary.tone">
+          <app-circle-icon [icon]="summary.icon" />
+          <div>
+            <strong>{{ summary.value }}</strong>
+            <p>{{ summary.label }}</p>
+          </div>
+        </article>
+      }
+    </div>
 
-  <app-business-list
-    [businesses]="businesses()"
-    [loading]="loading()"
-    [createRoute]="['/workspace', 'my-businesses', 'new']"
-  />
+    <app-business-list
+      [businesses]="businesses()"
+      [createRoute]="['/workspace', 'my-businesses', 'new']"
+    />
+  }
 </section>

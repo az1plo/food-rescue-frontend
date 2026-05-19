@@ -1,0 +1,177 @@
+<div class="create-offer-image__tabs">
+  <button
+    class="create-offer-image__tab"
+    type="button"
+    [class.is-active]="selectedSourceIs('manual-url')"
+    (click)="sourceSelected.emit('manual-url')"
+  >
+    Manual URL / preset
+  </button>
+  <button
+    class="create-offer-image__tab"
+    type="button"
+    [class.is-active]="selectedSourceIs('original-photo')"
+    (click)="sourceSelected.emit('original-photo')"
+  >
+    Original photo
+  </button>
+  <button
+    class="create-offer-image__tab"
+    type="button"
+    [class.is-active]="selectedSourceIs('own-upload')"
+    (click)="sourceSelected.emit('own-upload')"
+  >
+    Upload new image
+  </button>
+  <button
+    class="create-offer-image__tab"
+    type="button"
+    [class.is-active]="selectedSourceIs('ai-cover')"
+    (click)="sourceSelected.emit('ai-cover')"
+  >
+    <span>AI illustrative cover</span>
+    <small>Illustration only</small>
+  </button>
+</div>
+
+@if (selectedSourceIs('manual-url')) {
+  <div class="create-offer-image__panel">
+    <div class="create-offer-field">
+      <label class="create-offer-field__label" for="offer-image-url">Manual URL</label>
+      <input
+        id="offer-image-url"
+        class="form-control create-offer-field__control"
+        type="text"
+        [formControl]="manualImageControl()"
+        (input)="manualImageInput.emit()"
+      />
+      <div class="field-message-slot">
+        <p class="field-hint">Choose a preset or keep your hosted image URL.</p>
+      </div>
+    </div>
+
+    <div class="create-offer-image__presets">
+      @for (option of imageOptions(); track option.url) {
+        <button
+          class="create-offer-image__preset"
+          type="button"
+          [class.is-active]="manualImageControl().value === option.url"
+          (click)="imagePresetSelected.emit(option)"
+        >
+          <img [src]="option.url" [alt]="option.label" />
+          <span>{{ option.label }}</span>
+        </button>
+      }
+    </div>
+  </div>
+}
+
+@if (selectedSourceIs('original-photo')) {
+  <div class="create-offer-image__panel">
+    @if (originalPhotoAsset(); as originalPhoto) {
+      <div class="create-offer-image__asset-row">
+        <div class="create-offer-image__asset-copy">
+          <strong>{{ originalPhoto.fileName }}</strong>
+          <span>Use the real food photo as the final image.</span>
+        </div>
+
+        <div class="create-offer-image__asset-actions">
+          <label class="create-offer-button create-offer-button--secondary" for="create-offer-original-photo-input">
+            <span>Change photo</span>
+          </label>
+          <button class="create-offer-icon-button" type="button" (click)="originalPhotoRemoved.emit()" aria-label="Remove original photo">
+            <fa-icon [icon]="icons().trashCan" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="create-offer-image__empty">
+        <fa-icon [icon]="icons().camera" aria-hidden="true" />
+        <p>Upload the original food photo in the AI draft section first.</p>
+      </div>
+    }
+  </div>
+}
+
+@if (selectedSourceIs('own-upload')) {
+  <div class="create-offer-image__panel">
+    @if (ownImageAsset(); as ownImage) {
+      <div class="create-offer-image__asset-row">
+        <div class="create-offer-image__asset-copy">
+          <strong>{{ ownImage.fileName }}</strong>
+          <span>{{ ownImage.contentType }}</span>
+        </div>
+
+        <div class="create-offer-image__asset-actions">
+          <label class="create-offer-button create-offer-button--secondary" for="create-offer-own-image-input">
+            <span>Change photo</span>
+          </label>
+          <button class="create-offer-icon-button" type="button" (click)="ownUploadedImageRemoved.emit()" aria-label="Remove uploaded image">
+            <fa-icon [icon]="icons().trashCan" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="create-offer-image__empty">
+        <fa-icon [icon]="icons().upload" aria-hidden="true" />
+        <p>Upload a new image to use as the final customer-facing cover.</p>
+        <label class="create-offer-button create-offer-button--secondary" for="create-offer-own-image-input">
+          <fa-icon [icon]="icons().upload" aria-hidden="true" />
+          <span>Change photo</span>
+        </label>
+      </div>
+    }
+  </div>
+}
+
+@if (selectedSourceIs('ai-cover')) {
+  <div class="create-offer-image__panel">
+    <div class="create-offer-image__asset-row">
+      <div class="create-offer-image__asset-copy">
+        <strong>AI illustrative cover</strong>
+        <span>Illustration only</span>
+      </div>
+
+      <div class="create-offer-image__asset-actions">
+        <button
+          class="create-offer-button create-offer-button--secondary"
+          type="button"
+          [disabled]="generatingCover() || !canGenerateAiCover()"
+          (click)="aiCoverGenerationRequested.emit()"
+        >
+          <fa-icon [icon]="icons().wandMagicSparkles" aria-hidden="true" />
+          <span>{{ generatingCover() ? 'Generating cover...' : 'Change photo' }}</span>
+        </button>
+
+        @if (hasAiCover()) {
+          <button class="create-offer-icon-button" type="button" (click)="aiCoverRemoved.emit()" aria-label="Remove AI cover">
+            <fa-icon [icon]="icons().trashCan" aria-hidden="true" />
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (!hasAiCover()) {
+      <p class="field-hint">Generate an illustrative cover once the title is ready.</p>
+    }
+  </div>
+}
+
+<div class="create-offer-image__preview">
+  @if (selectedFinalImagePreview(); as previewUrl) {
+    <div class="create-offer-image__preview-frame">
+      <img [src]="previewUrl" [alt]="offerTitle() || 'Offer preview'" />
+      <div class="create-offer-image__preview-badges">
+        <span class="create-offer-image__preview-badge">{{ selectedFinalImageSourceLabel() }}</span>
+        @if (selectedFinalImageIllustrative()) {
+          <span class="create-offer-image__preview-badge create-offer-image__preview-badge--soft">Illustration only</span>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="create-offer-image__empty">
+      <fa-icon [icon]="icons().image" aria-hidden="true" />
+      <p>Select an image source to preview the final offer.</p>
+    </div>
+  }
+</div>

@@ -1,0 +1,268 @@
+<div class="workspace-page-skeleton" [attr.data-variant]="variant()" aria-hidden="true">
+  @switch (variant()) {
+    @case ('dashboard') {
+      <div class="workspace-page-skeleton__summary">
+        @for (summaryId of summaryIds; track summaryId) {
+          <article class="workspace-page-skeleton__surface workspace-page-skeleton__surface--summary">
+            <span class="workspace-page-skeleton__line workspace-page-skeleton__line--eyebrow"></span>
+            <span class="workspace-page-skeleton__line workspace-page-skeleton__line--value"></span>
+            <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+          </article>
+        }
+      </div>
+
+      <div class="workspace-page-skeleton__layout">
+        <section class="workspace-page-skeleton__surface workspace-page-skeleton__surface--panel-xl">
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--eyebrow"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--title"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+          <span class="workspace-page-skeleton__chart"></span>
+        </section>
+
+        <section class="workspace-page-skeleton__surface workspace-page-skeleton__surface--panel-md">
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--eyebrow"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--title"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+
+          @for (panelId of panelIds; track panelId) {
+            <div class="workspace-page-skeleton__list-card">
+              <span class="workspace-page-skeleton__line workspace-page-skeleton__line--md"></span>
+              <span class="workspace-page-skeleton__line workspace-page-skeleton__line--sm"></span>
+              <span class="workspace-page-skeleton__line"></span>
+            </div>
+          }
+        </section>
+      </div>
+
+      <div class="workspace-page-skeleton__layout workspace-page-skeleton__layout--secondary">
+        <section class="workspace-page-skeleton__surface workspace-page-skeleton__surface--panel-xl">
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--eyebrow"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--title"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+
+          @for (cardId of cardIds; track cardId) {
+            <div class="workspace-page-skeleton__list-card workspace-page-skeleton__list-card--row">
+              <div class="workspace-page-skeleton__stack">
+                <span class="workspace-page-skeleton__line workspace-page-skeleton__line--md"></span>
+                <span class="workspace-page-skeleton__line workspace-page-skeleton__line--sm"></span>
+              </div>
+              <div class="workspace-page-skeleton__stack workspace-page-skeleton__stack--actions">
+                <span class="workspace-page-skeleton__chip"></span>
+                <span class="workspace-page-skeleton__chip"></span>
+                <span class="workspace-page-skeleton__chip workspace-page-skeleton__chip--short"></span>
+              </div>
+            </div>
+          }
+        </section>
+
+        <section class="workspace-page-skeleton__surface workspace-page-skeleton__surface--panel-md">
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--eyebrow"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--title"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+
+          @for (panelId of panelIds; track panelId) {
+            <div class="workspace-page-skeleton__metric-row">
+              <div class="workspace-page-skeleton__stack">
+                <span class="workspace-page-skeleton__line workspace-page-skeleton__line--md"></span>
+                <span class="workspace-page-skeleton__line workspace-page-skeleton__line--sm"></span>
+              </div>
+              <span class="workspace-page-skeleton__meter"></span>
+              <span class="workspace-page-skeleton__line workspace-page-skeleton__line--sm"></span>
+            </div>
+          }
+        </section>
+      </div>
+    }
+
+    @case ('list') {
+      <div class="workspace-page-skeleton__summary">
+        @for (summaryId of summaryIds; track summaryId) {
+          <article class="workspace-page-skeleton__surface workspace-page-skeleton__surface--summary workspace-page-skeleton__surface--summary-list">
+            <span class="workspace-page-skeleton__icon"></span>
+            <div class="workspace-page-skeleton__stack">
+              <span class="workspace-page-skeleton__line workspace-page-skeleton__line--value"></span>
+              <span class="workspace-page-skeleton__line workspace-page-skeleton__line--sm"></span>
+            </div>
+          </article>
+        }
+      </div>
+
+      <div class="workspace-page-skeleton__card-grid">
+        @for (cardId of cardIds; track cardId) {
+          <article class="workspace-page-skeleton__surface workspace-page-skeleton__surface--business-card">
+            <span class="workspace-page-skeleton__line workspace-page-skeleton__line--title"></span>
+            <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+
+            <div class="workspace-page-skeleton__summary-grid">
+              <span class="workspace-page-skeleton__metric-box"></span>
+              <span class="workspace-page-skeleton__metric-box"></span>
+              <span class="workspace-page-skeleton__metric-box"></span>
+            </div>
+
+            <div class="workspace-page-skeleton__chip-row">
+              <span class="workspace-page-skeleton__chip"></span>
+              <span class="workspace-page-skeleton__chip"></span>
+            </div>
+          </article>
+        }
+      </div>
+    }
+
+    @case ('analytics') {
+      <div class="workspace-page-skeleton__hero">
+        <section class="workspace-page-skeleton__surface workspace-page-skeleton__surface--hero">
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--eyebrow"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--value-lg"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+
+          <div class="workspace-page-skeleton__summary-grid">
+            <span class="workspace-page-skeleton__metric-box"></span>
+            <span class="workspace-page-skeleton__metric-box"></span>
+          </div>
+        </section>
+
+        <div class="workspace-page-skeleton__summary workspace-page-skeleton__summary--hero">
+          @for (summaryId of summaryIds; track summaryId) {
+            <article class="workspace-page-skeleton__surface workspace-page-skeleton__surface--summary">
+              <span class="workspace-page-skeleton__line workspace-page-skeleton__line--eyebrow"></span>
+              <span class="workspace-page-skeleton__line workspace-page-skeleton__line--value"></span>
+              <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+            </article>
+          }
+        </div>
+      </div>
+
+      <div class="workspace-page-skeleton__layout">
+        <section class="workspace-page-skeleton__surface workspace-page-skeleton__surface--panel-xl">
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--eyebrow"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--title"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+          <span class="workspace-page-skeleton__chart"></span>
+        </section>
+
+        <section class="workspace-page-skeleton__surface workspace-page-skeleton__surface--panel-md">
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--eyebrow"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--title"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+
+          @for (panelId of panelIds; track panelId) {
+            <div class="workspace-page-skeleton__list-card">
+              <span class="workspace-page-skeleton__line workspace-page-skeleton__line--md"></span>
+              <span class="workspace-page-skeleton__line"></span>
+            </div>
+          }
+        </section>
+      </div>
+
+      <div class="workspace-page-skeleton__layout workspace-page-skeleton__layout--secondary">
+        @for (panelId of panelIds; track panelId) {
+          <section class="workspace-page-skeleton__surface workspace-page-skeleton__surface--panel-md">
+            <span class="workspace-page-skeleton__line workspace-page-skeleton__line--eyebrow"></span>
+            <span class="workspace-page-skeleton__line workspace-page-skeleton__line--title"></span>
+            <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+            <span class="workspace-page-skeleton__chart workspace-page-skeleton__chart--short"></span>
+          </section>
+        }
+      </div>
+    }
+
+    @case ('detail') {
+      <div class="workspace-page-skeleton__summary">
+        @for (summaryId of summaryIds; track summaryId) {
+          <article class="workspace-page-skeleton__surface workspace-page-skeleton__surface--summary">
+            <span class="workspace-page-skeleton__line workspace-page-skeleton__line--eyebrow"></span>
+            <span class="workspace-page-skeleton__line workspace-page-skeleton__line--value"></span>
+            <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+          </article>
+        }
+      </div>
+
+      <div class="workspace-page-skeleton__layout">
+        <section class="workspace-page-skeleton__surface workspace-page-skeleton__surface--panel-xl">
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--eyebrow"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--title"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+
+          <div class="workspace-page-skeleton__stack">
+            <span class="workspace-page-skeleton__line"></span>
+            <span class="workspace-page-skeleton__line"></span>
+            <span class="workspace-page-skeleton__line workspace-page-skeleton__line--md"></span>
+          </div>
+        </section>
+
+        <aside class="workspace-page-skeleton__surface workspace-page-skeleton__surface--panel-md">
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--eyebrow"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--title"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+          <div class="workspace-page-skeleton__stack workspace-page-skeleton__stack--actions">
+            <span class="workspace-page-skeleton__chip"></span>
+            <span class="workspace-page-skeleton__chip"></span>
+            <span class="workspace-page-skeleton__chip"></span>
+          </div>
+        </aside>
+      </div>
+    }
+
+    @case ('catalog') {
+      <div class="workspace-page-skeleton__layout workspace-page-skeleton__layout--catalog">
+        <section class="workspace-page-skeleton__surface workspace-page-skeleton__surface--panel-xl">
+          @for (cardId of cardIds; track cardId) {
+            <div class="workspace-page-skeleton__list-card workspace-page-skeleton__list-card--row">
+              <span class="workspace-page-skeleton__thumbnail"></span>
+              <div class="workspace-page-skeleton__stack">
+                <span class="workspace-page-skeleton__line workspace-page-skeleton__line--md"></span>
+                <span class="workspace-page-skeleton__line"></span>
+                <span class="workspace-page-skeleton__line workspace-page-skeleton__line--sm"></span>
+              </div>
+            </div>
+          }
+        </section>
+
+        <aside class="workspace-page-skeleton__surface workspace-page-skeleton__surface--panel-md">
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--eyebrow"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--title"></span>
+          <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+          <span class="workspace-page-skeleton__chart workspace-page-skeleton__chart--short"></span>
+          <div class="workspace-page-skeleton__chip-row">
+            <span class="workspace-page-skeleton__chip"></span>
+            <span class="workspace-page-skeleton__chip"></span>
+          </div>
+        </aside>
+      </div>
+    }
+
+    @case ('queue') {
+      <div class="workspace-page-skeleton__queue">
+        @for (queueId of queueIds; track queueId) {
+          <article class="workspace-page-skeleton__surface workspace-page-skeleton__surface--queue-card">
+            <div class="workspace-page-skeleton__stack">
+              <span class="workspace-page-skeleton__line workspace-page-skeleton__line--title"></span>
+              <span class="workspace-page-skeleton__line"></span>
+              <span class="workspace-page-skeleton__line workspace-page-skeleton__line--md"></span>
+            </div>
+
+            <div class="workspace-page-skeleton__summary-grid workspace-page-skeleton__summary-grid--queue">
+              <span class="workspace-page-skeleton__metric-box"></span>
+              <span class="workspace-page-skeleton__metric-box"></span>
+              <span class="workspace-page-skeleton__metric-box"></span>
+            </div>
+
+            <div class="workspace-page-skeleton__chip-row">
+              <span class="workspace-page-skeleton__chip"></span>
+              <span class="workspace-page-skeleton__chip workspace-page-skeleton__chip--short"></span>
+            </div>
+          </article>
+        }
+      </div>
+    }
+
+    @case ('inline-panel') {
+      <section class="workspace-page-skeleton__surface workspace-page-skeleton__surface--panel-md">
+        <span class="workspace-page-skeleton__line workspace-page-skeleton__line--eyebrow"></span>
+        <span class="workspace-page-skeleton__line workspace-page-skeleton__line--title"></span>
+        <span class="workspace-page-skeleton__line workspace-page-skeleton__line--lead"></span>
+        <span class="workspace-page-skeleton__chart workspace-page-skeleton__chart--short"></span>
+      </section>
+    }
+  }
+</div>

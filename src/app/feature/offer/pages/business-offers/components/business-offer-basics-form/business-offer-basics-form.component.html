@@ -1,0 +1,56 @@
+<div [formGroup]="form()">
+  <div class="create-offer-card__header">
+    <div class="create-offer-card__heading">
+      <div>
+        <h2>Offer basics</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="create-offer-field">
+    <div class="create-offer-field__label-row">
+      <label class="create-offer-field__label" for="offer-title">Offer title <span class="create-offer-field__required">*</span></label>
+      <span class="create-offer-field__counter">{{ form().get('title')?.value?.length ?? 0 }} / {{ titleMaxLength() }}</span>
+    </div>
+    <input id="offer-title" class="form-control create-offer-field__control" type="text" formControlName="title" />
+    <div class="field-message-slot">
+      @if (showFieldError('title')) {
+        <p class="field-error">Enter an offer title.</p>
+      }
+    </div>
+  </div>
+
+  <div class="create-offer-field">
+    <div class="create-offer-field__label-row">
+      <label class="create-offer-field__label" for="offer-category">Category <span class="create-offer-field__required">*</span></label>
+    </div>
+    <select id="offer-category" class="form-control create-offer-field__control" formControlName="category">
+      @for (option of categoryOptions(); track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="create-offer-field">
+    <div class="create-offer-field__label-row">
+      <label class="create-offer-field__label" for="offer-description">Description <span class="create-offer-field__required">*</span></label>
+      <span class="create-offer-field__counter">{{ form().get('description')?.value?.length ?? 0 }} / {{ descriptionMaxLength() }}</span>
+    </div>
+    <textarea
+      id="offer-description"
+      class="form-control create-offer-field__control create-offer-field__control--textarea create-offer-field__control--description"
+      formControlName="description"
+    ></textarea>
+    <div class="field-message-slot">
+      @if (showFieldError('description')) {
+        <p class="field-error">
+          {{ form().get('description')?.hasError('required')
+            ? 'Add a description for customers.'
+            : 'Keep the description under ' + descriptionMaxLength() + ' characters.' }}
+        </p>
+      } @else {
+        <p class="field-hint">Keep it clear and appealing. Customers see this first.</p>
+      }
+    </div>
+  </div>
+</div>

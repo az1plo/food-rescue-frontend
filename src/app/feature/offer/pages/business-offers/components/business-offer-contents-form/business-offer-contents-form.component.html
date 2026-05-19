@@ -1,0 +1,71 @@
+<div class="create-offer-card__header">
+  <div class="create-offer-card__heading">
+    <div>
+      <h2>Offer contents</h2>
+      <p>List what's included in this offer. At least one item is required.</p>
+    </div>
+  </div>
+</div>
+
+<div class="create-offer-contents">
+  <div class="create-offer-contents__head">
+    <span></span>
+    <span>Item name</span>
+    <span>Quantity</span>
+    <span></span>
+  </div>
+
+  <div class="create-offer-contents__list">
+    @for (itemGroup of itemGroups(); track $index; let index = $index) {
+      <div class="create-offer-contents__row" [formGroup]="itemGroup">
+        <span class="create-offer-contents__handle" aria-hidden="true"></span>
+
+        <div class="create-offer-field">
+          <input
+            class="form-control create-offer-field__control"
+            [id]="'offer-item-name-' + index"
+            type="text"
+            placeholder="Item name"
+            formControlName="name"
+          />
+          <div class="field-message-slot">
+            @if (showItemFieldError(index, 'name')) {
+              <p class="field-error">Enter an item name.</p>
+            }
+          </div>
+        </div>
+
+        <div class="create-offer-field">
+          <input
+            class="form-control create-offer-field__control"
+            [id]="'offer-item-quantity-' + index"
+            type="number"
+            min="1"
+            step="1"
+            formControlName="quantity"
+          />
+          <div class="field-message-slot">
+            @if (showItemFieldError(index, 'quantity')) {
+              <p class="field-error">Enter a valid quantity.</p>
+            }
+          </div>
+        </div>
+
+        <button
+          class="create-offer-icon-button"
+          type="button"
+          [disabled]="itemGroups().length === 1"
+          (click)="itemRemoved.emit(index)"
+          aria-label="Remove item"
+        >
+          <fa-icon [icon]="icons().trashCan" aria-hidden="true" />
+        </button>
+      </div>
+    }
+  </div>
+
+  <button class="create-offer-button create-offer-button--secondary create-offer-contents__add" type="button" (click)="itemAdded.emit()">
+    <fa-icon [icon]="icons().plus" aria-hidden="true" />
+    <span>Add item</span>
+  </button>
+</div>

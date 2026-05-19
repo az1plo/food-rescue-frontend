@@ -1,0 +1,171 @@
+.business-offers-page__offer-list {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.offer-workspace-card {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr) auto;
+  gap: 1.6rem;
+  padding: 1.6rem;
+  border: 1px solid rgba(216, 226, 210, 0.92);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.78);
+  transition:
+    border-color var(--transition-base),
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.offer-workspace-card[data-selected='true'] {
+  border-color: rgba(47, 143, 78, 0.45);
+  box-shadow: var(--shadow-sm);
+}
+
+.offer-workspace-card__media {
+  overflow: hidden;
+  border-radius: 1.4rem;
+  aspect-ratio: 1.08 / 0.84;
+}
+
+.offer-workspace-card__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.offer-workspace-card__main {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.offer-workspace-card__title-row,
+.offer-workspace-card__meta div,
+.offer-workspace-card__badges {
+  display: flex;
+  align-items: center;
+}
+
+.offer-workspace-card__title-row {
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+
+.offer-workspace-card__title-row h3 {
+  margin: 0 0 0.6rem;
+}
+
+.offer-workspace-card__title-row strong {
+  color: var(--color-primary-strong);
+  font-size: 2rem;
+  white-space: nowrap;
+}
+
+.offer-workspace-card__price-stack {
+  display: grid;
+  justify-items: end;
+  gap: 0.35rem;
+}
+
+.offer-workspace-card__original-price {
+  color: var(--color-text-muted);
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-decoration: line-through;
+  text-decoration-thickness: 0.14rem;
+}
+
+.offer-workspace-card__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.offer-workspace-card__status[data-tone='success'] {
+  background: #e8f6ec;
+  color: var(--color-primary-strong);
+}
+
+.offer-workspace-card__status[data-tone='warning'] {
+  background: #fff5db;
+  color: #8c6514;
+}
+
+.offer-workspace-card__status[data-tone='danger'] {
+  background: #fff0ef;
+  color: #a93636;
+}
+
+.offer-workspace-card__status[data-tone='default'] {
+  background: #eef2ec;
+  color: var(--color-text);
+}
+
+.offer-workspace-card__meta {
+  display: grid;
+  gap: 0.8rem;
+  color: var(--color-text-muted);
+  font-size: 1.4rem;
+}
+
+.offer-workspace-card__badges {
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.offer-workspace-card__badges span {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(242, 246, 238, 0.95);
+  color: var(--color-primary-strong);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.offer-workspace-card__badges span[data-tone='warning'] {
+  background: #fff5db;
+  color: #8c6514;
+}
+
+.offer-workspace-card__meta div {
+  gap: 0.8rem;
+}
+
+.offer-workspace-card__actions {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  min-width: 13rem;
+}
+
+@media (max-width: 1199px) {
+  .offer-workspace-card {
+    grid-template-columns: 1fr;
+  }
+
+  .offer-workspace-card__media {
+    max-width: 28rem;
+  }
+
+  .offer-workspace-card__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-width: 0;
+  }
+}
+
+@media (max-width: 959px) {
+  .offer-workspace-card__title-row {
+    display: grid;
+  }
+}

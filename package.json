@@ -6,7 +6,8 @@
     "start": "ng serve --proxy-config=proxy.conf.json",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "lint:arch": "npx dependency-cruiser --config dependency-cruiser.cjs src/app --output-type err-long"
   },
   "private": true,
   "packageManager": "npm@11.6.2",

@@ -1,0 +1,128 @@
+<div [formGroup]="form()">
+  <div class="create-offer-card__header">
+    <div class="create-offer-card__heading">
+      <div>
+        <span class="create-offer-card__kicker">Optional details</span>
+        <h2>Allergens &amp; dietary info</h2>
+        <p>Add this only when it helps customers make a safer choice.</p>
+      </div>
+    </div>
+
+    <span class="create-offer-card__badge create-offer-card__badge--optional">Optional</span>
+  </div>
+
+  <div class="create-offer-allergens__columns">
+    <div class="create-offer-allergens__group">
+      <div class="create-offer-allergens__group-head">
+        <div>
+          <span class="create-offer-field__label">Contains allergens</span>
+          <p class="create-offer-field__hint">These allergens are present in the offer. Select all that apply.</p>
+        </div>
+        <span class="create-offer-allergens__count">{{ selectedAllergenOptions('containsAllergens').length }} selected</span>
+      </div>
+
+      @if (selectedAllergenOptions('containsAllergens').length) {
+        <div class="create-offer-allergens__selected">
+          @for (option of selectedAllergenOptions('containsAllergens'); track option.value) {
+            <span class="create-offer-allergens__selected-chip">{{ option.label }}</span>
+          }
+        </div>
+      }
+
+      <label class="create-offer-allergens__search">
+        <fa-icon [icon]="icons().magnifyingGlass" aria-hidden="true" />
+        <input
+          type="text"
+          placeholder="Search allergens"
+          [value]="containsAllergenQuery()"
+          (input)="containsAllergenQueryChanged.emit($any($event.target).value)"
+        />
+      </label>
+
+      <div class="create-offer-allergens__list">
+        @for (option of filteredContainsAllergenOptions(); track option.value) {
+          <label class="create-offer-allergens__option" [class.is-active]="hasAllergen('containsAllergens', option.value)">
+            <input
+              type="checkbox"
+              [checked]="hasAllergen('containsAllergens', option.value)"
+              (change)="containsAllergenToggled.emit(option.value)"
+            />
+            <span class="create-offer-allergens__option-copy">{{ option.label }}</span>
+            @if (hasAllergen('containsAllergens', option.value)) {
+              <fa-icon [icon]="icons().circleCheck" aria-hidden="true" />
+            }
+          </label>
+        } @empty {
+          <p class="create-offer-allergens__empty">No allergens match this search.</p>
+        }
+      </div>
+    </div>
+
+    <div class="create-offer-allergens__group">
+      <div class="create-offer-allergens__group-head">
+        <div>
+          <span class="create-offer-field__label">May contain allergens</span>
+          <p class="create-offer-field__hint">These allergens may be present. Select all that apply.</p>
+        </div>
+        <span class="create-offer-allergens__count">{{ selectedAllergenOptions('mayContainAllergens').length }} selected</span>
+      </div>
+
+      @if (selectedAllergenOptions('mayContainAllergens').length) {
+        <div class="create-offer-allergens__selected">
+          @for (option of selectedAllergenOptions('mayContainAllergens'); track option.value) {
+            <span class="create-offer-allergens__selected-chip">{{ option.label }}</span>
+          }
+        </div>
+      }
+
+      <label class="create-offer-allergens__search">
+        <fa-icon [icon]="icons().magnifyingGlass" aria-hidden="true" />
+        <input
+          type="text"
+          placeholder="Search allergens"
+          [value]="mayContainAllergenQuery()"
+          (input)="mayContainAllergenQueryChanged.emit($any($event.target).value)"
+        />
+      </label>
+
+      <div class="create-offer-allergens__list">
+        @for (option of filteredMayContainAllergenOptions(); track option.value) {
+          <label class="create-offer-allergens__option" [class.is-active]="hasAllergen('mayContainAllergens', option.value)">
+            <input
+              type="checkbox"
+              [checked]="hasAllergen('mayContainAllergens', option.value)"
+              (change)="mayContainAllergenToggled.emit(option.value)"
+            />
+            <span class="create-offer-allergens__option-copy">{{ option.label }}</span>
+            @if (hasAllergen('mayContainAllergens', option.value)) {
+              <fa-icon [icon]="icons().circleCheck" aria-hidden="true" />
+            }
+          </label>
+        } @empty {
+          <p class="create-offer-allergens__empty">No allergens match this search.</p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="create-offer-field">
+    <div class="create-offer-field__label-row">
+      <label class="create-offer-field__label" for="offer-other-allergen-note">Other allergen information (optional)</label>
+      <span class="create-offer-field__counter">{{ form().get('otherAllergenNote')?.value?.length ?? 0 }} / {{ otherAllergenNoteMaxLength() }}</span>
+    </div>
+
+    <textarea
+      id="offer-other-allergen-note"
+      class="form-control create-offer-field__control create-offer-field__control--textarea"
+      formControlName="otherAllergenNote"
+    ></textarea>
+
+    <div class="field-message-slot">
+      @if (showOtherNoteError()) {
+        <p class="field-error">Keep the allergen note under {{ otherAllergenNoteMaxLength() }} characters.</p>
+      } @else {
+        <p class="field-hint">Add any additional allergen notes for your customers.</p>
+      }
+    </div>
+  </div>
+</div>

@@ -4,12 +4,13 @@ import { ActionButtonComponent } from '../../../../shared/ui/action-button/actio
 import { CircleIconComponent } from '../../../../shared/ui/circle-icon/circle-icon';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { appIcons } from '../../../../shared/icons/app-icons';
+import { WorkspacePageSkeletonComponent } from '../../../../shared/ui/workspace-page-skeleton/workspace-page-skeleton';
 import { BusinessModel } from '../../models/business.model';
 import { BusinessApiService } from '../../services/business-api.service';
 
 @Component({
   selector: 'app-admin-business-approvals-page',
-  imports: [DatePipe, ActionButtonComponent, CircleIconComponent],
+  imports: [DatePipe, ActionButtonComponent, CircleIconComponent, WorkspacePageSkeletonComponent],
   templateUrl: './admin-business-approvals.html',
   styleUrl: './admin-business-approvals.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

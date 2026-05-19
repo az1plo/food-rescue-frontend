@@ -1,5 +1,5 @@
 .browse-offers-page__content--map {
-  --browse-map-sticky-top: 1.8rem;
+  --browse-map-sticky-top: calc(var(--app-shell-header-height, 7.6rem) + 1.8rem);
   --browse-map-viewport-gap: 1.2rem;
 }
 
@@ -22,6 +22,23 @@
 
 .browse-filter-chip--radius-select select {
   cursor: pointer;
+}
+
+.browse-filter-chip--filter {
+  min-width: 13.6rem;
+  justify-content: space-between;
+}
+
+.browse-filter-chip__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  font-weight: 800;
+}
+
+.browse-filter-chip__count--hidden {
+  visibility: hidden;
 }
 
 .browse-offers-page__catalog-heading {
@@ -174,7 +191,7 @@
 }
 
 .browse-offers-page__content--map .browse-offers-page__grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .browse-offers-page__grid--skeleton {

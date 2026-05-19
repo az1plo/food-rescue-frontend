@@ -10,6 +10,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { UserService } from '../../../../core/services/user.service';
 import { appIcons } from '../../../../shared/icons/app-icons';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
+import { WorkspacePageSkeletonComponent } from '../../../../shared/ui/workspace-page-skeleton/workspace-page-skeleton';
 import { BusinessAnalyticsModel } from '../../models/business-analytics.model';
 import {
   BUSINESS_STATUS_META,
@@ -46,7 +47,7 @@ const BUSINESS_ICON_CONTENT_TYPES = ['image/png', 'image/jpeg', 'image/webp'] as
 
 @Component({
   selector: 'app-business-details-page',
-  imports: [DatePipe, RouterLink, ReactiveFormsModule, FontAwesomeModule, ActionButtonComponent],
+  imports: [DatePipe, RouterLink, ReactiveFormsModule, FontAwesomeModule, ActionButtonComponent, WorkspacePageSkeletonComponent],
   templateUrl: './business-details.html',
   styleUrl: './business-details.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

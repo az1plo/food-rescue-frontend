@@ -1,0 +1,109 @@
+<div class="create-offer-card__header">
+  <div class="create-offer-card__heading">
+    <span class="create-offer-card__icon">
+      <fa-icon [icon]="icons().wandMagicSparkles" aria-hidden="true" />
+    </span>
+    <div>
+      <h2>AI draft from real food photo</h2>
+    </div>
+  </div>
+
+  <span class="create-offer-card__badge">Optional</span>
+</div>
+
+<div class="create-offer-ai__layout">
+  <div class="create-offer-ai__preview">
+    @if (originalPhotoAsset(); as originalPhoto) {
+      <div class="create-offer-ai__preview-frame">
+        <img [src]="originalPhoto.previewUrl" [alt]="originalPhoto.fileName" />
+      </div>
+
+      <div class="create-offer-ai__preview-actions">
+        <label class="create-offer-button create-offer-button--secondary" for="create-offer-original-photo-input">
+          <fa-icon [icon]="icons().camera" aria-hidden="true" />
+          <span>Change photo</span>
+        </label>
+
+        <button class="create-offer-icon-button" type="button" (click)="originalPhotoRemoved.emit()" aria-label="Remove photo">
+          <fa-icon [icon]="icons().trashCan" aria-hidden="true" />
+        </button>
+      </div>
+    } @else {
+      <div class="create-offer-ai__empty">
+        <fa-icon [icon]="icons().image" aria-hidden="true" />
+        <p>Upload a food photo to get optional suggestions.</p>
+        <label class="create-offer-button create-offer-button--secondary" for="create-offer-original-photo-input">
+          <fa-icon [icon]="icons().upload" aria-hidden="true" />
+          <span>Change photo</span>
+        </label>
+      </div>
+    }
+  </div>
+
+  <div class="create-offer-ai__suggestions">
+    <div class="create-offer-ai__suggestions-head">
+      <span>Suggested from your photo</span>
+      <button
+        class="create-offer-button create-offer-button--ghost"
+        type="button"
+        [disabled]="draftingFromImage() || !hasOriginalPhoto()"
+        (click)="draftRequested.emit()"
+      >
+        <fa-icon [icon]="icons().wandMagicSparkles" aria-hidden="true" />
+        <span>{{ draftingFromImage() ? 'Analyzing photo...' : 'Analyze photo' }}</span>
+      </button>
+    </div>
+
+    @if (aiDraftSuggestion(); as suggestion) {
+      <div class="create-offer-ai__suggestion-list">
+        <article class="create-offer-ai__suggestion">
+          <div>
+            <span class="create-offer-ai__suggestion-label">Title</span>
+            <strong>{{ suggestion.suggestedTitle }}</strong>
+          </div>
+          <fa-icon [icon]="icons().circleCheck" aria-hidden="true" />
+        </article>
+
+        <article class="create-offer-ai__suggestion">
+          <div>
+            <span class="create-offer-ai__suggestion-label">Description</span>
+            <strong>{{ suggestion.suggestedDescription || 'No description suggested.' }}</strong>
+          </div>
+          <fa-icon [icon]="icons().circleCheck" aria-hidden="true" />
+        </article>
+
+        <article class="create-offer-ai__suggestion">
+          <div>
+            <span class="create-offer-ai__suggestion-label">Category</span>
+            <strong>{{ suggestedCategoryLabel() }}</strong>
+          </div>
+          <fa-icon [icon]="icons().circleCheck" aria-hidden="true" />
+        </article>
+      </div>
+    } @else {
+      <div class="create-offer-ai__suggestions-empty">
+        <p>{{ hasOriginalPhoto() ? 'Analyze the uploaded photo to get optional suggestions.' : 'Upload a food photo to get optional suggestions.' }}</p>
+      </div>
+    }
+  </div>
+</div>
+
+@if (visibleDetectedItems().length) {
+  <div class="create-offer-card__meta-block">
+    <span class="create-offer-card__meta-label">Detected items</span>
+    <div class="create-offer-ai__chips">
+      @for (item of visibleDetectedItems(); track item) {
+        <span class="create-offer-ai__chip">{{ item }}</span>
+      }
+
+      @if (hiddenDetectedItemCount()) {
+        <span class="create-offer-ai__chip create-offer-ai__chip--muted">+{{ hiddenDetectedItemCount() }} more</span>
+      }
+    </div>
+  </div>
+}
+
+<div class="create-offer-card__note">
+  <fa-icon [icon]="icons().circleInfo" aria-hidden="true" />
+  <span>AI suggestions are optional and can be edited.</span>
+</div>

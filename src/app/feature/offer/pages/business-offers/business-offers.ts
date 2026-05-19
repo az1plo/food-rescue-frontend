@@ -1,5 +1,4 @@
-import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, HostListener, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, HostListener, ViewEncapsulation, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -8,64 +7,99 @@ import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { appIcons } from '../../../../shared/icons/app-icons';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
-import { AddressModel, BUSINESS_STATUS_META, BusinessModel } from '../../../business/models/business.model';
+import { BUSINESS_STATUS_META, BusinessModel } from '../../../../shared/models/business.model';
+import { WorkspacePageSkeletonComponent } from '../../../../shared/ui/workspace-page-skeleton/workspace-page-skeleton';
 import {
   AllergenCode,
   ALLERGEN_OPTIONS,
-  AllergenOption,
   CreateOfferPayload,
-  formatAllergenLabel,
   LOCAL_OFFER_IMAGE_OPTIONS,
   OFFER_CATEGORY_OPTIONS,
-  OFFER_STATUS_META,
   OfferCategory,
-  OfferCategoryOption,
   OfferImageOption,
   OfferItemModel,
   OfferModel,
   OfferPayload,
-  OfferStatus,
-  OfferStatusMeta,
-  resolveOfferImage,
 } from '../../models/offer.model';
 import { GeneratedOfferImageModel, OfferDraftSuggestionModel } from '../../models/offer-assistant.model';
 import { OfferApiService } from '../../services/offer-api.service';
 import { OfferAssistantApiService } from '../../services/offer-assistant-api.service';
 import { OfferImageApiService } from '../../services/offer-image-api.service';
-
-type OfferEditorMode = 'view' | 'create' | 'edit';
-type OfferFinalImageSource = 'manual-url' | 'original-photo' | 'own-upload' | 'ai-cover';
-type OfferEditorStep = 'entry' | 'ai' | 'details' | 'operations';
-type OfferEditorFlowChoice = 'undecided' | 'ai' | 'manual';
-type PickupSchedulePanel = 'date' | 'pickupFrom' | 'pickupTo';
-type PickupTimeFieldName = 'pickupFrom' | 'pickupTo';
-
-interface EditorImageAsset {
-  fileName: string;
-  contentType: string;
-  imageBase64: string;
-  previewUrl: string;
-}
-
-interface DraftDetectedItem {
-  name: string;
-  quantity: number;
-}
-
-interface PickupCalendarCell {
-  date: string;
-  dayOfMonth: number;
-  isCurrentMonth: boolean;
-  isSelected: boolean;
-  isToday: boolean;
-}
+import { BusinessOfferActionBarComponent } from './components/business-offer-action-bar/business-offer-action-bar.component';
+import { BusinessOfferAiDraftComponent } from './components/business-offer-ai-draft/business-offer-ai-draft.component';
+import { BusinessOfferAllergensFormComponent } from './components/business-offer-allergens-form/business-offer-allergens-form.component';
+import { BusinessOfferBasicsFormComponent } from './components/business-offer-basics-form/business-offer-basics-form.component';
+import { BusinessOfferContentsFormComponent } from './components/business-offer-contents-form/business-offer-contents-form.component';
+import { BusinessOfferDetailComponent } from './components/business-offer-detail/business-offer-detail.component';
+import { BusinessOfferFlowChoiceComponent } from './components/business-offer-flow-choice/business-offer-flow-choice.component';
+import { BusinessOfferImagePickerComponent } from './components/business-offer-image-picker/business-offer-image-picker.component';
+import { EditorImageAsset, OfferFinalImageSource } from './components/business-offer-image-picker/business-offer-image-picker.models';
+import { BusinessOfferPickupSchedulerComponent } from './components/business-offer-pickup-scheduler/business-offer-pickup-scheduler.component';
+import { BusinessOfferPricingFormComponent } from './components/business-offer-pricing-form/business-offer-pricing-form.component';
+import { BusinessOfferStepperComponent } from './components/business-offer-stepper/business-offer-stepper.component';
+import { BusinessOffersCatalogComponent } from './components/business-offers-catalog/business-offers-catalog.component';
+import {
+  DraftDetectedItem,
+  formatBusinessOfferDetectedItemLabel,
+  normalizeBusinessOfferDetectedItemQuantity,
+  parseBusinessOfferDetectedItemLabel,
+} from './business-offers-draft.utils';
+import {
+  filterBusinessOfferAllergenOptions,
+  matchesBusinessOfferAddress,
+  sortBusinessOfferAllergens,
+} from './business-offers-form.utils';
+import {
+  OfferEditorFlowChoice,
+  OfferEditorMode,
+  OfferEditorStep,
+  PickupCalendarCell,
+  PickupSchedulePanel,
+  PickupTimeFieldName,
+} from './business-offers.models';
+import {
+  buildBusinessOfferPickupControlValues,
+  businessOfferPickupWindowRollsToNextDay,
+  formatBusinessOfferDateOnly,
+  parseBusinessOfferDateOnly,
+  parseBusinessOfferDateTimeLocalParts,
+  parseBusinessOfferTimeToMinutes,
+  resolveBusinessOfferDefaultPickupTime,
+  resolveBusinessOfferPickupBaseDateLabel,
+  resolveBusinessOfferPickupCalendarDays,
+  resolveBusinessOfferPickupTimePart,
+  resolveBusinessOfferPickupWindowSummary,
+  resolveBusinessOfferStartOfMonthString,
+  resolveBusinessOfferTodayDateString,
+  toBusinessOfferDateTimeLocalValue,
+  toBusinessOfferIsoString,
+} from './business-offers-pickup.utils';
+import { businessOfferStatusMeta } from './business-offers-presenter.utils';
 
 @Component({
   selector: 'app-business-offers-page',
-  imports: [DatePipe, ReactiveFormsModule, FontAwesomeModule, ActionButtonComponent],
+  imports: [
+    ReactiveFormsModule,
+    FontAwesomeModule,
+    ActionButtonComponent,
+    BusinessOfferActionBarComponent,
+    BusinessOfferAiDraftComponent,
+    BusinessOfferAllergensFormComponent,
+    BusinessOfferBasicsFormComponent,
+    BusinessOfferContentsFormComponent,
+    BusinessOfferDetailComponent,
+    BusinessOfferFlowChoiceComponent,
+    BusinessOfferImagePickerComponent,
+    BusinessOfferPickupSchedulerComponent,
+    BusinessOfferPricingFormComponent,
+    BusinessOfferStepperComponent,
+    BusinessOffersCatalogComponent,
+    WorkspacePageSkeletonComponent,
+  ],
   templateUrl: './business-offers.html',
   styleUrl: './business-offers.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
 })
 export class BusinessOffersPage {
   private readonly destroyRef = inject(DestroyRef);
@@ -109,7 +143,9 @@ export class BusinessOffersPage {
   protected readonly pickupFromTime = signal('');
   protected readonly pickupToTime = signal('');
   protected readonly pickupSchedulePanel = signal<PickupSchedulePanel | null>(null);
-  protected readonly pickupCalendarMonth = signal(this.startOfMonthString(this.todayDateString()));
+  protected readonly pickupCalendarMonth = signal(
+    resolveBusinessOfferStartOfMonthString(resolveBusinessOfferTodayDateString()),
+  );
   protected readonly editorFlowChoice = signal<OfferEditorFlowChoice>('undecided');
   protected readonly editorCurrentStep = signal<OfferEditorStep>('entry');
   protected readonly pickupCalendarWeekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
@@ -140,13 +176,13 @@ export class BusinessOffersPage {
     Math.max(0, this.aiDetectedItems().length - this.detectedItemPreviewLimit),
   );
   protected readonly filteredContainsAllergenOptions = computed(() =>
-    this.filterAllergenOptions(this.containsAllergenQuery()),
+    filterBusinessOfferAllergenOptions(this.allergenOptions, this.containsAllergenQuery()),
   );
   protected readonly filteredMayContainAllergenOptions = computed(() =>
-    this.filterAllergenOptions(this.mayContainAllergenQuery()),
+    filterBusinessOfferAllergenOptions(this.allergenOptions, this.mayContainAllergenQuery()),
   );
   protected readonly pickupCalendarMonthLabel = computed(() => {
-    const monthDate = this.parseDateOnly(this.pickupCalendarMonth());
+    const monthDate = parseBusinessOfferDateOnly(this.pickupCalendarMonth());
     if (!monthDate) {
       return '';
     }
@@ -157,32 +193,11 @@ export class BusinessOffersPage {
     }).format(monthDate);
   });
   protected readonly pickupCalendarDays = computed<PickupCalendarCell[]>(() => {
-    const monthDate = this.parseDateOnly(this.pickupCalendarMonth());
-    if (!monthDate) {
-      return [];
-    }
-
-    const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
-    const monthIndex = monthStart.getMonth();
-    const firstWeekdayIndex = (monthStart.getDay() + 6) % 7;
-    const gridStart = new Date(monthStart);
-    gridStart.setDate(monthStart.getDate() - firstWeekdayIndex);
-    const selectedDate = this.pickupBaseDate();
-    const todayDate = this.todayDateString();
-
-    return Array.from({ length: 42 }, (_, index) => {
-      const cellDate = new Date(gridStart);
-      cellDate.setDate(gridStart.getDate() + index);
-      const value = this.formatDateOnly(cellDate);
-
-      return {
-        date: value,
-        dayOfMonth: cellDate.getDate(),
-        isCurrentMonth: cellDate.getMonth() === monthIndex,
-        isSelected: value === selectedDate,
-        isToday: value === todayDate,
-      };
-    });
+    return resolveBusinessOfferPickupCalendarDays(
+      this.pickupCalendarMonth(),
+      this.pickupBaseDate(),
+      resolveBusinessOfferTodayDateString(),
+    );
   });
   protected readonly businessProfileAddressLabel = computed(() => {
     const business = this.business();
@@ -362,7 +377,7 @@ export class BusinessOffersPage {
   }
 
   protected startEditOffer(offer: OfferModel): void {
-    if (!this.statusMetaFor(offer.status).editable) {
+    if (!businessOfferStatusMeta(offer.status).editable) {
       return;
     }
 
@@ -376,7 +391,9 @@ export class BusinessOffersPage {
     this.originalPhotoAsset.set(null);
     this.ownImageAsset.set(null);
     this.aiCoverAsset.set(null);
-    this.aiDetectedItems.set(offer.items.map((item) => this.formatDetectedItemLabel(item.name, item.quantity)));
+    this.aiDetectedItems.set(
+      offer.items.map((item) => formatBusinessOfferDetectedItemLabel(item.name, item.quantity)),
+    );
     this.containsAllergenQuery.set('');
     this.mayContainAllergenQuery.set('');
     this.finalImageSource.set('manual-url');
@@ -449,7 +466,7 @@ export class BusinessOffersPage {
   }
 
   protected deleteOffer(offer: OfferModel): void {
-    if (!this.statusMetaFor(offer.status).deletable || this.isRemoving(offer.id)) {
+    if (!businessOfferStatusMeta(offer.status).deletable || this.removingIds().includes(offer.id)) {
       return;
     }
 
@@ -656,39 +673,10 @@ export class BusinessOffersPage {
     return 'saved';
   }
 
-  protected suggestedCategoryLabel(): string | null {
-    const suggestion = this.aiDraftSuggestion();
-    return suggestion ? this.formatCategory(suggestion.suggestedCategory) : null;
-  }
-
-  protected selectedFinalImageSourceLabel(): string {
-    switch (this.finalImageSource()) {
-      case 'original-photo':
-        return 'Original photo';
-      case 'own-upload':
-        return 'Upload new image';
-      case 'ai-cover':
-        return 'AI illustrative cover';
-      case 'manual-url':
-      default:
-        return 'Manual URL / preset';
-    }
-  }
-
-  protected showFieldError(fieldName: keyof typeof this.form.controls): boolean {
-    const control = this.form.controls[fieldName];
-    return control.invalid && (this.submitAttempted() || control.touched);
-  }
-
-  protected showItemFieldError(index: number, fieldName: 'name' | 'quantity'): boolean {
-    const control = this.offerItemControls()[index]?.get(fieldName);
-    return !!control && control.invalid && (this.submitAttempted() || control.touched);
-  }
-
   protected isPickupWindowInvalid(): boolean {
     const baseDate = this.pickupBaseDate();
-    const fromMinutes = this.parseTimeToMinutes(this.pickupFromTime());
-    const toMinutes = this.parseTimeToMinutes(this.pickupToTime());
+    const fromMinutes = parseBusinessOfferTimeToMinutes(this.pickupFromTime());
+    const toMinutes = parseBusinessOfferTimeToMinutes(this.pickupToTime());
 
     if (!baseDate || fromMinutes === null || toMinutes === null) {
       return false;
@@ -707,61 +695,12 @@ export class BusinessOffersPage {
     return originalPrice < price;
   }
 
-  protected statusMetaFor(status: OfferStatus): OfferStatusMeta {
-    return OFFER_STATUS_META[status];
-  }
-
-  protected resolveOfferImage(offer: OfferModel): string {
-    return resolveOfferImage(offer.imageUrl, offer.id);
-  }
-
-  protected isRemoving(offerId: number): boolean {
-    return this.removingIds().includes(offerId);
-  }
-
-  protected formatPrice(price: number): string {
-    return `${price.toFixed(2)} EUR`;
-  }
-
-  protected hasDiscount(price: number, originalPrice: number | null): boolean {
-    return typeof originalPrice === 'number' && originalPrice > price;
-  }
-
-  protected discountPercent(price: number, originalPrice: number | null): number | null {
-    if (!this.hasDiscount(price, originalPrice) || originalPrice === null) {
-      return null;
-    }
-
-    return Math.round(((originalPrice - price) / originalPrice) * 100);
-  }
-
-  protected offerItemsSummary(offer: OfferModel): string {
-    return offer.items.map((item) => `${item.quantity}x ${item.name}`).join(', ');
-  }
-
-  protected formatCategory(category: OfferCategory): string {
-    return this.categoryOptions.find((option) => option.value === category)?.label ?? category;
-  }
-
-  protected formatAllergen(code: AllergenCode): string {
-    return formatAllergenLabel(code);
-  }
-
-  protected hasAllergen(controlName: 'containsAllergens' | 'mayContainAllergens', code: AllergenCode): boolean {
-    return this.form.controls[controlName].value.includes(code);
-  }
-
   protected toggleContainsAllergen(code: AllergenCode): void {
     this.toggleAllergenSelection('containsAllergens', 'mayContainAllergens', code);
   }
 
   protected toggleMayContainAllergen(code: AllergenCode): void {
     this.toggleAllergenSelection('mayContainAllergens', 'containsAllergens', code);
-  }
-
-  protected selectedAllergenOptions(controlName: 'containsAllergens' | 'mayContainAllergens'): AllergenOption[] {
-    const selectedValues = new Set(this.form.controls[controlName].value);
-    return this.allergenOptions.filter((option) => selectedValues.has(option.value));
   }
 
   protected updateContainsAllergenQuery(value: string): void {
@@ -782,37 +721,12 @@ export class BusinessOffersPage {
     this.editorCurrentStep.set('details');
   }
 
-  protected isEditorStep(step: OfferEditorStep): boolean {
-    return this.editorCurrentStep() === step;
-  }
-
-  protected editorStepLabel(step: OfferEditorStep): string {
-    switch (step) {
-      case 'entry':
-        return 'Start';
-      case 'ai':
-        return 'AI draft';
-      case 'details':
-        return 'Offer setup';
-      case 'operations':
-        return 'Pickup and image';
-    }
-  }
-
-  protected canGoToEditorStep(step: OfferEditorStep): boolean {
-    return this.visibleEditorSteps().includes(step);
-  }
-
   protected goToEditorStep(step: OfferEditorStep): void {
-    if (!this.canGoToEditorStep(step)) {
+    if (!this.visibleEditorSteps().includes(step)) {
       return;
     }
 
     this.editorCurrentStep.set(step);
-  }
-
-  protected canGoBackStep(): boolean {
-    return this.visibleEditorSteps().indexOf(this.editorCurrentStep()) > 0;
   }
 
   protected goToPreviousStep(): void {
@@ -825,18 +739,8 @@ export class BusinessOffersPage {
     this.editorCurrentStep.set(visibleSteps[currentIndex - 1]);
   }
 
-  protected canGoToNextStep(): boolean {
-    if (!this.shouldShowPrimaryEditorAction()) {
-      return false;
-    }
-
-    const visibleSteps = this.visibleEditorSteps();
-    const currentIndex = visibleSteps.indexOf(this.editorCurrentStep());
-    return currentIndex >= 0 && currentIndex < visibleSteps.length - 1;
-  }
-
   protected goToNextStep(): void {
-    if (!this.shouldShowPrimaryEditorAction()) {
+    if (this.mode() === 'create' && this.editorCurrentStep() === 'entry' && this.editorFlowChoice() === 'undecided') {
       return;
     }
 
@@ -854,68 +758,12 @@ export class BusinessOffersPage {
     this.editorCurrentStep.set(visibleSteps[currentIndex + 1]);
   }
 
-  protected isFinalEditorStep(): boolean {
-    if (!this.shouldShowPrimaryEditorAction()) {
-      return false;
-    }
-
-    const visibleSteps = this.visibleEditorSteps();
-    return visibleSteps[visibleSteps.length - 1] === this.editorCurrentStep();
-  }
-
-  protected shouldShowEditorWizard(): boolean {
-    return this.isEditorMode();
-  }
-
-  protected editorWizardStatusLabel(): string {
-    if (this.mode() === 'create' && this.editorCurrentStep() === 'entry') {
-      return 'Choose how you want to start';
-    }
-
-    return this.editorStatusLabel();
-  }
-
-  protected shouldShowPrimaryEditorAction(): boolean {
-    return !(this.mode() === 'create' && this.editorCurrentStep() === 'entry' && this.editorFlowChoice() === 'undecided');
-  }
-
-  protected nextEditorActionLabel(): string {
-    const visibleSteps = this.visibleEditorSteps();
-    const currentIndex = visibleSteps.indexOf(this.editorCurrentStep());
-    const nextStep = currentIndex >= 0 ? visibleSteps[currentIndex + 1] : null;
-
-    switch (nextStep) {
-      case 'ai':
-        return 'Continue to AI draft';
-      case 'details':
-        return 'Continue to offer setup';
-      case 'operations':
-        return 'Continue to pickup and image';
-      default:
-        return 'Continue';
-    }
-  }
-
   protected pickupBaseDateValue(): string {
     return this.pickupBaseDate();
   }
 
   protected pickupBaseDateLabel(): string {
-    const value = this.pickupBaseDate();
-    if (!value) {
-      return 'Choose pickup day';
-    }
-
-    const parsedDate = this.parseDateOnly(value);
-    if (!parsedDate) {
-      return 'Choose pickup day';
-    }
-
-    return new Intl.DateTimeFormat('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }).format(parsedDate);
+    return resolveBusinessOfferPickupBaseDateLabel(this.pickupBaseDate());
   }
 
   protected pickupTimeValue(fieldName: PickupTimeFieldName): string {
@@ -944,19 +792,20 @@ export class BusinessOffersPage {
   }
 
   protected shiftPickupCalendarMonth(offset: number): void {
-    const currentMonth = this.parseDateOnly(this.pickupCalendarMonth()) ?? this.parseDateOnly(this.todayDateString());
+    const currentMonth = parseBusinessOfferDateOnly(this.pickupCalendarMonth())
+      ?? parseBusinessOfferDateOnly(resolveBusinessOfferTodayDateString());
     if (!currentMonth) {
       return;
     }
 
     const nextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + offset, 1);
-    this.pickupCalendarMonth.set(this.formatDateOnly(nextMonth));
+    this.pickupCalendarMonth.set(formatBusinessOfferDateOnly(nextMonth));
   }
 
   protected selectPickupRelativeDate(offsetDays: number): void {
     const nextDate = new Date();
     nextDate.setDate(nextDate.getDate() + offsetDays);
-    this.selectPickupDate(this.formatDateOnly(nextDate));
+    this.selectPickupDate(formatBusinessOfferDateOnly(nextDate));
   }
 
   protected selectPickupDate(value: string): void {
@@ -990,17 +839,15 @@ export class BusinessOffersPage {
   }
 
   protected pickupTimePart(fieldName: PickupTimeFieldName, part: 'hour' | 'minute'): string | null {
-    const value = this.pickupTimeValue(fieldName);
-    if (!/^\d{2}:\d{2}$/.test(value)) {
-      return null;
-    }
-
-    const [hour, minute] = value.split(':');
-    return part === 'hour' ? hour : minute;
+    return resolveBusinessOfferPickupTimePart(this.pickupTimeValue(fieldName), part);
   }
 
   protected selectPickupTimePart(fieldName: PickupTimeFieldName, part: 'hour' | 'minute', value: string): void {
-    const fallbackTime = this.defaultPickupTimeForField(fieldName);
+    const fallbackTime = resolveBusinessOfferDefaultPickupTime(
+      fieldName,
+      this.pickupTimeValue(fieldName),
+      fieldName === 'pickupFrom' ? this.pickupToTime() : this.pickupFromTime(),
+    );
     const fallbackHour = fallbackTime.slice(0, 2);
     const fallbackMinute = fallbackTime.slice(3, 5);
     const currentHour = this.pickupTimePart(fieldName, 'hour');
@@ -1016,69 +863,15 @@ export class BusinessOffersPage {
   }
 
   protected pickupWindowRollsToNextDay(): boolean {
-    const fromMinutes = this.parseTimeToMinutes(this.pickupFromTime());
-    const toMinutes = this.parseTimeToMinutes(this.pickupToTime());
-
-    if (fromMinutes === null || toMinutes === null) {
-      return false;
-    }
-
-    return toMinutes < fromMinutes;
+    return businessOfferPickupWindowRollsToNextDay(this.pickupFromTime(), this.pickupToTime());
   }
 
   protected pickupWindowSummary(): string | null {
-    const baseDate = this.pickupBaseDate();
-    const fromTime = this.pickupFromTime();
-    const toTime = this.pickupToTime();
-
-    if (!baseDate || !fromTime || !toTime) {
-      return null;
-    }
-
-    const from = new Date(`${baseDate}T${fromTime}`);
-    const toDate = this.pickupWindowRollsToNextDay() ? this.addDaysToDateString(baseDate, 1) : baseDate;
-    const to = new Date(`${toDate}T${toTime}`);
-    if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
-      return null;
-    }
-
-    const sameDay = from.toDateString() === to.toDateString();
-    const dateFormatter = new Intl.DateTimeFormat('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
+    return resolveBusinessOfferPickupWindowSummary({
+      baseDate: this.pickupBaseDate(),
+      fromTime: this.pickupFromTime(),
+      toTime: this.pickupToTime(),
     });
-    const timeFormatter = new Intl.DateTimeFormat('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-
-    if (sameDay) {
-      return `${dateFormatter.format(from)}, ${timeFormatter.format(from)} - ${timeFormatter.format(to)}`;
-    }
-
-    return `${dateFormatter.format(from)}, ${timeFormatter.format(from)} - ${dateFormatter.format(to)}, ${timeFormatter.format(to)}`;
-  }
-
-  protected selectedSourceIs(source: OfferFinalImageSource): boolean {
-    return this.finalImageSource() === source;
-  }
-
-  protected hasOriginalPhoto(): boolean {
-    return !!this.originalPhotoAsset();
-  }
-
-  protected hasOwnUploadedImage(): boolean {
-    return !!this.ownImageAsset();
-  }
-
-  protected hasAiCover(): boolean {
-    return !!this.aiCoverAsset();
-  }
-
-  protected usesBusinessProfileAddress(): boolean {
-    return this.form.controls.useBusinessProfileAddress.value;
   }
 
   protected canGenerateAiCover(): boolean {
@@ -1146,8 +939,8 @@ export class BusinessOffersPage {
         note: rawValue.pickupNote.trim() || null,
       },
       pickupTimeWindow: {
-        from: this.toIsoString(rawValue.pickupFrom),
-        to: this.toIsoString(rawValue.pickupTo),
+        from: toBusinessOfferIsoString(rawValue.pickupFrom),
+        to: toBusinessOfferIsoString(rawValue.pickupTo),
       },
     };
   }
@@ -1166,14 +959,14 @@ export class BusinessOffersPage {
       price: offer.price,
       originalPrice: offer.originalPrice,
       quantityAvailable: offer.quantityAvailable,
-      useBusinessProfileAddress: this.matchesBusinessProfileAddress(offer.pickupLocation.address, business?.address ?? null),
+      useBusinessProfileAddress: matchesBusinessOfferAddress(offer.pickupLocation.address, business?.address ?? null),
       pickupStreet: offer.pickupLocation.address.street,
       pickupCity: offer.pickupLocation.address.city,
       pickupPostalCode: offer.pickupLocation.address.postalCode,
       pickupCountry: offer.pickupLocation.address.country,
       pickupNote: offer.pickupLocation.note ?? '',
-      pickupFrom: this.toDateTimeLocalValue(offer.pickupTimeWindow.from),
-      pickupTo: this.toDateTimeLocalValue(offer.pickupTimeWindow.to),
+      pickupFrom: toBusinessOfferDateTimeLocalValue(offer.pickupTimeWindow.from),
+      pickupTo: toBusinessOfferDateTimeLocalValue(offer.pickupTimeWindow.to),
       items: [],
     });
     this.resetOfferItems(offer.items);
@@ -1205,20 +998,6 @@ export class BusinessOffersPage {
 
   private removeRemovingId(offerId: number): void {
     this.removingIds.update((ids) => ids.filter((currentId) => currentId !== offerId));
-  }
-
-  private toDateTimeLocalValue(value: string): string {
-    const parsedValue = new Date(value);
-    if (Number.isNaN(parsedValue.getTime())) {
-      return '';
-    }
-
-    const localDate = new Date(parsedValue.getTime() - parsedValue.getTimezoneOffset() * 60000);
-    return localDate.toISOString().slice(0, 16);
-  }
-
-  private toIsoString(value: string): string {
-    return new Date(value).toISOString();
   }
 
   private async readImageAssetFromEvent(event: Event): Promise<EditorImageAsset | null> {
@@ -1259,10 +1038,12 @@ export class BusinessOffersPage {
   private applyDraftSuggestion(suggestion: OfferDraftSuggestionModel): void {
     this.aiDraftSuggestion.set(suggestion);
     const detectedItems = (suggestion.detectedItems ?? [])
-      .map((item) => this.parseDetectedItemLabel(item))
+      .map((item) => parseBusinessOfferDetectedItemLabel(item))
       .filter((item) => !!item.name.trim());
 
-    this.aiDetectedItems.set(detectedItems.map((item) => this.formatDetectedItemLabel(item.name, item.quantity)));
+    this.aiDetectedItems.set(
+      detectedItems.map((item) => formatBusinessOfferDetectedItemLabel(item.name, item.quantity)),
+    );
 
     this.form.patchValue({
       title: suggestion.suggestedTitle || this.form.controls.title.value,
@@ -1295,7 +1076,7 @@ export class BusinessOffersPage {
     }
 
     return this.form.getRawValue().items
-      .map((item) => this.formatDetectedItemLabel(item.name.trim(), item.quantity))
+      .map((item) => formatBusinessOfferDetectedItemLabel(item.name.trim(), item.quantity))
       .filter((item) => !!item.trim());
   }
 
@@ -1305,7 +1086,7 @@ export class BusinessOffersPage {
     if (trailingCountMatch) {
       return {
         name: trailingCountMatch[1].trim(),
-        quantity: this.normalizeDetectedItemQuantity(Number.parseInt(trailingCountMatch[2], 10)),
+        quantity: normalizeBusinessOfferDetectedItemQuantity(Number.parseInt(trailingCountMatch[2], 10)),
       };
     }
 
@@ -1313,7 +1094,7 @@ export class BusinessOffersPage {
     if (leadingCountMatch) {
       return {
         name: leadingCountMatch[2].trim(),
-        quantity: this.normalizeDetectedItemQuantity(Number.parseInt(leadingCountMatch[1], 10)),
+        quantity: normalizeBusinessOfferDetectedItemQuantity(Number.parseInt(leadingCountMatch[1], 10)),
       };
     }
 
@@ -1321,23 +1102,6 @@ export class BusinessOffersPage {
       name: normalizedValue,
       quantity: 1,
     };
-  }
-
-  private normalizeDetectedItemQuantity(quantity: number): number {
-    if (!Number.isFinite(quantity) || quantity < 1) {
-      return 1;
-    }
-
-    return Math.min(99, Math.trunc(quantity));
-  }
-
-  private formatDetectedItemLabel(name: string, quantity: number): string {
-    const normalizedName = name.trim();
-    if (!normalizedName) {
-      return '';
-    }
-
-    return quantity > 1 ? `${normalizedName} x${quantity}` : normalizedName;
   }
 
   private async resolveSelectedImageForSubmission(
@@ -1420,21 +1184,12 @@ export class BusinessOffersPage {
       ? ['UNKNOWN']
       : [...currentValues.filter((value) => value !== 'UNKNOWN'), code];
 
-    targetControl.setValue(this.sortAllergens(cleanedCurrentValues));
+    targetControl.setValue(sortBusinessOfferAllergens(this.allergenOptions, cleanedCurrentValues));
     otherControl.setValue(otherValues.filter((value) => value !== code));
     targetControl.markAsDirty();
     targetControl.markAsTouched();
     otherControl.markAsDirty();
     otherControl.markAsTouched();
-  }
-
-  private filterAllergenOptions(query: string): AllergenOption[] {
-    const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) {
-      return this.allergenOptions;
-    }
-
-    return this.allergenOptions.filter((option) => option.label.toLowerCase().includes(normalizedQuery));
   }
 
   private visibleEditorSteps(): OfferEditorStep[] {
@@ -1477,8 +1232,8 @@ export class BusinessOffersPage {
   }
 
   private syncPickupDraftFromForm(): void {
-    const pickupFromParts = this.parseDateTimeLocalParts(this.form.controls.pickupFrom.value);
-    const pickupToParts = this.parseDateTimeLocalParts(this.form.controls.pickupTo.value);
+    const pickupFromParts = parseBusinessOfferDateTimeLocalParts(this.form.controls.pickupFrom.value);
+    const pickupToParts = parseBusinessOfferDateTimeLocalParts(this.form.controls.pickupTo.value);
 
     this.pickupBaseDate.set(pickupFromParts.date);
     this.pickupFromTime.set(pickupFromParts.time);
@@ -1486,23 +1241,12 @@ export class BusinessOffersPage {
     this.syncPickupCalendarMonth(pickupFromParts.date);
   }
 
-  private parseDateTimeLocalParts(value: string): { date: string; time: string } {
-    if (!value) {
-      return { date: '', time: '' };
-    }
-
-    const [datePart = '', timePart = ''] = value.split('T');
-    return { date: datePart, time: timePart.slice(0, 5) };
-  }
-
   private syncPickupControlsFromState(): void {
-    const baseDate = this.pickupBaseDate();
-    const fromTime = this.pickupFromTime();
-    const toTime = this.pickupToTime();
-
-    const pickupFromValue = baseDate && fromTime ? `${baseDate}T${fromTime}` : '';
-    const pickupToDate = this.pickupWindowRollsToNextDay() ? this.addDaysToDateString(baseDate, 1) : baseDate;
-    const pickupToValue = baseDate && toTime ? `${pickupToDate}T${toTime}` : '';
+    const { pickupFromValue, pickupToValue } = buildBusinessOfferPickupControlValues({
+      baseDate: this.pickupBaseDate(),
+      fromTime: this.pickupFromTime(),
+      toTime: this.pickupToTime(),
+    });
     const currentPickupFromValue = this.form.controls.pickupFrom.value;
     const currentPickupToValue = this.form.controls.pickupTo.value;
     const pickupFromChanged = currentPickupFromValue !== pickupFromValue;
@@ -1523,41 +1267,6 @@ export class BusinessOffersPage {
     if (pickupToValue || currentPickupToValue) {
       this.form.controls.pickupTo.markAsTouched();
     }
-  }
-
-  private parseTimeToMinutes(value: string): number | null {
-    if (!value || !/^\d{2}:\d{2}$/.test(value)) {
-      return null;
-    }
-
-    const [hours, minutes] = value.split(':').map((part) => Number.parseInt(part, 10));
-    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
-      return null;
-    }
-
-    return hours * 60 + minutes;
-  }
-
-  private addDaysToDateString(value: string, days: number): string {
-    if (!value) {
-      return value;
-    }
-
-    const parsedDate = this.parseDateOnly(value);
-    if (!parsedDate) {
-      return value;
-    }
-
-    parsedDate.setDate(parsedDate.getDate() + days);
-    return this.formatDateOnly(parsedDate);
-  }
-
-  private sortAllergens(values: AllergenCode[]): AllergenCode[] {
-    const orderMap = new Map<AllergenCode, number>(
-      this.allergenOptions.map((option, index) => [option.value, index] satisfies [AllergenCode, number]),
-    );
-
-    return [...new Set(values)].sort((left, right) => (orderMap.get(left) ?? 999) - (orderMap.get(right) ?? 999));
   }
 
   private shouldPreserveExistingIllustrativeFlag(): boolean {
@@ -1584,61 +1293,8 @@ export class BusinessOffersPage {
   }
 
   private syncPickupCalendarMonth(value: string): void {
-    this.pickupCalendarMonth.set(this.startOfMonthString(value || this.todayDateString()));
-  }
-
-  private defaultPickupTimeForField(fieldName: PickupTimeFieldName): string {
-    const currentValue = this.pickupTimeValue(fieldName);
-    if (currentValue) {
-      return currentValue;
-    }
-
-    const relatedValue = fieldName === 'pickupFrom' ? this.pickupToTime() : this.pickupFromTime();
-    if (relatedValue) {
-      return relatedValue;
-    }
-
-    return fieldName === 'pickupFrom' ? '10:00' : '12:00';
-  }
-
-  private todayDateString(): string {
-    return this.formatDateOnly(new Date());
-  }
-
-  private startOfMonthString(value: string): string {
-    const parsedDate = this.parseDateOnly(value) ?? new Date();
-    return this.formatDateOnly(new Date(parsedDate.getFullYear(), parsedDate.getMonth(), 1));
-  }
-
-  private parseDateOnly(value: string): Date | null {
-    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (!match) {
-      return null;
-    }
-
-    const year = Number.parseInt(match[1], 10);
-    const monthIndex = Number.parseInt(match[2], 10) - 1;
-    const day = Number.parseInt(match[3], 10);
-    const parsedDate = new Date(year, monthIndex, day);
-
-    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
-  }
-
-  private formatDateOnly(date: Date): string {
-    const year = date.getFullYear();
-    const month = `${date.getMonth() + 1}`.padStart(2, '0');
-    const day = `${date.getDate()}`.padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  private matchesBusinessProfileAddress(address: AddressModel, businessAddress: AddressModel | null): boolean {
-    if (!businessAddress) {
-      return false;
-    }
-
-    return address.street === businessAddress.street
-      && address.city === businessAddress.city
-      && address.postalCode === businessAddress.postalCode
-      && address.country === businessAddress.country;
+    this.pickupCalendarMonth.set(
+      resolveBusinessOfferStartOfMonthString(value || resolveBusinessOfferTodayDateString()),
+    );
   }
 }

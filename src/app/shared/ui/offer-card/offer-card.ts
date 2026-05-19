@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { resolveBusinessIconUrl } from '../../../feature/business/models/business.model';
 import { appIcons } from '../../icons/app-icons';
+import { resolveBusinessIconUrl } from '../../models/business.model';
 import { OfferCardModel, OfferCardVariant } from './offer-card.models';
-import { buildOfferBusinessMark } from './offer-card.utils';
+import { buildOfferBusinessMark, formatOfferStatusLabel } from './offer-card.utils';
 
 @Component({
   selector: 'app-offer-card',
@@ -35,11 +35,39 @@ export class OfferCardComponent {
 
   protected readonly icons = appIcons;
   protected readonly status = computed(() => this.card().status ?? 'AVAILABLE');
+  protected readonly isUnavailable = computed(() => {
+    const status = this.status();
+    return status === 'SOLD_OUT' || status === 'EXPIRED' || status === 'CANCELLED';
+  });
+  protected readonly hasOwnershipBadge = computed(
+    () => this.card().availabilityLabel?.trim().toLowerCase() === 'your offer',
+  );
+  protected readonly showUnavailableChip = computed(
+    () => this.isUnavailable() && this.hasOwnershipBadge(),
+  );
+  protected readonly unavailableMessage = computed(() => {
+    const status = this.status();
+    if (status === 'EXPIRED') {
+      return 'Unavailable today';
+    }
+
+    if (status === 'CANCELLED') {
+      return 'Unavailable';
+    }
+
+    if (status === 'SOLD_OUT') {
+      return 'Sold out';
+    }
+
+    return formatOfferStatusLabel(status);
+  });
   protected readonly isInCart = computed(() => this.card().inCart ?? false);
   protected readonly isSelected = computed(() => this.card().selected ?? false);
   protected readonly hasBadge = computed(() => Boolean(this.showBadge() && this.card().availabilityLabel));
   protected readonly hasMediaTop = computed(() => this.showCartButton() || this.hasBadge());
-  protected readonly hasFooter = computed(() => this.showPrice() || (this.showRating() && Boolean(this.card().rating)));
+  protected readonly hasFooter = computed(
+    () => this.showPrice() || (this.showRating() && Boolean(this.card().rating)),
+  );
   protected readonly brandImageUrl = computed(() => resolveBusinessIconUrl(this.card().brandImageUrl));
   protected readonly brandMark = computed(() => {
     const explicitBrandMark = this.card().brandMark?.trim();

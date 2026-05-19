@@ -1,0 +1,23 @@
+<div class="create-offer-flow-card__copy">
+  <span class="create-offer-flow-card__eyebrow">Quick start</span>
+  <h2>Would you like AI to help create this offer faster?</h2>
+  <p>You can start with a real food photo for optional suggestions, or jump straight into manual setup.</p>
+</div>
+
+<div class="create-offer-flow-card__options">
+  <button class="create-offer-flow-card__option" type="button" (click)="aiDraftSelected.emit()">
+    <span class="create-offer-flow-card__icon">
+      <fa-icon [icon]="icons().wandMagicSparkles" aria-hidden="true" />
+    </span>
+    <strong>Use AI draft</strong>
+    <p>Upload a real food photo and get optional title, description, and item suggestions.</p>
+  </button>
+
+  <button class="create-offer-flow-card__option" type="button" (click)="manualSetupSelected.emit()">
+    <span class="create-offer-flow-card__icon">
+      <fa-icon [icon]="icons().pen" aria-hidden="true" />
+    </span>
+    <strong>Create manually</strong>
+    <p>Fill in the offer yourself with a shorter, step-by-step setup flow.</p>
+  </button>
+</div>

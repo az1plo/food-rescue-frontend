@@ -1,0 +1,65 @@
+<div [formGroup]="form()">
+  <div class="create-offer-card__header">
+    <div class="create-offer-card__heading">
+      <div>
+        <h2>Pricing and availability</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="create-offer-grid create-offer-grid--pricing">
+    <div class="create-offer-field">
+      <label class="create-offer-field__label" for="offer-price">Current price <span class="create-offer-field__required">*</span></label>
+      <div class="create-offer-field__currency">
+        <span>&euro;</span>
+        <input id="offer-price" class="form-control create-offer-field__control" type="number" min="0" step="0.01" formControlName="price" />
+      </div>
+      <div class="field-message-slot">
+        @if (showFieldError('price')) {
+          <p class="field-error">Enter a valid price.</p>
+        }
+      </div>
+    </div>
+
+    <div class="create-offer-field">
+      <label class="create-offer-field__label" for="offer-original-price">Original price (optional)</label>
+      <div class="create-offer-field__currency">
+        <span>&euro;</span>
+        <input
+          id="offer-original-price"
+          class="form-control create-offer-field__control"
+          type="number"
+          min="0"
+          step="0.01"
+          formControlName="originalPrice"
+        />
+      </div>
+      <div class="field-message-slot">
+        @if (showFieldError('originalPrice') || (submitAttempted() && isOriginalPriceInvalid())) {
+          <p class="field-error">Original price must be equal to or greater than the current price.</p>
+        }
+      </div>
+    </div>
+
+    <div class="create-offer-field">
+      <label class="create-offer-field__label" for="offer-quantity">Quantity available <span class="create-offer-field__required">*</span></label>
+      <input
+        id="offer-quantity"
+        class="form-control create-offer-field__control"
+        type="number"
+        min="1"
+        step="1"
+        formControlName="quantityAvailable"
+      />
+      <div class="field-message-slot">
+        @if (showFieldError('quantityAvailable')) {
+          <p class="field-error">Enter a quantity greater than zero.</p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <p class="create-offer-field__hint">
+    Original price must be equal to or greater than the current price to show a discount.
+  </p>
+</div>

@@ -6,6 +6,7 @@ import { catchError, forkJoin, of, switchMap } from 'rxjs';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { appIcons } from '../../../../shared/icons/app-icons';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button';
+import { WorkspacePageSkeletonComponent } from '../../../../shared/ui/workspace-page-skeleton/workspace-page-skeleton';
 import { BusinessAnalyticsModel } from '../../models/business-analytics.model';
 import {
   BUSINESS_STATUS_META,
@@ -37,7 +38,7 @@ interface WorkspaceDashboardActivityPoint {
 
 @Component({
   selector: 'app-workspace-dashboard-page',
-  imports: [DatePipe, FontAwesomeModule, ActionButtonComponent],
+  imports: [DatePipe, FontAwesomeModule, ActionButtonComponent, WorkspacePageSkeletonComponent],
   templateUrl: './workspace-dashboard.html',
   styleUrl: './workspace-dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
